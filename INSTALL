@@ -1,0 +1,17 @@
+  For full information on installation, visit:
+  http://www.tekkotsu.org/downloads.html#installtekkotsu
+
+  In short, you should put the Tekkotsu directory someplace like
+  /usr/local (the default location scripts will look), and then copy
+  the template 'project' directory to your personal workspace (like
+  your home directory).
+
+  The Tekkotsu directory (the current directory) will be shared by all
+  projects.  You should be able to get pretty far without having to
+  modify the shared Tekkotsu framework files, although if you do, feel
+  free to let us know and send us a patch if you think your changes
+  would be useful to others.
+
+  Your code should go in your own copy of the 'project' directory.  To
+  build an executable, type 'make' in your local copy of 'project'.
+  You should edit project's Environment.conf to choose build settings.

@@ -1,0 +1,86 @@
+#!/bin/sh
+
+path=$1
+if [ -z "$path" ] ; then path="."; fi;
+
+bin=./footsteps-CHIARA
+
+if [ -z "$path" -o \! -d "$path" ] ; then
+	echo "$path is not a directory"
+	echo "Usage: $0 fig-dir"
+	exit 1;
+fi;
+
+function base {
+	sed 's/\.[^.]*//' <<< $1
+}
+
+function runall {
+	for env in trap.plist barrierR.plist field4.plist ; do
+		for walk in walk.plist walk2.plist walk3.plist ; do
+			echo "$env" "$walk" >&2
+			OPTS="--show-grid --show-work"
+			if [ "$env" = "trap.plist" ] ; then
+				OPTS="--no-rehab $OPTS";
+			fi;
+			"$bin" -e "$env" -w "$walk" -f "$path/$(base $env)-$(base $walk).svg" $OPTS | sed -n 's/^DATA \(.*\)/\1	'$walk'/p'
+			if [ ${PIPESTATUS[0]} -ne 0 ] ; then
+				exit 1;
+			fi;
+		done
+	done
+}
+
+function float_cond()
+{
+    local cond=0
+    if [[ $# -gt 0 ]]; then
+        cond=$(echo "$*" | bc -q 2>/dev/null)
+        if [[ -z "$cond" ]]; then cond=0; fi
+        if [[ "$cond" != 0  &&  "$cond" != 1 ]]; then cond=0; fi
+    fi
+    return $((cond == 0))
+}
+
+function min {
+	while read a b; do
+		if float_cond "$a < $b" ; then echo $a ; else echo $b ; fi
+	done
+}
+
+function res {
+	while read a b; do
+		bc -q <<< "$a - $b"
+	done
+}
+
+function cmp {
+	f1=$(mktemp -t f1)
+	f2=$(mktemp -t f2)
+	cut -f 1-4 "$1" > "$f1"
+	cut -f 1-4 "$2" | diff "$f1" - || exit 1
+	cut -f 5 "$1" > "$f1"
+	cut -f 5 "$2" | paste "$f1" - | res
+	cut -f 5 "$2" | paste "$f1" - | min > "$f2"
+	cut -f 1-4 "$2" > "$f1"
+	cut -f 6- "$2" | paste "$f1" "$f2" - > "$1"
+}
+
+echo RUN 1
+runall > "$path/data.txt" || exit 1;
+for (( i=2; i<=8; ++i )) ; do
+	echo
+	echo RUN $i
+	f=$(mktemp -t $0)
+	runall > "$f" || exit 1;
+	cmp "$path/data.txt" "$f" || exit 1;
+	cat "$path/data.txt"
+done
+mv "$path/data.txt" "$f"
+printf 'Steps\t"Nodes Expanded"\t"Nodes Open"\t"Path Length"\t"CPU Time"\t"Group Size"\tEnvironment\tGait' > "$path/data.txt"
+cat "$f" >> "$path/data.txt"
+
+echo '       Env & n &     time &    nodes &     dist \\\\'
+cat "$path/data.txt" | (read junk; while read a b c d e f g h; do
+	printf '%10s & %d & %8.3f & %8d & %8.3g \\\\\n' $(cut -f 1 -d . <<< $g) $f $e $b $d ;
+done)

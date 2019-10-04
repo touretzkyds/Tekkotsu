@@ -1,0 +1,50 @@
+#!/bin/sh
+
+cd "`dirname \"$0\"`"
+if [ ! -r org/tekkotsu/sketch/SketchGUI.java ] ; then
+	echo "Cannot access org/tekkotsu/sketch/SketchGUI.java"
+	echo "Make sure this script is located at the root of the java package tree"
+	echo "(i.e. Tekkotsu/tools/mon)"
+	exit 1;
+fi;
+
+if [ ! -r org/tekkotsu/sketch/SketchGUI.class ] ; then
+	echo "Cannot access Java executable."
+	echo "Perhaps the tools need to be compiled.  Go to the Tekkotsu/tools"
+	echo "directory and type 'make'"
+	exit 1;
+fi;
+
+if [ $# -eq 0 -o $# -gt 2 ] ; then
+	echo Usage: $0 hostname [cam/local/world]
+	exit 1;
+fi;
+
+# make sure second argument is one of cam/local/world
+if [ $# -eq 1 ] ; then
+  viewspace="cam"
+else
+  viewspace="$2"
+fi;
+if [ ! "$viewspace" == "cam" -a  ! "$viewspace" == "local" -a  ! "$viewspace" == "world" ] ; then
+      echo Usage: $0 hostname [cam/local/world]
+      exit 1;
+fi;
+
+if uname | grep -iq cygwin ; then
+    # cygwin: don't know how to open a new command window, so run SketchGUI here
+    java -Xmx256M org.tekkotsu.sketch.SketchGUI $*
+elif uname | grep -iq darwin ; then
+    # MacOS: run in a new Terminal window
+    # The 'exit' in the script below closes the window after the command 
+    # completes (otherwise it would stay open).
+    osascript - << EOF
+    tell application "Terminal"
+        do script "cd `pwd`; java -Xmx256M org.tekkotsu.sketch.SketchGUI $1 $viewspace; sleep 5; exit"
+    end tell
+EOF
+else
+    # Linux: run in a new xterm
+    xterm -e "java -Xmx256M org.tekkotsu.sketch.SketchGUI $1 $viewspace" &
+fi;
+

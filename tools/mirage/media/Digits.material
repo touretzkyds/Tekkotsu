@@ -1,0 +1,103 @@
+material Digit1
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture Digits/digit1.png
+        rotate 90
+      }
+    }
+  }
+}
+
+material Digit2
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture Digits/digit2.png
+        rotate 90
+      }
+    }
+  }
+}
+
+material Digit3
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture Digits/digit3.png
+        rotate 90
+      }
+    }
+  }
+}
+
+material Digit4
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture Digits/digit4.png
+        rotate 90
+      }
+    }
+  }
+}
+material TagDigit1
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture Digits/tagdigit1.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material TagDigit2
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture Digits/tagdigit2.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material TagDigit3
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture Digits/tagdigit3.png
+        rotate -90
+      }
+    }
+  }
+}

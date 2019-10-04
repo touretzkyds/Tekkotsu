@@ -1,0 +1,48 @@
+#!/bin/bash
+
+usage="$0 [-h | --help] [-j|--java] [-c|--cc] [-x|--ext other] search-term
+
+  -j, --java  Searches .java files
+  -c, --cc    Searches .h, .fsm, and .cc files
+  -x, --ext   Searches the specified extension
+
+If no extensions are specified, the --cc is assumed as default.
+search-term can be a regex for grep.
+";
+
+declare -a ext;
+
+while [ $# -gt 0 ] ; do
+	case "$1" in
+		-h | --help) echo "$usage"; exit 2;;
+		-j | --java) ext=( "${ext[@]}" "\\.java" ); shift;;
+		-c | --cc) ext=( "${ext[@]}" "\\.h" "\\.cc" "\\.fsm" ); shift;;
+		-x | --ext) ext=( "${ext[@]}" "$2" ); shift; shift;;
+		*) break;;
+	esac;
+done;
+if [ "${#ext[@]}" -eq 0 ] ; then
+	ext=( "\\.h" "\\.cc" "\\.fsm" )
+fi;
+
+term="$1";
+shift;
+if [ -z "$term" ] ; then
+	echo "no search term?"
+	exit 0;
+fi;
+
+declare -a query;
+for x in "${ext[@]}" ; do
+	if [ -z "$x" ] ; then
+		continue;
+	fi;
+	query=( "${query[@]}" -o -name "*$x" );
+done;
+if [ "${#query[@]}" -eq 0 ] ; then
+	echo "no extensions specified?"
+	exit 0;
+fi;
+unset query[0]
+
+find . \( "${query[@]}" -o -name build -prune \) -type f -exec grep -Hn "$term" \{\} \;

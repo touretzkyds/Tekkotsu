@@ -1,0 +1,138 @@
+#include "Behaviors/Demos/Navigation/PilotDemo.h"
+
+$nodeclass Maze5x5: PilotDemo {
+
+  $nodeclass Goer: PilotNode($, PilotTypes::goToShape) : doStart {
+    {
+      GET_SHAPE(destination, EllipseData, worldShS);
+      destination.deleteShape();
+    }
+
+    //pilot->setAgent(Point(200,200,0,allocentric), 0);
+    NEW_SHAPE(destination, EllipseData, new EllipseData(worldShS, Point(3900,600,0,allocentric), 50, 50));
+    destination->setColor(rgb(255,0,0));
+    destination->setObstacle(false);
+    pilotreq.targetShape = destination;
+    pilotreq.displayTree = true;
+    pilotreq.maxRRTIterations = 10000;
+    pilotreq.collisionAction = collisionIgnore;
+  }
+
+  $setupmachine{
+    rundemo: Goer
+    rundemo =PILOT(noError)=> SpeechNode($, "completed") =C=> StateNode
+    rundemo =PILOT(startCollides)=> SpeechNode($, "start collides") =C=> StateNode
+    rundemo =PILOT(endCollides)=> SpeechNode($, "end collides") =C=> StateNode
+    rundemo =PILOT=> SpeechNode($, "failure") =C=> StateNode
+  }
+
+  virtual void buildMap() {
+    cout << "Building map..." << endl;
+
+    // world bounds
+    vector<Point> pts;
+    pts.push_back(Point(   4400.0,    4600.0,  allocentric));
+    pts.push_back(Point(   4400.0,    1602.0,  allocentric));
+    pts.push_back(Point(   3402.0,    1602.0,  allocentric));
+    pts.push_back(Point(   3402.0,    3600.0,  allocentric));
+    pts.push_back(Point(   3398.0,    3600.0,  allocentric));
+    pts.push_back(Point(   3398.0,     600.0,  allocentric));
+    pts.push_back(Point(   3402.0,     600.0,  allocentric));
+    pts.push_back(Point(   3402.0,    1598.0,  allocentric));
+    pts.push_back(Point(   4400.0,    1598.0,  allocentric));
+    pts.push_back(Point(   4400.0,    -400.0,  allocentric));
+    pts.push_back(Point(   2402.0,    -400.0,  allocentric));
+    pts.push_back(Point(   2402.0,    3600.0,  allocentric));
+    pts.push_back(Point(   2398.0,    3600.0,  allocentric));
+    pts.push_back(Point(   2398.0,     602.0,  allocentric));
+    pts.push_back(Point(   1400.0,     602.0,  allocentric));
+    pts.push_back(Point(   1400.0,     598.0,  allocentric));
+    pts.push_back(Point(   2398.0,     598.0,  allocentric));
+    pts.push_back(Point(   2398.0,    -400.0,  allocentric));
+    pts.push_back(Point(   -600.0,    -400.0,  allocentric));
+    pts.push_back(Point(   -600.0,     598.0,  allocentric));
+    pts.push_back(Point(    402.0,     598.0,  allocentric));
+    pts.push_back(Point(    402.0,    2598.0,  allocentric));
+    pts.push_back(Point(   1398.0,    2598.0,  allocentric));
+    pts.push_back(Point(   1398.0,    1600.0,  allocentric));
+    pts.push_back(Point(   1402.0,    1600.0,  allocentric));
+    pts.push_back(Point(   1402.0,    2602.0,  allocentric));
+    pts.push_back(Point(    402.0,    2602.0,  allocentric));
+    pts.push_back(Point(    402.0,    3600.0,  allocentric));
+    pts.push_back(Point(    398.0,    3600.0,  allocentric));
+    pts.push_back(Point(    398.0,     602.0,  allocentric));
+    pts.push_back(Point(   -600.0,     602.0,  allocentric));
+    pts.push_back(Point(   -600.0,    4600.0,  allocentric));
+    pts.push_back(Point(   1398.0,    4600.0,  allocentric));
+    pts.push_back(Point(   1398.0,    3600.0,  allocentric));
+    pts.push_back(Point(   1402.0,    3600.0,  allocentric));
+    pts.push_back(Point(   1402.0,    4600.0,  allocentric));
+   
+    NEW_SHAPE(worldBounds, PolygonData, new PolygonData(worldShS, pts, true));
+
+    addTag( 0,  0,  -595,  100);
+    addTag( 1,  1,  -100,  595);
+    addTag( 2,  2,  -100, -395);
+    addTag( 3,  3,   900, -395);
+    addTag( 4,  4,  1900, -395);
+    addTag( 5,  5,  2395,  100);
+    addTag( 6,  6,  1900,  595);
+    addTag( 7,  7,   405, 1100);
+    addTag( 8,  8,   405, 2100);
+    addTag( 9,  9,   900, 2595);
+    addTag(10, 10,  1395, 2100);
+    addTag(11, 11,  1900,  605);
+    addTag(12, 12,  2395, 1100);
+    addTag(13, 13,  2395, 2100);
+    addTag(14, 14,  1405, 2100);
+    addTag(15, 15,  2395, 3100);
+    addTag(16, 16,  1900, 4595);
+    addTag(17, 17,  1405, 4595);
+    addTag(18, 18,   900, 2605);
+    addTag(19, 19,   405, 3100);
+    addTag(20, 20,  1395, 4100);
+    addTag(21, 21,   900, 4595);
+    addTag(22, 22,  -100, 4595);
+    addTag(23, 23,  -595, 4100);
+    addTag(24, 24,  -595, 3100);
+    addTag(25, 25,  -595, 2100);
+    addTag(26, 26,  -595, 1100);
+    addTag(27, 27,  -100,  605);
+    addTag(28, 28,   395, 1100);
+    addTag(29, 29,   395, 2100);
+    addTag(30,  6,   395, 3100);
+    addTag(31, 16,  2405, 3100);
+    addTag(32,  6,  2405, 2100);
+    addTag(33, 10,  2405, 1100);
+    addTag(34, 17,  2405,  100);
+    addTag(35, 24,  2900, -395);
+    addTag(36,  3,  3395, 1100);
+    addTag(37, 23,  3395, 2100);
+    addTag(38,  9,  3395, 3100);
+    addTag(39,  2,  2900, 4595);
+    addTag(40, 28,  3405, 3100);
+    addTag(41, 14,  3405, 2100);
+    addTag(42,  0,  3900, 1605);
+    addTag(43,  7,  4395, 2100);
+    addTag(44, 21,  4395, 3100);
+    addTag(45,  1,  4395, 4100);
+    addTag(46,  8,  3900, 4595);
+    addTag(47,  4,  3900, -395);
+    addTag(48, 11,  4395,  100);
+    addTag(49, 18,  4395, 1100);
+    addTag(50, 25,  3900, 1595);
+    addTag(51, 21,  3405, 1100);
+    
+  }
+
+  void addTag(int num, int tagid, float x, float y) {
+    float const tagHeight = 7.0 * 25.4;  // tag height in mm
+    NEW_SHAPE(tag, AprilTagData, 
+	      new AprilTagData(worldShS, AprilTags::TagDetection(tagid), 
+                               Point(x,y,tagHeight,allocentric)));
+    char buff[50];
+    sprintf(buff, "Tag%02d", num);
+    tag->setName(string(buff));
+  }
+
+}

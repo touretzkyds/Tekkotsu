@@ -1,0 +1,1233 @@
+#!/usr/bin/perl
+
+# Parse a Tekkotsu state machine description in a .fsm file
+# and generate C++ code as a .h or .cc file.
+#
+# Author: David S. Touretzky
+# Version 7.2 -- April, 2015
+#
+# Usage: stateparser infile [outfile | -] [library_dir]
+
+# Copies lines from infile to outfile until it finds $nodeclass or
+# $statemachine.  Then it parses the state machine definition in the
+# succeeding lines and inserts the generated code into outfile.  after
+# which the program goes back to copying lines instead of parsing
+# them.  Multiple state machines may be included in the same file.
+
+# Node definition syntax:
+#
+#    $nodeclass CONSTRUCTOR : PARENTS : INITIALIZERS : METHODSPEC {
+#
+# CONSTRUCTOR may be a class name, or a full constructor signature
+# with argument names and default values.  A first argument "const
+# std::string &name" is added automatically and cannot be overridden.
+# Each argument "arg" is renamed to "_arg" and a corresponding entry
+# "arg(_arg)" is added to the initializer, so that "arg" can be
+# referenced in the body.  But note that in order to reference it in
+# the initializer you must write "_arg" instead.
+#
+# Since C++ types can have a variable numnber of keywords (e.g.,
+# "const unsigned int"), the parser can't recognize anonymous
+# parameters as in "void foo(unsigned int) {}".  So anonymous
+# parameters must be given the name "_", but this will be eliminated
+# in the generated C++ code.
+#
+#
+# PARENTS is a comma-separated list of at least one parent.  Each
+# parent can be class name, in which case the instance name is passed
+# as a single argument to the constructor, or it can be a constructor
+# call, in which case any occurrent of "$" will be replaced by the
+# constructor name.  All parents are automatically declared public;
+# this cannot be overridden. The default parent if none is supplied
+# is VisualRoutinesStateNode.
+#
+# INITIALIZERS is an optional comma-separated list of expressions of
+# form localvar(value).  Parents class constructor calls and
+# argument-derived member variables are automatically prepended to the
+# front of the initializer list, so the only initializers that need to
+# be explicitly included here are for additional user-defined member
+# variables.
+#
+# METHODSPEC is an optional method name and must be one of doStart,
+# start, preStart, postStart, doStop, stop, doEvent, setup, or
+# constructor.  If it is used, the lines that follow are included in
+# the body of that method, until a $endnodemethod is encountered or
+# the class definition is closed by a right brace.  If METHODSPEC is
+# omitted then the lines that follow are included in the class
+# definition itself; useful if one wants to define additional member
+# variables or methods other than the standard ones.
+#
+# Use $nodeclass* if the class contains pointer member variables to
+# request generation of dummy copy constructor and assignment
+# operators.
+#
+# Note: $nodeclass can nest, so you can define statenode classes that
+# are local to the parent state machine definition and not gobally
+# visible where they could cause name conflicts.
+
+# State machine expression syntax:
+#
+#  1.  nodename: NodeClass<template_args>(constructor_args) [inits]
+#
+#    Reduces to a sourcename and may be followed by a >==transition==>
+#    definition.  If (constructor_args) is omitted, the node name is
+#    supplied as a string.  If constructor_args are specified, an optional
+#    $ as the first arg expands to insert the node name as a string.
+#
+#
+#  2.  sourcename >== transname: TransClass<template_args>(constructor_args) [inits] ==> targetnode
+#
+#    The targetnode may be a node name, or a complete node definition, which
+#    means node and transition definitions can alternate, forming a chain.
+#    If constructor_args are specified, optional $ refers to the transition name
+#    as a a string; use $$ to refer to the target node name.  It will be filled
+#    in once the target node is known (may require processing the next node definition.)
+#
+#    The sourcename and/or targetnode may also be a list of node names of form {name1, ...}
+#
+# Consecutive nonblank lines are run together, allowing for a chain of
+# alternating node and link references or declarations.
+#
+# Instance names should be lowercase; node and transition class names
+# should be capitalized.  To avoid ambiguity in parsing a transition
+# that chains to an unnamed node definition, node class names MUST
+# begin with a capital letter.
+#
+# The following transition abbreviations are supported:
+#
+#       =N=>           >== NullTrans ==>
+#       =C=>           >== CompletionTrans ==>
+#       =C(n)=>        >== CompletionTrans($,$$,n) ==>
+#       =T(t)=>        >== TimeOutTrans($,$$,t) ==>
+#       =B(b)=>        >== EventTrans($,$$,Eventbase::buttonEGID,RobotInfo::b)
+#       =B(b,t)=>      >== EventTrans($,$$,Eventbase::buttonEGID,RobotInfo::b,EventBase::t)
+#       =TM=>          >== EventTrans($,$$,EventBase::textmsgEGID) ==>
+#       =TM(s)=>       >== TextMsgTrans($,$$,s) ==>
+#       =S<t>=>        >== SignalTrans<t>($,$$) ==>
+#       =S<t>(v)=>     >== SignalTrans<t>($,$$,v) ==>
+#       =F=>           >== SignalTrans<SuccessOrFailure>($,$$,failureSignal) ==>
+#       =S=>           >== SignalTrans<SuccessOrFailure>($,$$,successSignal) ==>
+#       =E(g,s,t)=>    >== EventTrans($,$$,g,s,t) ==>
+#       =RND=>         >== RandomTrans ==>
+#       =MAP=>         >== EventTrans(mapbuilderEGID,...,statusETID) ==>
+#       =GRASP=>       >== GrasperTrans ==>
+#       =GRASP(v)=>    >== GrasperTrans($,$$,GrasperRequest::v)  ==>
+#       =PILOT=>       >== PilotTrans ==>
+#       =PILOT(v)=>    >== PilotTrans($,$$,Pilotequest::v)  ==>
+#
+# Abbreviated transitions can accept labels only with no intervening
+# spaces, e.g.,  =mytrans:N=>
+#
+# Comments inside a state machine must be preceded by // as in C++.
+# They are not preserved in the generated code.  Comments delimited by
+# /* */ are preserved, so they should only go where C++ expressions
+# are expected; they cannot be embedded at top level between elements
+# of a node or transition.
+#
+################################################################
+
+# Check args and print usage string if appropriate.  Do this first because
+# the third argument might be needed to locate the Perl library.
+if ( scalar(@ARGV) > 3 || $ARGV[0] =~ /^\-/ ) {
+  die "Usage: $0 [infile [{outfile | -} [librarydir]]]]\n";
+} elsif ( scalar(@ARGV) >= 3 ) {
+  push(@INC,$ARGV[2]);
+}
+
+use Term::ANSIColor;
+use Data::Dumper qw(Dumper);  # for debugging do:  print Dumper($x);
+
+eval {require Parse::RecDescent};
+if ( $@ ) {
+  print "$@\n";
+  print color("bold red"),"Error in stateparser: Perl module Parse::RecDescent not installed.\n" .
+    "Do:  sudo perl -MCPAN -e \"install Parse::RecDescent\"\n" .
+    "Or run /usr/bin/cpan and type 'install Parse::RecDescent'.\n" .
+      color("reset");
+  die "No Parse::RecDescent module. Tekkotsu's stateparser cannot continue.  Aborting";
+}
+
+################################################################
+# Grammar for parsing node declarations
+
+$nodeGrammar = <<'_EOGRAMMAR_';
+
+  NAME : /[a-zA-Z_]\w*/ {$item[1]}
+
+  # matches balanced delimeters but not top-level commas, e.g., 3+foo(x[5],y)-g[2][3]
+  EXPRESSION : /[^\(\)\[\],]+/ EXPRESSION  {"$item[1]$item[2]"}
+     | '(' EXPRESSION2 ')' EXPRESSION {"$item[1]$item[2]$item[3]$item[4]"}
+     | '[' EXPRESSION2 ']' EXPRESSION {"$item[1]$item[2]$item[3]$item[4]"}
+     | {""}
+
+  # this version allows top-level commas as part of the expression; use only inside a delimeter pair () [] <>
+  EXPRESSION2 : /[^\(\)\[\]]+/ EXPRESSION2  {"$item[1]$item[2]"}
+     | '(' EXPRESSION2 ')' EXPRESSION2 {"$item[1]$item[2]$item[3]$item[4]"}
+     | '[' EXPRESSION2 ']' EXPRESSION2 {"$item[1]$item[2]$item[3]$item[4]"}
+        |  {""}
+
+  # match an optional list of template parameters, which can nest, e.g., "map<float, pair<int,int> >"
+  TEMPLATEPARAMS : '<' TEMPLATEITEMS '>' {my $temp = "$item[1]$item[2]$item[3]"; $temp =~ s/>>/> >/gs; $temp} | {""}
+  TEMPLATEITEMS : /[^<>]+/ TEMPLATEPARAMS TEMPLATEITEMS {"$item[1]$item[2]$item[3]"} | {""}
+
+  # We can't rely on the parser to separate the typespec from the
+  # varname because we don't know how many tokens the typespec
+  # contains (e.g., "unsigned short int", and the greedy recdescent
+  # algorithm cannot back up.  So grab both at once, and separate them
+  # later.
+  TYPE_AND_NAME : /[\w\&\*:\s]*/ TEMPLATEPARAMS (NAME {"$item[1]"} | {""}) {"$item[1]$item[2]$item[3]"}
+
+  PARAMETER : TYPE_AND_NAME (/=/ EXPRESSION {[@item]} |)
+   {::treePARAMETER($item[1],$item[2])}
+
+  PARAMETERLIST : '(' ')'  {[]} | '(' <leftop: PARAMETER ',' PARAMETER> ')' {$item[2]}
+
+  CONSTRUCTORNAME : NAME TEMPLATEPARAMS {"$item[1]$item[2]"}
+
+  CONSTRUCTOR : CONSTRUCTORNAME (PARAMETERLIST |) {{name => $item[1], params => ref($item[2]) ? $item[2] : undef}}
+
+  PARENT : NAME ('(' EXPRESSION2 ')' {[@item]} |) {{name => $item[1], args => ref($item[2]) ? "($item[2][2])" : undef}}
+
+  PARENTS : PARENT(s /,/) {$item[1]}
+
+  INITIALIZER : NAME '(' EXPRESSION2 ')' {{name => $item[1], value => $item[3]}}
+
+  INITIALIZERS : <leftop: INITIALIZER ',' INITIALIZER> {$item[1]}
+
+  METHODSPEC : 
+	       /^((start)|(doStart)|(preStart)|(postStart)|(stop)|(doStop)|(doEvent)|(setup))/ /^$/ {"$item[1]()"} |
+	       /^constructor\s*$/ {"constructor"}
+
+  NODEMETHODSPEC :
+	       /^((start)|(doStart)|(preStart)|(postState)|(stop)|(doStop)|(doEvent)|(setup))/ /^$/ {"$item[1]()"} |
+	       NAME '(' EXPRESSION2 ')' {"$item[1]($item[3])"} |
+	       NAME {"$item[1]()"}
+
+  INITIALIZERS_OR_METHODSPEC : (INITIALIZERS | METHODSPEC) {$item[1]}
+
+  # for $provide declarations
+  PROVIDEPARAMETER : TYPE_AND_NAME ( '(' EXPRESSION ')' {[@item]} |)
+   {::treePARAMETER($item[1],$item[2])}
+
+  PROVIDEPARAMETERLIST : PROVIDEPARAMETER(s /,/) {$item[1]}
+
+  PROVIDESPEC : '$provide' PROVIDEPARAMETERLIST ';' {$item[2]}
+
+  # for $reference declarations
+  REFERENCEPARAMETER : /\w+/ '::' /\w+/ {{parent => $item[1], name => $item[3]}}
+
+  REFERENCELIST : REFERENCEPARAMETER(s /,/) {$item[1]}
+
+  REFERENCESPEC : '$reference' REFERENCELIST ';' {$item[2]}
+
+_EOGRAMMAR_
+
+# Extract a parsed parameter specification of form 'typespec varname [= initval]'
+sub treePARAMETER {
+  my ($param,$init) = @_;
+  my ($paramType,$paramName) = $param =~ /(.*?\W)(\w+)\s*$/;
+  $paramType =~ s/\s*$//;   # trim any trailing spaces
+  my $initval = ref($init) ? $init->[2] : undef;
+  return {type => $paramType, name => $paramName, init => $initval};
+}
+
+$nodeParser = Parse::RecDescent->new($nodeGrammar);
+
+################################################################
+# Main program
+
+# Read input stream into an array of lines
+if ( scalar(@ARGV) == 0 ) {
+  $infile_name = "<STDIN>";
+  @file_lines = <STDIN>;
+} else {
+  $infile = $ARGV[0];
+  open infile or die "Can't open $infile\n";
+  $infile_name = $infile;
+  @file_lines = <infile>;
+}
+
+# Create array of output lines so we can go back and modify constructor definitions
+@outputLines = ();
+$outputLineCount = 0;
+
+# Open output stream
+if ( scalar(@ARGV) == 0 || $ARGV[1] eq "-" ) {
+  $outfile = "&STDOUT";
+} elsif ( scalar(@ARGV) >= 2 ) {
+  $outfile = $ARGV[1];		# user specified output file name
+} elsif ( $infile =~ /\.(h|cc)\.fsm$/ ) { # if input is foo.h.fsm, make output be foo.h; similarly for foo.cc.fsm
+  ($outfile = $infile) =~ s/^(.*)\.(h|cc)\.fsm$/\1\.\2/;
+} else {
+  ($outfile = $infile ) =~ s/^(.*)((\.[^\.]*)|)$/\1\.h/; # just add or change extension to .h
+}
+open OUT, ">$outfile" or die "Can't open output file $outfile";
+
+# Main processing loop
+$file_curline = -1;
+@definitionStack = ();
+resynch_next_source_line();  # assure that the first line of the file is tagged with the .fsm file name
+while ( $file_curline++ < $#file_lines ) {
+  $line = $file_lines[$file_curline];
+
+  # is this a $statemachine line?
+  if ( $line =~ /^\s*(#|\$)statemachine(\W|$)/ ) {
+    parse_a_machine();
+    resynch_next_source_line();
+    next;
+  }
+
+  # is this a $setupmachine line?
+  if ( $line =~ /^\s*\$setupmachine(\W|$)/ ) {
+    my $indent = "  " x (1+$#definitionStack);
+    emitLine($indent . "virtual void setup() {\n");
+    parse_a_machine();
+    emitLine("$indent\}\n");
+    resynch_next_source_line();
+    next;
+  }
+
+  # is this a $provide or $reference line?
+  if ( my ($type) = $line =~ /^\s*\$(provide|reference)\W/ ) {
+    # look for missing semicolon to continue line
+    $line =~ s/\s*\/\/.*$//;	# first flush any // comment at end
+    my $trueline = $file_curline + 1;
+    while ( $line !~ /;\s*$/ ) {
+      if ( $file_curline++ < $#file_lines ) {
+	$line .= $file_lines[$file_curline];
+	$line =~ s/\s*\/\/.*$//;	# flush any // comment at end
+      } else {
+	report_error("\$$type declaration doesn't end with a ';'",$trueline);
+	last;
+      }
+    }
+    if ( $type eq "provide") {
+      parse_a_provide($line,$trueline);
+    } else {
+      parse_a_reference($line,$trueline);
+    }
+    resynch_next_source_line();
+    next;
+  }
+
+  # is this a $nodeclass or $endnodemethod line?
+  my ($prefix,$short,$x,$end,$type,$x,$star,$x,$text) =
+    ($line =~ /^\s*(#|\$)\s*((short)|(end)|)node((class(\*|))|(method))\s*(.*$)/);
+  if ( defined($prefix) ) {
+    # look for \ line continuation character because #nodeclass definitions can be very long
+    while ( $prefix eq "#" && $text =~ s/\\\s*$// ) {
+      if ( $file_curline++ < $#file_lines ) {
+	$text .= $file_lines[$file_curline];
+      } else {
+	report_error("Last line of file ends with line continuation character '\\'");
+	break;
+      }
+    }
+    # look for missing right brace to continue line, because $nodeclass definitions can be very long
+    $text =~ s/\s*\/\/.*$//;	# first flush any // comment at end
+    my $trueline = $file_curline + 1;
+    while ( $prefix eq "\$" && $end ne "end" && $text !~ /\{\s*((\}\s*)|)$/ ) {
+      if ( $file_curline++ < $#file_lines ) {
+	$text .= $file_lines[$file_curline];
+	$text =~ s/\s*\/\/.*$//;	# flush any // comment at end
+      } else {
+	report_error("\$nodeclass declaration doesn't end with a '{'",$trueline);
+	last;
+      }
+    }
+    # additional preprocessing steps
+    $text =~ s/\/\*.*?\*\///g;  # flush any /*comments*/
+    $text =~ s/\{\s*$//;	# flush any left brace at end
+    my $openclose = $text =~ s/\s*\{\s*\}\s*$//;   # handle {} at end of nodeclass specially
+    $type =~ s/\*//;	 # get rid of any trailing nodeclass* asterisk
+    # now handle the actual directive
+    if ( $end eq "end" ) {
+      # if ( $text =~ /\S/ ) {
+      #   report_error("Junk at end of #endnode$type: '$text'");
+      # }
+      endNodeOrMethod($type);
+    } elsif ( $type eq "class") {
+      parse_a_nodeclass($short,$star,$text);
+      if ( $openclose ) {
+	endNodeOrMethod($type);
+      }
+    } else {
+      parse_a_nodemethod($short,$text);
+    }
+    next
+  }
+
+  # this was not a $nodeclass or $endnodemethod line; check for other cases
+  if ( $line =~ /^\s*$/ ) {       # blank line terminates #shortnodeclass or #shortnodemethod
+    while ( $#definitionStack >= 0 && $definitionStack[-1]->{'short'} eq "short") {
+      popDefinitionStack(undef);
+    }
+  }
+
+  # misspelled directive
+  if ( $line =~ s/^\s*\$// ) {
+    report_error("Invalid stateparser directive: '\$$line'");
+    next;
+  }
+
+  # check if line contains left or right braces and increment/decrement the brace counter
+  my $stripped_line = $line;
+  $stripped_line =~ s/\s*\/\/.*$//;      # flush any trailing // comment
+  $stripped_line =~ s/'({|}|")'//g;      # flush character constants '{' '}' '"'
+  $stripped_line =~ s/\\"//g;            # flush any \" sequences
+  $stripped_line =~ s/"[^"]*"//g;        # finally flush any "..." strings since they might contain { or }
+  my $lcount = $stripped_line =~ tr/{//; # now count the left braces
+  my $rcount = $stripped_line =~ tr/}//; # and count the right braces
+  my $bracechange = $lcount - $rcount;
+  increment_brace_counter($bracechange) if $bracechange > 0;
+  decrement_brace_counter($bracechange) if $bracechange < 0;
+
+  # this is just an ordinary line of C++ code; indent it and pass it through
+  my $indent = "  " x ($#definitionStack-1);
+  emitLine("$indent$line") if defined($line);  # decrement_brace_counter may have killed the line
+
+} # end of while loop for processing lines
+
+# finished processing all the lines; now check for any errors
+checkDefinitionStackEmpty();
+
+if ( $errcnt ) {
+  die "Total errors: $errcnt\n";
+} else {
+  writeOutputLines();
+  print color("bold green") . "Wrote $outfile" . color("reset") . "\n" unless $outfile eq "&STDOUT";
+}
+
+sub resynch_this_source_line {
+  # Call this before emitting a source line generated from a
+  # stateparser directive, to assign it the line number of that
+  # directive. Can pass it an argument if you want to specify the line
+  # directly.
+ my $the_line = defined($_[0]) ? $_[0] : $file_curline + 1;
+ emitLine("#line $the_line \"$infile_name\"\n");
+}
+
+sub resynch_next_source_line {
+  # Call this after generating a bunch of source lines from a
+  # stateparser directive, to assure that the next line of user code
+  # has the correct source line number.
+ my $the_line = $file_curline + 1 + 1;
+ emitLine("#line $the_line \"$infile_name\"\n");
+}
+
+################################################################
+
+sub emitLine {
+  $outputLines[$outputLineCount++] = $_[0];
+}
+
+sub writeOutputLines {
+  foreach $line (@outputLines) {
+    print OUT $line;
+  }
+}
+
+sub parse_a_machine {
+  initialize();
+  load_lines();
+  parse_lines();
+  generate_code();
+}
+
+sub initialize {
+  undef $lasttrans;
+  undef $nodenamelist;
+  undef $firstnode;
+  undef @src_lines;
+  undef @src_linenos;
+  undef @src_nlcount;
+  undef @node_names;
+  undef @node_decls;
+  undef @node_inits;
+  undef @node_refs;
+  undef @node_reflines;
+  undef @node_linenums;
+  undef @trans_names;
+  undef @trans_classes;
+  undef @trans_args;
+  undef @trans_inits;
+  undef @trans_sources;
+  undef @trans_targets;
+  undef @trans_linenums;
+}
+
+sub load_lines {
+  ################################################################
+  # Load all the state machine source lines into an array before parsing begins.
+  # Join multiline statements (terminated by blank lines) into single source lines.
+  $src_linecnt = 0;
+  $have_line = 0;
+  $start_line = $file_curline + 1;
+  while ( 1 ) {
+    $_ = @file_lines[++$file_curline];
+    if ( $file_curline > $#file_lines ) {
+      report_error("#statemachine at line $start_line not closed by #endstatemachine\n");
+      die "Write aborted.";
+    }
+
+    # turn isolated right brace into $endstatemachine; then look for ($|#)endstatemachine
+    s/^\s*}\s*(;|)\s*$/\$endstatemachine/;
+    my $terminate = /^\s*[#\$]\s*end((statemachine)|(nodeclass)|(nodemethod))(\W|$)/;
+
+    # blank lines or $endstatemachine terminate multiline statements
+    if ( /^\s*$/ || $terminate ) {
+      $src_nlcount[$src_linecnt] = $src_lines[$src_linecnt] =~ tr/\n/\n/s;
+      $src_linecnt++ if $have_line;
+      $have_line = 0;
+      last if $terminate;
+      next;
+    }
+
+    /^(([^\/]|(\/[^\/]))*)((\/\/.*)|$)/; # match up to a trailing comment, if any
+    @src_lines[$src_linecnt] .= $1;
+    @src_linenos[$src_linecnt] = 1+$file_curline if not $have_line; # use line number of first line for multiline stmt
+    $have_line = 1;
+  } # end of while loop: no more lines
+
+  --$file_curline if /^\s*#\s*end((nodeclass)|(nodemethod))(\W|$)/;  # if we ended with an #endnodeclass or #endnodemethod, preserve it
+  $src_linecnt-- unless $have_line; # we always increment after a blank line; undo here if no non-blank line followed
+}
+
+sub parse_lines {
+  ################################################################
+  # Now parse the source lines
+
+  $i = -1;
+  while ($i < $src_linecnt) {
+    $_ =  $src_lines[++$i];
+
+    # Use .*? for () and [] argument lists instead of .+? so we don't
+    # spuriously match =TM()=> as =TM(...another transition...)=>.
+    # Instead we'll turn =TM()=> into TextMsgTrans($,$$,) which will
+    # generate a compilation error due to the trailing comma.
+
+    # Insert $$ as first arg in any long form event
+    s/(>==\s*((\w+:)|)\s*\w+(`|))\s*\(/\1\(\$\$,/gs;
+
+    # Substitute out any transition abbreviations
+    s/=((\w+:)|)N(`|)((\[.*?\])|)=>/>==\1NullTrans\3\4==>/gs;
+    s/=((\w+:)|)C(`|)((\[.*?\])|)=>/>==\1CompletionTrans\3\4==>/gs;
+    s/=((\w+:)|)C(`|)\((.*?)\)((\[.*?\])|)=>/>==\1CompletionTrans\3(\$,\$\$,\4)\6==>/gs;
+    s/=((\w+:)|)T(`|)\((.*?)\)((\[.*?\])|)=>/>==\1TimeOutTrans\3(\$,\$\$,\4)\5==>/gs;
+    s/=((\w+:)|)S(`|)(<[^\(\)=]+?>)((\[.*?\])|)=>/>==\1SignalTrans\3\4\5==>/gs;
+    s/=((\w+:)|)S(`|)(<[^\(\)=]+?>)\((.*?)\)((\[.*?\])|)=>/>==\1SignalTrans\3\4(\$,\$\$,\5)\6==>/gs;
+    s/=((\w+:)|)TM(`|)((\[.*?\])|)=>/>==\1TextMsgTrans\3(\$,\$\$)\4==>/gs;
+    s/=((\w+:)|)TM(`|)\((.*?)\)((\[.*?\])|)=>/>==\1TextMsgTrans\3(\$,\$\$,\4)\5==>/gs;
+    s/=((\w+:)|)RND(`|)((\[.*?\])|)=>/>==\1RandomTrans\3\4==>/gs;
+    s/=((\w+:)|)RND(`|)\((.*?)\)((\[.*?\])|)=>/>==\1RandomTrans\3(\$,\$\$,\4)\6==>/gs;
+    # success or failure
+    s/=((\w+:)|)S(`|)((\[.*?\])|)=>/>==\1SignalTrans\3<StateNode::SuccessOrFailure>(\$,\$\$,StateNode::successSignal)\4==>/gs;
+    s/=((\w+:)|)F(`|)((\[.*?\])|)=>/>==\1SignalTrans\3<StateNode::SuccessOrFailure>(\$,\$\$,StateNode::failureSignal)\4==>/gs;
+    # special handling for =MAP=> event
+    s/=((\w+:)|)MAP(`|)((\[.*?\])|)=>/=\1E\3(mapbuilderEGID,(size_t)___sourcename___,statusETID)\4=>/gs;
+    # special halding for =PILOT=> event
+    s/=((\w+:)|)PILOT(`|)((\[.*?\])|)=>/>==\1PilotTrans\3(\$,\$\$)\4==>/gs;
+    s/=((\w+:)|)PILOT(`|)\((.*?)\)((\[.*?\])|)=>/>==\1PilotTrans\3(\$,\$\$,PilotTypes::\4)\5==>/gs;
+    # special handling for =GRASP=> event
+    s/=((\w+:)|)GRASP(`|)((\[.*?\])|)=>/>==\1GrasperTrans\3(\$,\$\$)\4==>/gs;
+    s/=((\w+:)|)GRASP(`|)\((.*?)\)((\[.*?\])|)=>/>==\1GrasperTrans\3(\$,\$\$,GrasperRequest::\4)\5==>/gs;
+    # make button press transitions with no second argument default to activateETID; also handle missing first argument
+    s/=((\w+:)|)B(`|)((\(\))|)((\[.*?\])|)=>/=\1E\3(buttonEGID)\6=>/gs;
+    s/=((\w+:)|)B(`|)\(([^,]+?)\)((\[.*?\])|)=>/=\1B\3(\4,activateETID)\5=>/gs;
+    # special handling to insert RobotInfo:: and  EventBase:: for button press events
+    s/=((\w+:)|)B(`|)\((\s*)(\w+)((\s*,.*?)|)\)((\[.*?\])|)=>/=\1B\3(\RobotInfo::\5\6)\8=>/gs; # for sourceID
+    s/=((\w+:)|)B(`|)\((.*?,\s*)(\w+\s*)\)((\[.*?\])|)=>/=\1B\3(\4EventBase::\5)\6=>/gs; # for ETID
+    s/=((\w+:)|)B(`|)\((.*?)\)((\[.*?\])|)=>/>==\1EventTrans\3(\$,\$\$,EventBase::buttonEGID,\4)\5==>/gs;
+    # special handling to insert EventBase:: in EventTrans EGID and ETID arguments
+    s/=((\w+:)|)E(`|)\((\s*)(\w+)((\s*,.*?)|)\)((\[.*?\])|)=>/=\1E\3(\4EventBase::\5\6)\8=>/gs; # for EGID
+    s/=((\w+:)|)E(`|)\((.*?)(,.*?,\s*)(\w+\s*)\)((\[.*?\])|)=>/=\1E\3(\4\5EventBase::\6)\7=>/gs; # for ETID
+    s/=((\w+:)|)E(`|)\((.*?)\)((\[.*?\])|)=>/>==\1\3EventTrans(\$,\$\$,\4)\5==>/gs;
+
+    # Delete any trailing semicolon that the user put in to make their text editor happy; don't delete newline
+    s/;\s*$//;
+
+    # Try parsing next token sequence as a node declaration
+  TRYNODE:
+    s/^\s*//s;                      # first drop any leading whitespace, including newlines
+    my $nlcount = tr/\n/\n/s;
+    my $truelinenum =$src_linenos[$i] + $src_nlcount[$i] - $nlcount;
+
+    $node_parser =
+      "^"
+    . "(((\\w+)\\s*:\\s*)|)"        # node name followed by colon (optional)
+    . "(\\w+)(\\s*`|)"              # class name (required) and optional backquote (to speak node name)
+    . "((\\s*<.*?>)|)"              # template arguments (optional)
+    . "((\\s*\\(.*?\\))|)"          # constructor arguments (optional)
+    . "((\\s*\\[(.*?)\\])|)"        # initialization expressions (optional)
+    . "\\s*(((>==)|(\\w*\\s*(:|(>==)|\\{))|(\\s+\\w+)|\$)(.*))\$";   # nested paren matching hack: remainder of expression must look like a node or transition definition
+
+    ($x1,$x2,$nodename,$nodeclass,$nodespeak,$nodetemplate,$x,$args,$x,$initexpr,$x,$inits,$rest) = /$node_parser/s;
+    # print "\$nodename=$nodename   \$nodeclass=$nodeclass  \$args='$args'  \$initexpr='$initexpr'   \$inits='$inits'  \$rest='$rest'\n";
+    if ( $nodeclass ne "" ) {
+      if ( $nodeclass =~ /^[a-z]/ ) {
+	if ( "$x1$nodespeak$nodetemplate$args$initexpr" eq "" ) {  # was just an instance name
+	  goto TRYTRANS;
+	} else {
+	  check_capitalized($nodeclass);
+	}
+      }
+      $nodename = &gensym($nodeclass) if $nodename eq "";
+      check_uncapitalized($nodename);
+      if ( " @node_names " =~ " $nodename " ) {
+	report_error("Node '$nodename' was previously defined");
+      } else {
+	push(@node_names, $nodename);
+      }
+      $firstnode = $nodename unless $firstnode;
+      $args = '($)' if $args =~ /^((\(\s*\))|)$/; # if no arguments specified, provide $ as only arg
+      $args =~ s/^\s*\((\s*[^\$])/\(\$,\1/; # if first argument wasn't a $, insert one
+      $args =~ s/(^|[^\$])\$([^\$]|$)/\1"$nodename"\2/g; # replace $ with node name string
+      $node_decls{$nodename} =  "$nodeclass$nodetemplate *$nodename = new $nodeclass$nodetemplate$args;";
+      $node_linenums{$nodename} = $truelinenum;
+      $inits = "setSpeechText(\"$nodename\");$inits" if $nodespeak ne "";
+      $node_inits{$nodename} = $inits if $inits ne "";
+      if ( $lasttrans ) {
+	$trans_args{$lasttrans} =~ s/\$\$/$nodename/g;
+      }
+      # Once we get here, we won't be linking to any previous transition
+      undef $lasttrans;
+      next if ( $rest eq "" );
+      # Move on to the rest of the expression and set up to parse a transition declaration in case one follows
+      if ( $rest =~ /^\s*>==/ ) {
+        $_ = $nodename . ' ' . $rest;
+      } else {
+	$_ = $rest;
+      }
+      goto TRYNODE;
+    }
+
+  TRYNAMELIST:
+    # Try parsing next token sequence as a comma-separated list of nodes, enclosed in braces
+    $namelist_parser =
+      "^"
+    . "("
+    . "\\{\\s*"                 # opening brace
+    . "(\\w+"                   # first name
+    . "((\\s*,\\s*\\w+)*)|)"    # additional names preceded by commas
+    . "\\s*\\}"                 # closing brace
+    . ")"
+    . "(.*?)\$";                # remainder of line
+    ($full_nodenamelist,$nodenamelist,$x,$x,$rest) = /$namelist_parser/s;
+    if ($nodenamelist ne "") {
+      $nodenamelist =~ s/\s//g;	# eliminate any spaces that were matched; commas are the separators
+
+      # note references to all ndoes
+      my @tempnodenames = split(/,/, $nodenamelist);
+      my $tempnoderefs = " @node_refs ";
+      foreach $noderef (@tempnodenames) {
+	if ( not $tempnoderefs =~ / $noderef / ) {
+	  push(@node_refs, $noderef);
+	  $node_reflines{$noderef} = $truelinenum;
+	}
+      }
+
+      if ( $lasttrans eq "" ) {	# this is a source node list
+	$_ = '___nodenamelist___' . $rest;  # set up a dummy source node and look for a transition
+	goto TRYTRANS;
+      } else {			# this is a target node list
+	($x1,$x2,$xrest) = $nodenamelist =~ /^(\w+)(,|)(.*?)$/;
+	$trans_args{$lasttrans} =~ s/\$\$/$x1/;
+	$trans_targets{$lasttrans} = $xrest;
+	undef $lasttrans;
+	undef $nodenamelist;
+	next if $rest =~ /^\s*$/s;
+	# if followed by a transition, put the original list back and re-parse as a source node list
+	# otherwise, this expression is complete and the next thing must be a label, node list, or node specification
+	if ( $rest =~ /^\s*>==/ ) {
+	  $_ = $full_nodenamelist . $rest;
+	  goto TRYNAMELIST;
+	} else {
+	  $_ = $rest;
+	  goto TRYNODE;
+	}
+      }
+    }
+
+    # If we have a transition waiting for a target and we cannot parse the
+    # current (non-empty) expression as either a node or a node list, complain.
+    if ( $lasttrans ne  "" && not /^\s*$/s ) {
+      report_error("Missing target node(s) for transition '$lasttrans'",$trans_linenums{$lasttrans});
+      undef $lasttrans;
+    }
+
+  TRYTRANS:
+    # Try parsing input line (or residual from node decl.) as a transition declaration
+    s/^\s*//s;                 # first drop any leading whitespace, including newlines
+    my $nlcount = tr/\n/\n/s;
+    my $truelinenum =$src_linenos[$i] + $src_nlcount[$i] - $nlcount;
+
+    $transition_parser =
+      "^"
+    . "(\\w+)"                 # source node name (required)
+    . "\\s*>==\\s*"	       # tail of transition arrow (required)
+    . "(((\\w+)\\s*:)|)"       # transition name (optional)
+    . "\\s*(\\w+)(`|)"         # transition class (required) and optional backquote (to speak transition name)
+    . "(\\s*(<.*?>)|)"         # template arguments (optional)
+    . "(\\s*(\\(.*?\\))|)"     # constructor arguments (optional)
+    . "(\\s*(\\[(.*)\\])|)"    # initializers (optional)
+    . "\\s*==>"                # head of transition arrow (required)
+    . "(\\s*([_a-z]\\w*)|)"    # destination node name (optional)
+    . "(.*)\$";                # remainder of line
+
+    ($srcname,$x,$x,$transname,$transclass,$transspeak,$x,$transtemplate,$x,$args,$x,$initexpr,$inits,$x,$targname,$rest) =
+      /$transition_parser/s;
+
+    if ( $transclass ) {
+      if ( $srcname ne "___nodenamelist___" && not (" @node_refs " =~ / $srcname /) ) {
+	push(@node_refs, $srcname);
+	$node_reflines{$srcname} = $truelinenum;
+      }
+      $transname = &gensym($transclass) if not $transname;
+      check_capitalized($transclass);
+      check_uncapitalized($transname);
+      $targname = "\$\$" if not $targname;
+ #     print "   1*** \$args = '$args'\n";
+      $args .= "(\$,$targname)" if ($args !~ /\)$/); # insert (\$,$targname) if no args were given
+      $args = "(\$,$targname)" if ($args =~ /^\(\s*\)$/); # insert (\$,$targname) if args were given as ()
+#      print "   2*** \$args = '$args'\n";
+      $args =~ s/\(/\(\$,/ if $args !~ /^\(\s*\$\s*,/; # if first arg isn't \$, insert it
+#      print "   3*** \$args = '$args'\n";
+###      $args =~ s/\(\s*\$\s*,/\(\$,\$\$,/ if $args !~ /^\(\s*\$\s*,\s*\$\$/; # if second arg isn't \$\$, insert it
+#      print "   4*** \$args = '$args'\n";
+      $args =~ s/(^|[^\$])\$([^\$]|$)/\1"$transname"\2/g; # replace $ with transition name string
+      $args =~ s/___sourcename___/$srcname/; # insert source node name for =MAP=> or =PILOT=> transition
+      if ( $targname eq "\$\$" ) {
+	$lasttrans = $transname; # we'll fill in the transition target node from the next node def.
+      } else {
+	$args =~ s/\$\$/$targname/;
+	if (" @node_refs " !~ / $targname /) {
+	  push(@node_refs, $targname);
+	  $node_reflines{$targname} = $truelinenum;
+	}
+      }
+#      print "   5*** \$args = '$args'\n";
+#      print "\n";
+      $trans_args{$transname} = $args;
+      push (@trans_names, $transname);
+      $trans_classes{$transname} = "$transclass$transtemplate";
+      $trans_linenums{$transname} = $truelinenum;
+      $inits = "setSpeechText(\"$transname\");$inits" if $transspeak ne "";
+      $trans_inits{$transname} = $inits if $inits ne "";
+      if ( $srcname ne "___nodenamelist___" ) {
+	$trans_sources{$transname} = $srcname;
+      } else {
+	$trans_sources{$transname} = $nodenamelist;
+      }
+      undef $nodenamelist;
+      next unless $rest;
+      # Put the target name back if it's a label (not $$) and there
+      # isn't another label or list of labels pending.  The target
+      # name may be needed for a following node definition or transition.
+      if ( $targname =~ /^[_a-z]/ && $rest !~ /^\s*[\w\{]/) {
+	$rest = $targname . $rest;
+      }
+      $_ = $rest;
+      goto TRYNODE;
+    }
+
+    # Can't parse -- error unless we just have a node name left over
+    report_error("Parse error at '$_'",$truelinenum) unless /^\s*\w*\s*$/s;
+  }
+}
+
+sub generate_code {
+  ################################################################
+  # Now spit out the C++ code for the state machine.  First check
+  # for undefined references.
+
+  # *** CHECK FOR UNDEFINED REFERENCES HERE ***
+  my $definednodes = " @node_names ";
+  foreach $noderef (@node_refs) {
+    if ( $definednodes !~ " $noderef " ) {
+      report_error("Reference to undefined node '$noderef'",$node_reflines{$noderef});
+    }
+  }
+
+  my $indent = "  " x (1+$#definitionStack);
+  # Node declarations
+  foreach $nodename (@node_names) {
+    emitLine("#line $node_linenums{$nodename} \"$infile_name\"\n");
+    if ( $nodename ne "startnode" ) {
+      emitLine("$indent $node_decls{$nodename}\n");
+    } else {
+      $startnode_decl = $node_decls{$nodename};
+      $startnode_decl =~ s/.* = /startnode = /m;
+      emitLine("$indent $startnode_decl\n");
+    }
+    emitLine("$indent addNode($nodename);\n");
+    if ( $node_inits{$nodename} ) {
+      @initexps = split /;/, $node_inits{$nodename};
+      if ( $nodename ne "startnode" ) {
+	$node_acc = $nodename;
+      } else {
+	($nodeclass) = $startnode_decl =~ /new (.*)\(.*\);/;
+	$node_acc = "(($nodeclass*)$nodename)";
+      }
+      foreach (@initexps) {
+	($init) = /^\s*(.*\S)\s*$/s;
+	if ( $init ne "" ) {
+	  emitLine("#line $node_linenums{$nodename} \"$infile_name\"\n");
+	  emitLine("$indent $node_acc->$init;\n");
+	}
+      }
+    }
+    emitLine("\n");
+  }
+
+  # If no explicit startnode was defined, make the first node the startnode
+  if ( " @node_names " !~ / startnode / ) {
+    emitLine("$indent startnode = $firstnode;\n\n");
+  }
+
+  # Transition declarations
+  $printednewline = 1;
+  foreach $transname (@trans_names) {
+    # Use short form for transitions with no identifier,
+    # one source, one destination, and no inits: don't bother declaring
+    # an identifier for the transition instance.
+    if ( $trans_targets{$transname} eq "" && $is_gensym{$transname} && $trans_inits{$transname} eq "" &&
+	 not $trans_sources{$transname} =~ /,/ ) {
+      emitLine("#line $trans_linenums{$transname} \"$infile_name\"\n");
+      emitLine("$indent $trans_sources{$transname}->addTransition(new $trans_classes{$transname}$trans_args{$transname});\n");
+      undef $printednewline;
+      next;
+    }
+    # Use long form for more complex transitions: requires an identifier for the instance.
+    emitLine("\n") unless $printednewline;
+    emitLine("#line $trans_linenums{$transname} \"$infile_name\"\n");
+    emitLine("$indent $trans_classes{$transname} *$transname = new $trans_classes{$transname}$trans_args{$transname};\n");
+    if ( $trans_inits{$transname} ) {
+      @initexps = split /;/s, $trans_inits{$transname};
+      foreach (@initexps) {
+	($init) = /^\s*(.*\S)\s*$/s;
+	if ( $init ne "" ) {
+	  emitLine("#line $trans_linenums{$transname} \"$infile_name\"\n");
+	  emitLine("$indent $transname->$init;\n");
+	}
+      }
+    }
+    @addtargets = split /\,/, $trans_targets{$transname};
+    foreach $targname (@addtargets) {
+      emitLine("$indent $transname->addDestination($targname);\n") if $targname;
+    }
+    @addsources = split /\,/, $trans_sources{$transname};
+    foreach $srcname (@addsources) {
+      emitLine("$indent $srcname->addTransition($transname);\n");
+    }
+    emitLine("\n");
+    $printednewline = 1;
+  }
+}
+
+sub gensym {
+  my ($class) = @_;
+  $class =~ tr/A-Z/a-z/;
+  $cnt = ++$namecounts{$class};
+  my $name = $class . $cnt;
+  $is_gensym{$name} = 1;
+  return $name;
+}
+
+sub check_capitalized {
+  my ($string) = @_;
+  report_error("Error: '$string' is an illegal class name (must be capitalized).\n",$src_linenos[$i])
+    if $string !~ /^[A-Z]/;
+}
+
+sub check_uncapitalized {
+  my ($string) = @_;
+  report_error("Error: '$string' is an illegal instance name (must not be capitalized).\n",$src_linenos[$i])
+    if $string =~ /^[A-Z]/;
+}
+
+################################################################
+# Parse node declarations
+
+sub parse_a_nodeclass {
+  my ($short,$star,$text) = @_;
+  $parseResult = parse_node_definition($short,$star,$text);
+  if ( defined($parseResult) ) {
+    genCodeForClass($parseResult);
+    resynch_next_source_line();
+  }
+  my $methodspec = ${$parseResult}{'method'};
+  if ( defined($methodspec) ) {
+    my $classname = ${$parseResult}{'classname'};
+    my $short = ${$parseResult}{'short'};
+    push(@definitionStack,{short => $short, type => "method", name => $methodspec, implicit => "implicit", bracecount => 1});
+  }
+}
+
+sub parse_node_definition {
+  my ($short,$star,$text) = @_;
+  my ($classname,$constructor,$parents,$initializers,$methodspec);
+  # Start by parsing the constructor call and extract the class name
+  $constructor = $nodeParser->CONSTRUCTOR(\$text);
+  if ( !defined($constructor) || $text !~ /^\s*(:|$)/ ) {
+    report_error("Bad constructor in '$text'");
+    return undef;
+  }
+  $classname = ${$constructor}{'name'};
+  check_capitalized($classname);
+  # Check for parent classes
+  if ($text =~ s/^\s*:\s*//) {
+    $temp = $text;
+    $methodspec = $nodeParser->METHODSPEC(\$temp);
+    if ( defined($methodspec) ) {
+      $text = ": " . $text;   # put it back so we can parse as a methodspec below
+    } else {
+      $parents = $nodeParser->PARENTS(\$text);
+      if ( !defined($parents) || $text !~ /^\s*({|:|$)/ ) {
+	report_error("Bad parent class specification for $classname in: '$text'");
+	return undef;
+      }
+    }
+    if ( $text =~ s/^\s*:\s*// ) {
+      # Try to parse an initializer but check later to see if it was really a methodspec
+      $initializers = $nodeParser->INITIALIZERS_OR_METHODSPEC(\$text);
+      if ( !defined($initializers)  || $text !~ /^\s*({|:|$)/ ) {
+	report_error("Bad initializer or method specification for $classname in: '$text'");
+	return undef;
+      }
+      if ( $text =~ s/^\s*:\s*// ) {
+	$methodspec = $nodeParser->METHODSPEC(\$text);
+	if ( !defined($methodspec) ) {
+	  report_error("Bad method specifier for $classname in: '$text'");
+	  return undef;
+	}
+      }
+    }
+    if ( defined($initializers) && !ref($initializers) ) {  # Initializer was really a methodspec, which is always a string
+      $methodspec = $initializers;
+      $initializers = [];
+    }
+  }
+  if ( $text !~ /^\s*$/ ) {
+    report_warning("Junk at end of input for $classname definition: '$text'");
+  }
+  # Give nodename a default if all other constructor params have defaults.
+  if ( ${$constructor}{'params'} == undef ) {
+    ${$constructor}{'params'} = [];
+  }
+  my $nodenameinit =  "\"$classname\"";
+  foreach $p ( @{${$constructor}{'params'}} ) {
+    if ( ${$p}{'init'} == undef ) {
+      $nodenameinit = undef;
+      last;
+    }
+  }
+  unshift(@{${$constructor}{'params'}}, {name => "nodename", type => "const std::string &", init => $nodenameinit});
+  # Default parent class is VisualRoutinesStateNode
+  if ( !defined($parents->[0]) ) {
+    $parents->[0] = {name => 'VisualRoutinesStateNode'};
+  }
+  # Default parent constructor arglist is the classname string.
+  foreach $parentref (@{$parents}) {
+    if ( !defined(${$parentref}{'args'}) ) {
+      ${$parentref}{'args'} = "(\$)";
+    } else { # insert missing "$," as first argument; delete trailing comma if not needed
+      substr(${$parentref}{'args'}, 1, 0) = "\$," if ${$parentref}{'args'} !~ /^\(\s*\$/;
+      substr(${$parentref}{'args'}, 2, 1) = "" if ${$parentref}{'args'} =~ /^\(\s*\$,\s*\)/;
+    }
+    ${$parentref}{'args'} =~ s/\$/nodename/;
+  }
+  # Also get the variable declarations needed for caching constructor parameters.
+  my @initializer_list = ();
+  my @vardecl_list = ();
+  my @argname_list = ();
+  my @param_list = ();
+  my $params = @{$constructor}{'params'};
+  for my $param (@{$params}) {
+    my $argname = ${$param}{'name'};
+    my $argtype = ${$param}{'type'};
+    my $arginit = ${$param}{'init'};
+    if ( $argname ne "nodename" && $argname ne "_") {
+      push(@initializer_list, "$argname(_$argname)");
+      push(@vardecl_list, "$argtype $argname;");
+      push(@argname_list, $argname);
+    }
+    if ( $argname ne "_" ) {  # normal argument, e.g., "x" in "unsigned int x"
+      push(@param_list, ($argname eq "nodename" ? "$argtype" : "$argtype _") . $argname . (defined($arginit) ? "=$arginit" : ""));
+    } else {  # anonymous argument, e.g., "unsigned int"; user must write "unsigned int _" in fsm file
+      push(@param_list, $argtype);
+    }
+  }
+  my $varsubst_names = ($#argname_list == -1) ? "# dummy #" :  join "|", @argname_list;
+  my $varsubst_pattern = qr/\b($varsubst_names)\b/;
+
+  # Compute inheritance info and parent constructor initializer terms,
+  # substituting any references to constructor arguments.
+  my @inheritance_list = ();
+  my @parent_constructors = ();
+  for my $p (@{$parents}) {
+    push(@inheritance_list, "public ${$p}{'name'}");
+    my $constructor_args = ${$p}{'args'};
+    $constructor_args =~ s/$varsubst_pattern/_$1/gs;
+    push(@parent_constructors, "${$p}{'name'}$constructor_args");
+  }
+
+  # Process the user-specified initializers, substituting any
+  # references to constructor arguments.
+  for my $param (@{$initializers}) {
+    my $val = ${$param}{'value'};
+    $val =~ s/$varsubst_pattern/_$1/gs;
+    push(@initializer_list, "${$param}{'name'}($val)");
+  }
+  my $nodeDescriptor =
+    {type => "class", name => $classname, short => $short, star => $star,
+     params => join(", ", @param_list),
+     inherit => join(", ", @inheritance_list),
+     inits => join(", ", (@parent_constructors, @initializer_list)),
+     vars => \@vardecl_list,
+     method => $methodspec,
+     providevars => [],
+     bracecount => 1
+    };
+  push(@definitionStack, $nodeDescriptor);
+  return $nodeDescriptor;
+}
+
+sub increment_brace_counter {
+ my ($count) = @_;
+ if ( $#definitionStack >= 0 ) {
+   $definitionStack[-1]->{'bracecount'} += $count;
+ }
+}
+
+sub decrement_brace_counter {
+ my ($count) = @_;
+ if ( $#definitionStack >= 0 ) {
+   my $bracecount = $definitionStack[-1]->{'bracecount'} += $count;
+   if  ( $bracecount < 0 ) {
+     report_error("Too many right brace characters")
+   } elsif ( $bracecount == 0 ) {
+     # right brace should close both the implicit method and the nodeclass
+     if ( $definitionStack[-1]->{'type'} eq "method" && $definitionStack[-1]->{'implicit'} eq "implicit" ) {
+       endNodeOrMethod("method");
+     }
+     endNodeOrMethod(undef);
+     undef $line;  # don't emit anything for this line because endNodeOrMethod already did
+   }
+ }
+}
+
+sub genCodeForClass {
+  my $parseval = $_[0];
+  my $classname = $parseval->{'name'};
+  my $params = $parseval->{'params'};
+  my $inherit = $parseval->{'inherit'};
+  my $inits = $parseval->{'inits'};
+  my @vars = @{$parseval->{'vars'}};
+  my $method = $parseval->{'method'};
+  my $constructor_body = (defined($method) && $method eq "constructor") ? "{" : "{}";
+  my $indent = "  " x $#definitionStack;
+  # generate the code
+  resynch_this_source_line();
+  emitLine($indent . "class $classname : $inherit {\n");
+  emitLine("$indent public:\n");
+  resynch_this_source_line();
+  $parseval->{'constructorLine'} = $outputLineCount;
+  emitLine("$indent  $classname($params) : $inits $constructor_body\n");
+  for my $vardecl (@vars) {
+    resynch_this_source_line();
+    emitLine("$indent  $vardecl  // cache the constructor's parameter\n");
+  }
+  if ( defined($method) && $method ne "constructor" ) {
+    resynch_this_source_line();
+    emitLine("$indent  virtual void $method {\n");
+  }
+}
+
+sub parse_a_nodemethod {
+  my ($short,$text) = @_;
+  # Terminate any method that's already open
+  if ( $#definitionStack >= 0 && $definitionStack[-1]->{'type'} eq "method" ) {
+    endNodeOrMethod("method");
+  }
+  # Complain if we're not inside a class definition
+  if ( $#definitionStack < 0 ) {
+    report_error("#".$short."nodemethod is not inside a class definition:   Perhaps a #shortnodeclass was terminated by an extraneous blank line?");
+    return;
+  }
+  # Parse the method declaration
+  my $methodspec = $nodeParser->NODEMETHODSPEC(\$text);
+  my ($methodname) = $methodspec =~ /^(\w+)/;
+  if ( !defined($methodname) ) {
+    report_error("Illegal method specification");
+    return;
+  } elsif ( $text =~ /\S/ ) {
+    report_error("Junk at end of method specification: '$text'");
+    return;
+  }
+  # Everything checks out; open the definition for the new method
+  my $indent = "  " x $#definitionStack;
+  $text .= "()" if $text !~ /\(/;
+  emitLine("$indent  virtual void $methodspec {\n");
+  push(@definitionStack,{short => $short, type => "method", name => $methodname, implicit => "explicit", bracecount => 1});
+}
+
+sub endNodeOrMethod {
+  my ($type) = @_;
+  if ( $type eq "method" && $definitionStack[-1]->{'type'} eq "class" ) {
+    report_error("No method to close in definition of " . $definitionStack[-1]->{'name'});
+    return;
+  } elsif ( $type eq "class" ) {
+    if ( $#definitionStack >= 0 && $definitionStack[-1]->{'type'} eq "method" ) {
+      popDefinitionStack("method");
+    }
+  }
+  popDefinitionStack($type);
+}
+
+sub popDefinitionStack {
+  my ($type) = @_;
+  if ( $#definitionStack == -1 ) {
+    report_error("Extraneous $endnode$type");
+    return;
+  }
+  my $indent = "  " x $#definitionStack;
+  if ( $definitionStack[-1]->{'type'} eq "class" ) {
+    genCodeForProvides($definitionStack[-1]->{"providevars"});
+    if ( $definitionStack[-1]->{'star'} eq "*" ) {
+      my $classname = $definitionStack[-1]->{'name'};
+      resynch_this_source_line();
+      emitLine($indent . " private:  // dummy copy and assignment to suppress compiler warnings\n");
+      resynch_this_source_line();
+      emitLine($indent . "  $classname(const $classname\&);\n");
+      resynch_this_source_line();
+      emitLine($indent . "  $classname\& operator=(const $classname\&);\n");
+    }
+  }
+  my $closer = "}" . ($definitionStack[-1]->{'type'} eq "class"  ? ";" : "");
+  pop(@definitionStack);
+  resynch_this_source_line();
+  emitLine("$indent$closer\n");
+}
+
+sub checkDefinitionStackEmpty {
+  while ( $#definitionStack >= 0 ) {
+    my $entry = pop(@definitionStack)->{'name'};
+    report_error("File ended without closing definition of $entry\n");
+  }
+}
+
+################################################################
+# Parse a $provide or $reference
+
+sub parse_a_provide {
+  my ($line,$trueline) = @_;
+  # Complain if we're not inside a class definition
+  if ( $#definitionStack < 0 ) {
+    report_error("\$provide appears outside of a class definition.");
+    return;
+  }
+  elsif ( $#definitionStack >= 0 && $definitionStack[-1]->{'type'} eq "method" ) {
+    report_error("\$provide appears inside a method; it can only go in the class definition.");
+    return;
+  }
+  # Parse the provide
+  my $providespec = $nodeParser->PROVIDESPEC(\$line);
+  if ( ! defined($providespec) ) {
+    report_error("Syntax error in \$provide declaration.",$trueline);
+    return;
+  } elsif ( $line !~ /^\s*$/ ) {
+    report_error("Junk at end of \$provide statement: '$line'");
+    return;
+  }
+  for my $vardecl (@{$providespec}) {
+    $vardecl->{'trueline'} = $trueline;
+    push(@{$definitionStack[-1]->{'providevars'}}, $vardecl);
+  }
+}
+
+sub genCodeForProvides {
+  my ($providespec) = @_;
+  my $indent = "  " x (1+$#definitionStack);
+  my $inits = "";
+  # generate declarations for all the $provide variables
+  foreach $varspec (@{$providespec}) {
+    resynch_this_source_line($varspec->{'trueline'});
+    emitLine("$indent$varspec->{'type'} $varspec->{'name'};   // from \$provide\n");
+    my $thisInit = defined($varspec->{'init'}) ? $varspec->{'init'} : "";
+    $inits .= ", $varspec->{'name'}($thisInit)";
+  }
+  # now modify the class constructor to initialize the $provide variables just before the { of the body
+  my $cline = $definitionStack[-1]->{'constructorLine'};
+  $outputLines[$cline] =~ s/ \{(}|)\n$/$inits \{\1\n/s;
+}
+
+sub parse_a_reference {
+  my ($line,$trueline) = @_;
+  # Complain if we're not inside a class definition
+  if ( $#definitionStack < 0 ) {
+    report_error("\$reference appears outside of a class definition.");
+    return;
+  }
+  # Parse the reference
+  my $referencespec = $nodeParser->REFERENCESPEC(\$line);
+  if ( !defined($referencespec) ) {
+    report_error("Syntax error in \$reference declaration.",$trueline);
+    return;
+  } elsif ( $line !~ /^\s*$/ ) {
+    report_error("Junk at end of \$reference statement: '$line'");
+    return;
+  }
+  my $indent = "  " x (1+$#definitionStack);
+  for $varref (@{$referencespec}) {
+    my $parent = $varref->{'parent'};
+    my $name = $varref->{'name'};
+    # find the parent nodeclass and its providevars list
+    my $providevars;
+    my $stackptr = $#definitionStack;
+    while ( --$stackptr >= 0 ) {
+      if ( $definitionStack[$stackptr]->{'type'} eq "class" &&
+	   $definitionStack[$stackptr]->{'name'} eq $parent ) {
+	$providevars = $definitionStack[$stackptr]->{'providevars'};
+	last;
+      }
+    }
+    if ( $stackptr < 0 ) {
+      report_error("No parent class named '$parent' visible here.");
+      next;
+    }
+    # found the parent; now find the type information for the variable
+    my $vartype;
+    for $vardecl (@{$providevars}) {
+      if ( $vardecl->{'name'} eq $name ) {
+	$vartype = $vardecl->{'type'};
+	last;
+      }
+    }
+    if ( !defined($vartype) ) {
+      report_error("Class '$parent' doesn't provide a variable named '$name'");
+      next;
+    }
+    # We found the provided variable; generate the reference code
+    resynch_this_source_line();
+    emitLine("$indent$vartype &$name = getAncestor<$parent>()->$name;\n");
+  }
+}
+
+################################################################
+# Error reporting
+
+sub report_error {
+  my ($msg,$lineno) = @_;
+  $msg =~ s/\n$//;
+  $msg =~ s/\n/\\n/mg;
+  $lineno = (1+$file_curline) unless defined($lineno);
+  print color("bold red") . "$infile_name line $lineno: $msg" . color("reset") . "\n";
+  ++$errcnt;
+}
+
+sub report_warning {
+  my ($msg) = @_;
+  $msg =~ s/\n$//;
+  $msg =~ s/\n/\\n/mg;
+  print color("bold yellow") . "$infile_name: $msg" . color("reset") . "\n";
+}

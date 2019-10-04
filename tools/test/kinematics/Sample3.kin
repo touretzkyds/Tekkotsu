@@ -1,0 +1,122 @@
+<?xml version="1.0"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><array>
+<!--
+##################################################################
+##################   Kinematics Configuration   ##################
+##################################################################
+
+This is an XML-based format using the Property List (plist) layout.
+
+Each joint is defined by a <dict> element with the keys listed below.
+A branch in the chain is denoted by an <array> containing the
+joints of the sub-chain.
+
+  JointType: Indicates the type of motion produced by the joint
+    One of: revolute | prismatic
+
+  Denavit-Hartenberg parameters: (here in order of application)
+    d: Displacement along the previous joint's z axis
+    θ: Rotation about the previous joint's z axis (theta, U+03B8)
+    r: Displacement from prev. z along the current joint's x axis
+    α: Rotation about the current joint's x axis (alpha, U+03B1)
+  In other words, θ and d align the previous joint's x axis with
+  this joint's x axis, and then a displacement of r (radius of
+  rotation) along this x defines the current joint's origin.
+  α then defines the current joint's z axis (the axis of actuation).
+
+  qOffset: An additional parameter which shifts the final reference
+    frame to the physical joint's 0 position.  This is a rotation
+    about the joint's z axis for revolute joints, or transation
+    along z for prismatic.
+  Min: The minimum acceptable joint value for inverse kinematics
+  Max: The maximum acceptable joint value for inverse kinematics
+    Inverse kinematics ignores this joint if Min==Max (immobile).
+
+  Model: for 3D graphics, the name of the OGRE mesh file to render
+    for the link following the joint. (drop the ".mesh" suffix)
+  Material: for 3D graphics, the name of the material to apply to
+    the model, or blank to use the model's defaults
+
+All distances are in millimeters.  Angles are radians, unless a
+'unit' attribute is specified, or a '°' is suffixed.  You can
+also specify radians as multiples of Pi, e.g. 'π/2'.
+-->
+
+<dict>
+	<key>Name</key>        <string>BaseFrame</string>
+	
+	<!--======== Components ========-->
+	<key>Components</key>  <array>
+		<dict>
+			<key>CollisionModel</key>        <string>Cube</string>
+			<key>CollisionModelOffset</key>  <array> <real>0</real> <real>0</real> <real>18.125</real> </array>
+			<key>CollisionModelScale</key>   <array> <real>1.8125</real> <real>1.8125</real> <real>36.25</real> </array>
+			<key>Material</key>              <string>Steel</string>
+		</dict>
+		<dict>
+			<key>Model</key>       <string>ReferenceFrame</string>
+			<key>ModelScale</key>  <real>0.363405120010712</real>
+			<key>Visible</key>     <false/>
+		</dict>
+	</array>
+</dict>
+<array>
+	<dict>
+		<key>Name</key>        <string>Link1</string>
+		<key>d</key>           <real>36.25</real>
+		<key>θ</key>           <string>0°</string>
+		<key>r</key>           <real>0</real>
+		<key>α</key>           <string>0°</string>
+		<key>Min</key>         <string>-90°</string>
+		<key>Max</key>         <string>90°</string>
+	
+		<!--======== Components ========-->
+		<key>Components</key>  <array>
+			<dict>
+				<key>CollisionModel</key>          <string>Cube</string>
+				<key>CollisionModelOffset</key>    <array> <real>63.2582521472478</real> <real>13.2582521472478</real> <real>28.125</real> </array>
+				<key>CollisionModelRotation</key>  <array> <real>0</real> <real>0</real> <real>0.103115783508211</real> </array>
+				<key>CollisionModelScale</key>     <array> <real>129.265427933764</real> <real>6.46327139668819</real> <real>56.25</real> </array>
+				<key>Material</key>                <string>Steel</string>
+			</dict>
+			<dict>
+				<key>Model</key>       <string>ReferenceFrame</string>
+				<key>ModelScale</key>  <real>1.4112188787019</real>
+				<key>Visible</key>     <false/>
+			</dict>
+			<dict>
+				<key>CollisionModel</key>        <string>Cylinder</string>
+				<key>CollisionModelOffset</key>  <real>0</real>
+				<key>CollisionModelScale</key>   <real>32.316356983441</real>
+			</dict>
+		</array>
+	</dict>
+</array>
+<array>
+	<dict>
+		<key>Name</key>        <string>Link2</string>
+		<key>d</key>           <real>56.25</real>
+		<key>θ</key>           <string>-45°</string>
+		<key>r</key>           <real>70.7106781186548</real>
+		<key>α</key>           <string>-90°</string>
+		<key>Min</key>         <string>-90°</string>
+		<key>Max</key>         <string>90°</string>
+	
+		<!--======== Components ========-->
+		<key>Components</key>  <array>
+			<dict>
+				<key>Model</key>       <string>ReferenceFrame</string>
+				<key>ModelScale</key>  <real>0.707106781186548</real>
+				<key>Visible</key>     <false/>
+			</dict>
+			<dict>
+				<key>CollisionModel</key>        <string>Cylinder</string>
+				<key>CollisionModelOffset</key>  <array> <real>0</real> <real>0</real> <real>108.210678118655</real> </array>
+				<key>CollisionModelScale</key>   <real>26.5165042944955</real>
+			</dict>
+		</array>
+	</dict>
+</array>
+</array></plist>
+

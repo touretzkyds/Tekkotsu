@@ -1,0 +1,266 @@
+ifeq ($(TEKKOTSU_ENVIRONMENT_CONFIGURATION),)
+$(error This makefile is not meant to be run directly.  It is intended to contain Aperios-specific build instructions.  Please run 'make' from the main project directory.);
+endif
+
+.PHONY: newstick compile-install compile-update checkInstallBinTimestamp
+
+#Each directory represents a separate OObject aka process/thread
+#PROJ_OOBJECTS holds those defined in the project, OOBJECTS
+#holds those defined in either/both $(TEKKOTSU_ROOT) and project
+PROJ_OOBJECTS:=$(filter-out .svn CVS bin include lib share man,$(subst aperios/,,$(shell find aperios -mindepth 1 -maxdepth 1 -type d -prune)))
+OOBJECTS:=$(sort $(PROJ_OOBJECTS) $(filter-out .svn CVS bin include lib share man,$(subst $(TEKKOTSU_ROOT)/aperios/,,$(shell find $(TEKKOTSU_ROOT)/aperios -mindepth 1 -maxdepth 1 -type d -prune))))
+
+# Location of Aperios (the Aibo's OS) binary executables
+SYSTEM_BINARIES:=$(OPENRSDK_ROOT)/OPEN_R/MS_$(if $(findstring $(TEKKOTSU_TARGET_MODEL),TGT_ERS7),ERS7,ERS200)/WCONSOLE/nomemprot
+
+ifeq ($(FILENAME_CASE),lower)
+  TRCMD=tr "[:upper:]" "[:lower:]"
+  CONVERTCASE=$(TEKKOTSU_ROOT)/tools/sbin/makelowercase
+  #BINSUFFIX applies to stuff in the "installdir", but not the PROJ_BD dir (for which we assume/hardcode ".bin", no case switching)
+  BINSUFFIX=.bin
+  MSIMGDIR=ms
+  INSTALLDIR=$(MSIMGDIR)/open-r/mw/objs
+  MMCOMBO_FORKS=mainobj.bin motoobj.bin
+else
+  TRCMD=tr "[:lower:]" "[:upper:]"
+  CONVERTCASE=$(TEKKOTSU_ROOT)/tools/sbin/makeuppercase
+  #BINSUFFIX applies to stuff in the "installdir", but not the PROJ_BD dir (for which we assume/hardcode just ".bin", no case switching)
+  BINSUFFIX=.BIN
+  MSIMGDIR=MS
+  INSTALLDIR=$(MSIMGDIR)/OPEN-R/MW/OBJS
+  MMCOMBO_FORKS=MAINOBJ.BIN MOTOOBJ.BIN
+endif
+
+# These are the file names of the final executable binaries, in the
+# memstick image directory
+INSTALL_BINS:=$(shell echo $(addprefix $(INSTALLDIR)/, $(addsuffix $(BINSUFFIX), MainObj MotoObj $(filter-out MMCombo,$(OOBJECTS)))) | $(TRCMD))
+
+$(PROJ_BD)/aperios/aperios.d: $(shell find aperios -name "[^.]*$(SRCSUFFIX)")
+	$(testEnvScr)
+	@echo Generating $@...
+	@mkdir -p $(dir $@)
+	@rm -f $@;
+	@for dir in $(OOBJECTS) ; do \
+		unset curobj curdir tkdir tkobj; \
+		if [ -d "aperios/$$dir" ] ; then \
+			curdir="aperios/$$dir"; \
+			curobj=`find aperios/$$dir -name "[^.]*$(SRCSUFFIX)" | sed 's@\(.*\)$(SRCSUFFIX)$$@$(PROJ_BD)/\1.o@' | xargs` ; \
+			if [ -f "aperios/$$dir/stub.cfg" -a ! -f "aperios/$$dir/$${dir}Stub.cc" ] ; then \
+				curobj="$$curobj $(PROJ_BD)/aperios/$$dir/$${dir}Stub.o"; \
+			fi; \
+		fi; \
+		if [ -d "$(TEKKOTSU_ROOT)/aperios/$$dir" ] ; then \
+			tkdir="$(TEKKOTSU_ROOT)/aperios/$$dir"; \
+			tkobj=`find "$(TEKKOTSU_ROOT)/aperios/$$dir" -name "[^.]*$(SRCSUFFIX)" | sed 's@^$(TEKKOTSU_ROOT)\(.*\)$(SRCSUFFIX)$$@$(TK_BD)\1.o@' | xargs` ; \
+			if [ -f "$(TEKKOTSU_ROOT)/aperios/$$dir/stub.cfg" -a ! -f "$(TEKKOTSU_ROOT)/aperios/$$dir/$${dir}Stub.cc" ] ; then \
+				tkobj="$$tkobj $(TK_BD)/aperios/$$dir/$${dir}Stub.o"; \
+			fi; \
+		fi; \
+		echo "$${dir}_OBJS:=$$curobj $$tkobj" >> $@; \
+		echo "$${dir}_OCF:=`find $$curdir $$tkdir -name \"*.ocf\" | head -n 1`" >> $@; \
+		echo >> $@ ; \
+		echo "$(PROJ_BD)/aperios/$${dir}.bin: \$$($${dir}_OBJS) \$$($${dir}_OCF) $(USERLIBS)" >> $@ ; \
+		echo >> $@ ; \
+		if [ -d "aperios/$$dir" ] ; then \
+			echo "aperios/$$dir/$${dir}Stub.h aperios/$$dir/$${dir}Stub.cc aperios/$$dir/def.h aperios/$$dir/entry.h: aperios/$$dir/stub.cfg" >> $@ ; \
+			echo '	cd $$(dir $$@) && $$(STUBGEN) stub.cfg' >> $@ ;\
+			echo >> $@ ; \
+			echo "$(PROJ_BD)/aperios/$$dir/$${dir}Stub.o $(PROJ_BD)/aperios/$$dir/$${dir}Stub.d : aperios/$$dir/$${dir}Stub.h aperios/$$dir/$${dir}Stub.cc" >> $@ ; \
+			echo >> $@ ; \
+		fi; \
+		if [ "$$dir" != "MMCombo" ] ; then \
+			inst=`echo $${dir} | $(TRCMD)`; \
+			printf "$(INSTALLDIR)/$${inst}$(BINSUFFIX): $(PROJ_BD)/aperios/$${dir}.bin\\n\\n" >> $@; \
+		fi; \
+	done;
+
+#the touch at the end is because memsticks seem to round time to even seconds, which screws up updates.  Grr.
+compile: checkInstallBinTimestamp $(PROJ_BD)/installbin.timestamp
+	@image="$(PROJ_BD)/$(notdir $(MEMSTICK_ROOT))" ; \
+	if [ \! -d "$$image" ] ; then \
+		if [ \! -d "$(SYSTEM_BINARIES)" ] ; then \
+			echo "Could not find OPEN-R system binaries" ; \
+			exit 1 ; \
+		fi ; \
+		echo "Copying system files..." ; \
+		cp -r "$(SYSTEM_BINARIES)" "$$image" ; \
+		chmod -R u+w "$$image" ; \
+		$(CONVERTCASE) -r $$image/*; \
+		rm -f "$$image/open-r/mw/conf/connect.cfg" "$$image/open-r/mw/conf/object.cfg" "$$image/open-r/system/conf/wlandflt.txt" ; \
+		find "$$image" -depth -type d -empty -exec rmdir \{\} \; ; \
+		curt=`date +%Y%m%d%H%M`; \
+		find "$$image" -exec touch -ft $$curt \{\} \; ; \
+	fi;
+	@badfiles=`find ./$(MSIMGDIR) -name CVS -prune -o -type f -print | grep -v '.*/[^/]\{0,8\}\.\{0,1\}[^/]\{0,3\}~\{0,1\}$$' | grep -v '^./$(MSIMGDIR)/.'`; \
+	if [ "$$badfiles" ] ; then \
+		echo "ERROR: Bad file names were detected:" ; \
+		echo "$$badfiles" ; \
+		echo "Filenames in '$(MSIMGDIR)' directory must conform to the DOS-style 8.3 naming system"; \
+		exit 1; \
+	fi;
+	@baddirs=`find ./$(MSIMGDIR) -name CVS -prune -o -type d -print | grep -v '.*/[^/]\{0,8\}$$'`; \
+	if [ "$$baddirs" ] ; then \
+		echo "ERROR: Bad directory names were detected:" ; \
+		echo "$$baddirs" ; \
+		echo "Directories in '$(MSIMGDIR)' must conform to the DOS-style 8.3 naming system (dirs less than 8 characters)"; \
+		exit 1; \
+	fi;
+	@ms=`find . -ipath './$(MSIMGDIR)'`; \
+	if [ "$(FILENAME_CASE)" = "lower" ] ; then \
+		casefiles=`find "$$ms" -name CVS -prune -o -regex '.*/[^./]*[[:upper:]][^/]*' -print` ; \
+	else \
+		casefiles=`find "$$ms" -name CVS -prune -o -regex '.*/[^./]*[[:lower:]][^/]*' -print` ; \
+	fi; \
+	if [  "$$casefiles" ] ; then \
+		echo "WARNING: filenames of the wrong case detected in $$ms -- may cause excessive resyncing"; \
+		echo "$$casefiles"; \
+		if [ "$(FILENAME_CASE)" = "lower" ] ; then echo "Try running ../tools/sbin/makelowercase -r $$ms" ; \
+		else echo "Try running ../tools/sbin/makeuppercase -r $$ms" ; fi; \
+	fi;
+	@bldinfo=$(shell echo "$(MSIMGDIR)/bld_info.txt" | $(TRCMD)); \
+	printf "Built with $(TEKKOTSU_VERSION), at %s by %s\n" "`date +\"%Y/%m/%d %H:%M:%S\"`" "$$USER" > $$bldinfo ; \
+	printf "Target Model: $(patsubst TGT_%,%,$(TEKKOTSU_TARGET_MODEL))\n" >> $$bldinfo ; \
+	printf "Target Platform: $(patsubst PLATFORM_%,%,$(TEKKOTSU_TARGET_PLATFORM))\n" >> $$bldinfo ; \
+	printf "Project: %s\nFramework: %s\n" "`pwd`" "$(TEKKOTSU_ROOT)" >> $$bldinfo
+	@echo "Type: '$(MAKE) install' to compile and copy all files to the memory stick";
+	@echo "  or: '$(MAKE) update' to compile and copy only changed files";
+	@echo "  or: '$(MAKE) ftpupdate IPADDRESS=<ipaddr>' to compile and copy changed files over FTP";
+	@echo "     ('$(TEKKOTSU_ROOT)/tools/sbin/{ftpinstall,ftpupdate} <ipaddr> ms' might also be useful)";
+	@echo "Build successful."
+
+checkInstallBinTimestamp:
+	@if [ \! -d "$(MSIMGDIR)" ] ; then \
+		echo "ERROR: could not find memory stick image directory $(MSIMGDIR)" ; \
+		ms=`find . -ipath './$(MSIMGDIR)'`; \
+		if [ "$$ms" ] ; then \
+			if [ "$(FILENAME_CASE)" = "lower" ] ; then echo "May be the wrong case on case-sensitive file system?  Try running ../tools/sbin/makelowercase -r $$ms" ; \
+			else echo "May be the wrong case on case-sensitive file system?  Try running ../tools/sbin/makeuppercase -r $$ms" ; fi; \
+		fi; \
+		exit 1; \
+	fi;
+	@for x in $(INSTALL_BINS) ; do \
+		if [ "$$x" -nt "$(PROJ_BD)/installbin.timestamp" ] ; then \
+			printf "Target switch detected, cleaning binaries..." ; \
+			rm -f $(INSTALL_BINS) ; \
+			printf "done.\n" ; \
+			exit 0; \
+		fi; \
+	done;
+
+#only MMCombo depends on the project files -- the other processes don't have hooks for user code
+$(PROJ_BD)/aperios/MMCombo.bin: $(PROJ_BD)/project.a
+
+#PROC_BINS:    (executable binaries, uncompressed)
+# we have to do a couple extra steps to cd into the builddir because
+# mkbin doesn't support -o target in a different directory... drops an
+# intermediate file in . and then complains (as of 1.1.3 anyway)
+$(PROJ_BD)/aperios/%.bin:
+	@echo "Creating executable binary..."
+	@objs="$($*_OBJS)" ; \
+	ocf="$($*_OCF)" ; \
+	libs="$(if $(findstring MMCombo,$*),$(PROJ_BD)/project.a) $(USERLIBS) $(LDFLAGS)" ; \
+	if [ "$*" = "MMCombo" ] ; then undef=`$(NM) -g "$(PROJ_BD)/project.a" $(filter %.a,$(USERLIBS)) | grep autoRegister | grep -v " *U" | cut -f 3 -d ' ' | sort -u | sed 's/^/-u /'`; fi; \
+	echo "$@ <- $${objs}, $${ocf}, $${libs}" | sed 's@$(PROJ_BD)/@@g'; \
+	$(MKBIN) $(MKBINFLAGS) $$undef -o $@ $$objs -m $$ocf $$libs  ; \
+	if [ $$? -gt 0 ] ; then \
+		echo "Build failed."; \
+		exit 1; \
+	fi; \
+	$(STRIP) $@ ;
+
+#INSTALL_BINS:     (compressed executables, in proper location in image directory)
+$(INSTALLDIR)/%$(BINSUFFIX):
+	@if [ \! -d "$(INSTALLDIR)" ] ; then \
+		echo "I can't find $(INSTALLDIR).  Hmmm."; \
+		exit 1; \
+	fi;
+	@echo "Compressing $< -> $@"
+	@gzip -c $< > $@;
+
+$(INSTALLDIR)/$(shell echo MainObj.bin | $(TRCMD)): $(PROJ_BD)/aperios/MMCombo.bin
+	@if [ \! -d "$(INSTALLDIR)" ] ; then \
+		echo "I can't find $(INSTALLDIR).  Hmmm."; \
+		exit 1; \
+	fi;
+	@echo "Compressing $< ~> $@"
+	@$(TEKKOTSU_ROOT)/tools/sbin/strswap $< MMCombo MainObj | gzip -c > $@
+
+$(INSTALLDIR)/$(shell echo MotoObj.bin | $(TRCMD)): $(PROJ_BD)/aperios/MMCombo.bin
+	@if [ \! -d "$(INSTALLDIR)" ] ; then \
+		echo "I can't find $(INSTALLDIR).  Hmmm."; \
+		exit 1; \
+	fi;
+	@echo "Compressing $< ~> $@"
+	@$(TEKKOTSU_ROOT)/tools/sbin/strswap $< MMCombo MotoObj | gzip -c > $@
+
+$(PROJ_BD)/installbin.timestamp: $(INSTALL_BINS)
+	@touch $@
+
+compile-install: compile
+	@export MEMSTICK_ROOT="$(MEMSTICK_ROOT)"; \
+	echo "Installing files to memory stick at $$MEMSTICK_ROOT" \
+	$(TEKKOTSU_ROOT)/tools/sbin/mntmem; \
+	if [ \! -r "$$MEMSTICK_ROOT/open-r/version.txt" -o \! -r "$$MEMSTICK_ROOT/open-r/system/objs/ipstack.bin" -o \! -r "$$MEMSTICK_ROOT/open-r/system/objs/vr.bin" -o \! -r "$$MEMSTICK_ROOT/open-r/system/objs/wlanenbl.bin" ] ; then \
+		echo "** ERROR: It looks like your memory stick is missing critical system files."; \
+		echo "**        You may want to 'make newstick' first to clear the memory stick"; \
+		echo "**        and copy the OPEN-R system files onto it."; \
+		echo Unmounting "$$MEMSTICK_ROOT"; \
+		$(TEKKOTSU_ROOT)/tools/sbin/umntmem; \
+		exit 1; \
+	fi; \
+	if [ -z "`grep \"$(if $(findstring TGT_ERS7,$(TEKKOTSU_TARGET_MODEL)),ERS-7,ERS-210/220)\" \"$$MEMSTICK_ROOT/open-r/version.txt\"`" ] ; then \
+		echo "** ERROR: It looks like your memory stick has the system files for the wrong"; \
+		echo "**        model of AIBO.  You may want to 'make newstick' first to clear the"; \
+		echo "**        memory stick and reinstall the OPEN-R system files onto it."; \
+		echo Unmounting "$$MEMSTICK_ROOT"; \
+		$(TEKKOTSU_ROOT)/tools/sbin/umntmem; \
+		exit 1; \
+	fi; \
+	$(TEKKOTSU_ROOT)/tools/sbin/cpymem --all --img $(MSIMGDIR) --tgt "$$MEMSTICK_ROOT" --tools $(TEKKOTSU_ROOT)/tools; \
+	touch .copiedtomemstick.timestamp
+
+compile-update: compile
+	@export MEMSTICK_ROOT="$(MEMSTICK_ROOT)"; \
+	echo "Syncing $(MSIMGDIR) and $$MEMSTICK_ROOT"; \
+	$(TEKKOTSU_ROOT)/tools/sbin/mntmem "$$MEMSTICK_ROOT" || exit 1; \
+	if [ $(STRICT_MEMSTICK_IMAGE) ] ; then \
+		echo "Strict image copy is on." ; \
+		rsync -rLtWCv --exclude='.*' --delete --modify-window=1 $(MSIMGDIR)/* "$(PROJ_BD)/$(notdir $(MEMSTICK_ROOT))/"* "$$MEMSTICK_ROOT" || exit 1 ; \
+	else \
+		rsync -rLtWCv --exclude='.*' --modify-window=1 $(MSIMGDIR)/* "$(PROJ_BD)/$(notdir $(MEMSTICK_ROOT))/"* "$$MEMSTICK_ROOT" || exit 1 ; \
+	fi; \
+	$(TEKKOTSU_ROOT)/tools/sbin/umntmem "$$MEMSTICK_ROOT"; \
+	touch .copiedtomemstick.timestamp
+
+compile-ftpupdate: compile
+	@echo "Updating the memory stick using ftpupdate with the IP address $(IPADDRESS)" 
+	@$(TEKKOTSU_ROOT)/tools/sbin/ftpupdate $(IPADDRESS) $(MSIMGDIR);
+
+newstick:
+	@echo "  We are about to delete all the files contained within '$(MEMSTICK_ROOT)':"
+	@echo "    rm -rf \"$(MEMSTICK_ROOT)/\"*"
+	@echo
+	@echo "  These files will be replaced with a fresh copy of the system binaries"
+	@echo "  from '$(SYSTEM_BINARIES)'"
+	@printf "  Are you sure you want to continue? (Type 'yes' to continue) > "
+	@read resp ; if [ "$$resp" != "yes" ] ; then \
+		echo "newstick canceled"; \
+		exit 1; \
+	fi;
+	$(TEKKOTSU_ROOT)/tools/sbin/mntmem "$(MEMSTICK_ROOT)";
+	rm -rf "$(MEMSTICK_ROOT)/"*;
+	cp -r "$(SYSTEM_BINARIES)/"* "$(MEMSTICK_ROOT)";
+	$(TEKKOTSU_ROOT)/tools/sbin/umntmem "$(MEMSTICK_ROOT)";
+
+# MMCombo is actually done in the root library, but just in case it gets moved back here...
+#The "fork" we do of MMCombo into MainObj and MotoObj
+#crashes with optimization turned on... not sure why, but it's
+#not a big loss, just turn it off for these files
+$(PROJ_BD)/aperios/MMCombo/MMCombo.o $(PROJ_BD)/aperios/MMCombo/MMComboStub.o: %.o:
+	@mkdir -p $(dir $@)
+	@src=$(patsubst %.o,%$(SRCSUFFIX),$(patsubst $(PROJ_BD)/%,%,$@)); \
+	echo "Compiling $$src... (no -O2)"; \
+	$(CXX) $(filter-out -O2,$(CXXFLAGS)) -o $@ -c $$src > $*.log 2>&1; \
+	retval=$$?; \
+	cat $*.log | $(FILTERSYSWARN) | $(COLORFILT) | $(TEKKOTSU_LOGVIEW); \
+	test $$retval -eq 0; \

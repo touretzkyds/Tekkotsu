@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><array>
+<dict>
+	<!--.type: Allows polymorphic load/save, must match known class name-->
+	<key>.type</key>       <string>Rectangle</string>
+	
+	<!--Center point-->
+	<key>Center</key>      <array> <real>650</real> <real>0</real> </array>
+	
+	<!--Dimensions: Width and height-->
+	<key>Dimensions</key>  <array> <real>300</real> <real>600</real> </array>
+	
+	<!--Name: Human readable name for debugging, display-->
+	<key>Name</key>        <string></string>
+	
+	<!--Orientation: Rotation (radians unless you specify ° suffix)-->
+	<key>Orientation</key> <string>0°</string>
+</dict>
+<dict>
+	<!--.type: Allows polymorphic load/save, must match known class name-->
+	<key>.type</key>       <string>Rectangle</string>
+	
+	<!--Center point-->
+	<key>Center</key>      <array> <real>500</real> <real>500</real> </array>
+	
+	<!--Dimensions: Width and height-->
+	<key>Dimensions</key>  <array> <real>600</real> <real>400</real> </array>
+	
+	<!--Name: Human readable name for debugging, display-->
+	<key>Name</key>        <string></string>
+	
+	<!--Orientation: Rotation (radians unless you specify ° suffix)-->
+	<key>Orientation</key> <string>0°</string>
+</dict>
+<dict>
+	<!--.type: Allows polymorphic load/save, must match known class name-->
+	<key>.type</key>       <string>Rectangle</string>
+	
+	<!--Center point-->
+	<key>Center</key>      <array> <real>500</real> <real>-500</real> </array>
+	
+	<!--Dimensions: Width and height-->
+	<key>Dimensions</key>  <array> <real>600</real> <real>400</real> </array>
+	
+	<!--Name: Human readable name for debugging, display-->
+	<key>Name</key>        <string></string>
+	
+	<!--Orientation: Rotation (radians unless you specify ° suffix)-->
+	<key>Orientation</key> <string>0°</string>
+</dict>
+</array></plist>

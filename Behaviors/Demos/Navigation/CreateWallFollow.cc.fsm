@@ -1,0 +1,94 @@
+#include "Shared/RobotInfo.h"
+#ifdef TGT_IS_CREATE
+
+#include "Behaviors/StateMachine.h"
+using namespace DualCoding;
+
+//! Wall following using the Create's buit-in IR wall sensor.  Min/max distance thresholds are chosen for a white wall (high reflectance).
+$nodeclass CreateWallFollow(float minval=20.f, float maxval=150.f) :  VisualRoutinesStateNode {
+
+	/* these constant values are initialized below, after the class */
+	
+  static float const forwardFwdVel;  // in mm/sec
+  static unsigned int const forwardTravelTime;  // in msec
+
+  static float const veerFwdVel;  // in mm/sec
+  static float const veerAwayAngVel;  // deg/sec converted to rad/sec
+  static float const veerCloserAngVel;  // deg/sec converted to rad/sec
+  static unsigned int const veerTravelTime;  // in msec
+
+  static float const backupFwdVel; // in mm/sec
+  static float const backupAngVel; // deg/sec converted to rad/sec
+  static unsigned int const backupTravelTime; // in msec
+
+  enum IRsignal {
+      goodDistance,
+      tooClose,
+      tooFar
+    };
+
+  $nodeclass CheckIR(float minval, float maxval) : StateNode : doStart {
+    float wallReading = state->sensors[WallSignalOffset];
+    if ( wallReading > maxval )
+      postStateSignal<IRsignal>(tooClose);
+    else if ( wallReading < minval )
+      postStateSignal<IRsignal>(tooFar);
+    else
+      postStateSignal<IRsignal>(goodDistance);
+  }
+
+  $nodeclass Forward : WalkNode($, forwardFwdVel, 0, 0, forwardTravelTime, WalkNode::VEL) {}
+
+  $nodeclass VeerAway : WalkNode($, veerFwdVel, 0, veerAwayAngVel, veerTravelTime, WalkNode::VEL) {}
+
+  $nodeclass VeerCloser : WalkNode($, veerFwdVel, 0, veerCloserAngVel, veerTravelTime, WalkNode::VEL) {}
+
+  $nodeclass BackUpAndTurnLeft : WalkNode($, backupFwdVel, 0, backupAngVel, backupTravelTime, WalkNode::VEL) {}
+			
+  virtual void setup() {
+    $statemachine {
+      startnode: SpeechNode($,"Starting Wall Follow Demo") =C=> check
+
+      check: CheckIR($, minval, maxval)
+      check =S<IRsignal>(goodDistance)=> forward: Forward
+      check =S<IRsignal>(tooClose)=> veeraway: VeerAway`
+      check =S<IRsignal>(tooFar)=> veercloser: VeerCloser`
+
+      {forward, veeraway, veercloser} =C(1)=> check
+
+      {forward, veeraway, veercloser} =B(BumpRightButOffset)=>
+	 backup: BackUpAndTurnLeft` =C=> forward
+    }
+  }
+
+  virtual std::string getDescription() const {
+    return "Follows a right-side wall using the Create's IR wall sensor"; }
+
+}
+
+float const CreateWallFollow::forwardFwdVel = 50;  // in mm/sec
+unsigned int const CreateWallFollow::forwardTravelTime = 500;  // in msec
+
+float const CreateWallFollow::veerFwdVel = 20;  // in mm/sec
+float const CreateWallFollow::veerAwayAngVel = 8*(float)M_PI/180;  // deg/sec converted to rad/sec
+float const CreateWallFollow::veerCloserAngVel = -8*(float)M_PI/180;  // deg/sec converted to rad/sec
+unsigned int const CreateWallFollow::veerTravelTime = 800;  // in msec
+
+float const CreateWallFollow::backupFwdVel = -40; // in mm/sec
+float const CreateWallFollow::backupAngVel = 50*(float)M_PI/180; // deg/sec converted to rad/sec
+unsigned int const CreateWallFollow::backupTravelTime = 1250; // in msec
+
+REGISTER_BEHAVIOR_MENU(CreateWallFollow,DEFAULT_TK_MENU"/Navigation Demos");
+
+#endif
+
+/*! @file
+ * @brief Wall-following demo using the Create's IR wall sensor
+ * @author Owen Watson (Creator) and Dave Touretzky
+ *
+ * $Author: dst $
+ * $Name:  $
+ * $Revision: 1.7 $
+ * $State: Exp $
+ * $Date: 2016/06/17 08:00:25 $
+ */

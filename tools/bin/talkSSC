@@ -1,0 +1,1 @@
+kermit "`dirname \"$0\"`/kermit-ssc.cmd"

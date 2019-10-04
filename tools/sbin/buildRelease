@@ -1,0 +1,269 @@
+#!/bin/sh
+
+#initialization
+
+tmp="/tmp";
+if [ -z "$MEMSTICK_ROOT" ] ; then
+	if [ `uname` = "Darwin" ] ; then
+		if [ -z "$TEKKOTSU_ROOT" ] ; then
+			MEMSTICK_ROOT=`/usr/local/Tekkotsu/tools/osx_find_memstick`
+		else
+			MEMSTICK_ROOT=`$TEKKOTSU_ROOT/tools/osx_find_memstick`
+		fi;
+	else
+		MEMSTICK_ROOT=/mnt/memstick
+	fi
+else
+	ORIG_MEMSTICK_ROOT=$MEMSTICK_ROOT
+fi;
+
+if [ $# -lt 2 ] ; then
+	echo "Usage $0 <newversion> <prevversion>";
+	exit 2;
+fi;
+newtag=tekkotsu-`echo $1 | tr . _`;
+oldtag=tekkotsu-`echo $2 | tr . _`;
+
+echo New tag: ${newtag}
+echo Old tag: ${oldtag}
+
+MAKE=make;
+
+
+
+#cvs export source
+
+cd ${tmp};
+rm -rf Tekkotsu_$1
+rm -rf Tekkotsu_$1.tar.gz
+rm -rf Tekkotsu_memstick_$1
+rm -rf Tekkotsu_memstick_$1.tar.gz
+
+echo "Checking out source for ${newtag}..."
+cvs -q -d :pserver:anonymous@cvs.tekkotsu.org:/cvs checkout -r ${newtag} -d Tekkotsu_$1 Tekkotsu
+if [ ! -d Tekkotsu_$1 ] ; then
+	echo "cvs export failed"
+	exit 1;
+fi;
+
+
+
+#build source tarball
+
+cd Tekkotsu_$1;
+
+if [ `grep PROJECT_NUMBER docs/doxygencfg | grep -c "$1"` -eq 0 ] ; then
+	echo "Version mismatch with docs/doxygencfg - you forgot to update PROJECT_NUMBER";
+	read -p "Press return to ignore... (^C to stop)"
+fi;
+
+for x in project/SampleMC.h project/SampleBehavior.h ; do
+	if [ -f "$x" ] ; then
+		echo "You forgot to untag the sample files"
+		read -p "Press return to ignore... (^C to stop)"
+	fi;
+done;
+for x in ERS210A ERS7 ; do
+	echo "Checking for docs/benchmarks/profilerun_${x}_$1.txt..."
+	if [ ! -f "docs/benchmarks/profilerun_${x}_$1.txt" ] ; then
+		echo "You forgot to include updated profile runs (docs/benchmarks)"
+		read -p "Press return to ignore... (^C to stop)"
+	fi;
+done;
+
+#notice truncates to minute to get even seconds
+#needed because silly memsticks drop lowest bit of timestamp apparently
+curt=`date +%Y%m%d%H%M`;
+find project/ms -exec touch -ft $curt \{\} \; ;
+
+echo "Building Tekkotsu_$1.tar.gz..."
+cd ${tmp};
+tar -czf Tekkotsu_$1.tar.gz Tekkotsu_$1;
+
+
+
+#build patch files
+
+echo "Building patch files..."
+cd ${tmp};
+rm -rf Tekkotsu_$2
+cvs -q export -r ${oldtag} -d Tekkotsu_$2 Tekkotsu
+cd Tekkotsu_$1;
+diff -urdN --exclude=CVS '-I\$[^$]*:[^$]*\$' ../Tekkotsu_$2 . > "${tmp}/Tekkotsu_patch_$2_to_$1.diff";
+if [ "`head -n 1 "${tmp}/Tekkotsu_patch_$2_to_$1.diff" | sed 's/ .*//'`" != "diff" ] ; then
+	echo "Framework patch file failed"
+	exit 1;
+fi;
+cd project;
+diff -urdN --exclude=CVS '-I\$[^$]*:[^$]*\$' ../../Tekkotsu_$2/project . > "${tmp}/Tekkotsu_patch_project_$2_to_$1.diff"
+if [ "`head -n 1 "${tmp}/Tekkotsu_patch_project_$2_to_$1.diff" | sed 's/ .*//'`" != "diff" ] ; then
+	echo "Project patch file failed"
+	exit 1;
+fi;
+
+
+
+#build memstick image tarball
+
+
+export TEKKOTSU_ROOT=..
+
+for x in TGT_QBOTPLUS TGT_QWERK TGT_LYNXARM6 TGT_REGIS1 TGT_CREATE TGT_ERS210 TGT_ERS220 TGT_ERS2xx; do
+	export TEKKOTSU_TARGET_MODEL=$x;
+	printf "\n\nTesting $x build\n\n\n";
+	cd ${tmp}/Tekkotsu_$1;
+	${MAKE} -j2
+	if [ $? -ne 0 ] ; then
+		echo "Framework build failed for $x"
+		exit 1;
+	fi;
+	cd ${tmp}/Tekkotsu_$1/tools;
+	${MAKE} -j2 releaseCheck
+	if [ $? -ne 0 ] ; then
+		echo "Framework tools failed for $x"
+		exit 1;
+	fi;
+	cd ${tmp}/Tekkotsu_$1/project;
+	${MAKE} -j2;
+	if [ $? -ne 0 ] ; then
+		echo "Project Build failed for $x"
+		exit 1;
+	fi;
+	${MAKE} -j2 tekkotsu;
+	if [ $? -ne 0 ] ; then
+		echo "sim build failed for $x"
+		exit 1;
+	fi;
+done;
+
+echo "Enter memstick to be built onto for ERS-2xx - this memstick will be erased";
+read -p "Press return when ready... (^C to stop)"
+
+if [ -z "$MEMSTICK_ROOT" ] ; then
+	if [ `uname` = "Darwin" ] ; then
+		if [ -z "$TEKKOTSU_ROOT" ] ; then
+			MEMSTICK_ROOT=`/usr/local/Tekkotsu/tools/osx_find_memstick`
+		else
+			MEMSTICK_ROOT=`$TEKKOTSU_ROOT/tools/osx_find_memstick`
+		fi;
+	else
+		MEMSTICK_ROOT=/mnt/memstick
+	fi
+fi;
+$TEKKOTSU_ROOT/tools/mntmem $MEMSTICK_ROOT;
+rm -rf $MEMSTICK_ROOT*;
+${MAKE} update;
+if [ $? -ne 0 ] ; then
+	echo "Project build failed"
+	exit 1;
+fi;
+
+$TEKKOTSU_ROOT/tools/mntmem $MEMSTICK_ROOT;
+rm -rf ${tmp}/Tekkotsu_memstick_ERS2xx_$1;
+cp -rp $MEMSTICK_ROOT ${tmp}/Tekkotsu_memstick_ERS2xx_$1;
+$TEKKOTSU_ROOT/tools/umntmem $MEMSTICK_ROOT;
+chmod a+rx ${tmp}/Tekkotsu_memstick_ERS2xx_$1
+
+cd ${tmp};
+tar -cvzf Tekkotsu_memstick_ERS2xx_$1.tar.gz Tekkotsu_memstick_ERS2xx_$1;
+
+echo "ERS-2xx Build done"
+
+read -p "Press return if the memstick actually works. (^C to stop)"
+
+
+
+# ERS-7 build
+
+for x in TGT_ERS7; do
+	export TEKKOTSU_TARGET_MODEL=$x;
+	# turn off precompiled headers to check that all of the #includes are correct
+	export TEKKOTSU_PCH="";
+	printf "\n\nTesting $x build\n\n\n";
+	cd ${tmp}/Tekkotsu_$1;
+	${MAKE} -j2
+	if [ $? -ne 0 ] ; then
+		echo "Framework build failed for $x"
+		exit 1;
+	fi;
+	cd ${tmp}/Tekkotsu_$1/tools;
+	${MAKE} -j2 releaseCheck
+	if [ $? -ne 0 ] ; then
+		echo "Framework tools failed for $x"
+		exit 1;
+	fi;
+	cd ${tmp}/Tekkotsu_$1/project;
+	${MAKE} -j2
+	if [ $? -ne 0 ] ; then
+		echo "Project Build failed for $x"
+		exit 1;
+	fi;
+	${MAKE} -j2 tekkotsu;
+	if [ $? -ne 0 ] ; then
+		echo "sim build failed for $x"
+		exit 1;
+	fi;
+done;
+
+echo "Enter memstick to be built onto for ERS-7 - this memstick will be erased";
+read -p "Press return when ready... (^C to stop)"
+
+#reset memstick root if using darwin; (memstick name might change if using different stick)
+if [ `uname` = "Darwin" -a -z "$ORIG_MEMSTICK_ROOT" ] ; then
+	if [ -z "$TEKKOTSU_ROOT" ] ; then
+		MEMSTICK_ROOT=`/usr/local/Tekkotsu/tools/osx_find_memstick`
+	else
+		MEMSTICK_ROOT=`$TEKKOTSU_ROOT/tools/osx_find_memstick`
+	fi;
+fi
+$TEKKOTSU_ROOT/tools/mntmem $MEMSTICK_ROOT;
+rm -rf $MEMSTICK_ROOT/*;
+${MAKE} update;
+if [ $? -ne 0 ] ; then
+	echo "Project build failed"
+	exit 1;
+fi;
+
+$TEKKOTSU_ROOT/tools/mntmem $MEMSTICK_ROOT;
+rm -rf ${tmp}/Tekkotsu_memstick_ERS7_$1;
+cp -rp $MEMSTICK_ROOT ${tmp}/Tekkotsu_memstick_ERS7_$1;
+$TEKKOTSU_ROOT/tools/umntmem $MEMSTICK_ROOT;
+chmod a+rx ${tmp}/Tekkotsu_memstick_ERS7_$1
+
+cd ${tmp};
+tar -cvzf Tekkotsu_memstick_ERS7_$1.tar.gz Tekkotsu_memstick_ERS7_$1;
+
+echo "ERS-7 Build done"
+
+read -p "Press return if the memstick actually works. (^C to stop)"
+
+
+
+#build TekkotsuMon tarball
+
+echo "Building TekkotsuMon tarball..."
+cd ${tmp};
+rm -rf Tekkotsu_mon_$1;
+cp -r Tekkotsu_$1/tools/mon Tekkotsu_mon_$1;
+tar -cvzf Tekkotsu_mon_$1.tar.gz Tekkotsu_mon_$1;
+
+
+
+#build documentation
+
+echo "Building documentation..."
+cd ${tmp}/Tekkotsu_$1;
+docs/builddocs -a -c -r -s -t;
+cd docs/generated;
+mv html Tekkotsu_doc_$1;
+tar -czf Tekkotsu_doc_$1.tar.gz --exclude Tekkotsu_doc_$1/search.idx Tekkotsu_doc_$1;
+mv Tekkotsu_doc_$1.tar.gz ${tmp};
+
+
+
+#final notice
+
+echo "Done!"
+echo ""
+echo "If you disabled robot access on the staging website, don't forget to"
+echo "turn it back on for the real site when you copy up the files!"

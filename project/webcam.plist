@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<!--======== Drivers ========-->
+<!--Settings for device drivers-->
+<key>Drivers</key> <dict>
+	
+	<!--======== Logged ========-->
+	<key>Logged</key> <dict>
+		<!--.type: Stores the typename of the class so it can be re-instantiated on load.
+		** Do not edit ** -->
+		<key>.type</key> <string>LoggedData</string>
+	</dict>
+	
+	<!--======== Camera ========-->
+	<key>Camera</key> <dict>
+		<!--.type: Stores the typename of the class so it can be re-instantiated on load.
+		** Do not edit ** -->
+		<key>.type</key> <string>Camera</string>
+	</dict>
+	
+</dict>
+
+<!--======== Sensors ========-->
+<!--Settings for the loading of sensor values-->
+<key>Sensors</key>         <dict>
+	<key>Sources</key>    <array/>
+	
+	<!--Heartbeat: If enabled, an empty "heartbeat" message is sent at the appropriate framerate, even if no data is being processed (i.e. frozen, no data loaded, or out of frames); this will cause an update event within the simulator, repeating processing on the previous data.-->
+	<key>Heartbeat</key> <true/>
+</dict>
+
+<!--======== Vision ========-->
+<!--Settings for the loading of camera frames-->
+<key>Vision</key> <dict>
+	
+	<!--======== Sources ========-->
+	<key>Sources</key> <array> <string>Camera</string> </array>
+	
+	<!--Framerate: The rate at which data should be loaded.  This is a hint to the hardware devices, which generally use their 'native' framerate, but may use this to limit data flow.-->
+	<key>Framerate</key> <real>25</real>
+	
+	<!--Heartbeat: If enabled, an empty "heartbeat" message is sent at the appropriate framerate, even if no data is being processed (i.e. frozen, no data loaded, or out of frames); this will cause an update event within the simulator, repeating processing on the previous data.-->
+	<key>Heartbeat</key> <false/>
+</dict>
+
+<!--WaitForSensors: If true, wait for initial sensor readings before triggering the startup behavior or starting the motion polling thread.  On some platforms (e.g. Dynamixel based actuators), sensed output values can be used to initialize output positions.  On others, you may be unable to get any feedback, or can only expect feedback if the robot was left running and the executable is reconnecting (e.g. SSC-32).-->
+<key>WaitForSensors</key>  <false/>
+
+</dict></plist>

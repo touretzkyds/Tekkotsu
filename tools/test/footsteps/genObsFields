@@ -1,0 +1,32 @@
+#!/bin/sh
+
+seed=45989937636
+minx=300
+maxx=800
+miny=-800
+maxy=800
+
+./minefield -z -r -s $seed 50 35 $minx $maxx $miny $maxy > field1r.plist
+./minefield -z -r -s $seed 125 40 $minx $maxx $miny $maxy > field2r.plist
+./minefield -z -r -s $seed 400 45 $minx $maxx $miny $maxy > field3r.plist
+./minefield -z -s $seed 50 35 $minx $maxx $miny $maxy > field1.plist
+./minefield -z -s $seed 100 40 $minx $maxx $miny $maxy > field2.plist
+./minefield -z -s $seed 250 45 $minx $maxx $miny $maxy > field3.plist
+./minefield -z -s $seed 400 45 $minx $maxx $miny $maxy > field4.plist
+./minefield -x -s $seed 50 35 $minx $maxx $miny $maxy > field1x.plist
+./minefield -x -s $seed 75 45 $minx $maxx $miny $maxy > field2x.plist
+./minefield -x -s $seed 100 50 $minx $maxx $miny $maxy > field3x.plist
+
+mkdir -p barriers
+
+for (( x=1; x<=360; ++x )) ; do
+	cat > barriers/barrier$(printf '%03d' $x).plist << EOF
+<?xml version="1.0"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><array><dict>
+	<key>.type</key>       <string>Rectangle</string>
+	<key>Center</key>      <array> <real>500</real> <real>0</real> </array>
+    <key>Dimensions</key>  <array> <real>$x</real> <real>2000</real> </array>
+</dict></array></plist>
+EOF
+done;

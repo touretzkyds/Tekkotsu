@@ -1,0 +1,102 @@
+#!/bin/sh
+
+usage="\
+$0 <zlib-dir>
+    will cause libzlib to be built and installed into the
+    directory which contains this script.
+    
+    You will need to have OPENRSDK installed, either at
+    /usr/local/OPEN_R_SDK, or else set the OPENRSDK_ROOT
+    environment variable.
+    
+    The patch contained within this script was relative to
+    the zlib-1.2.2 release, and may need to be tweaked
+    or replaced to support newer versions...
+";
+
+
+if [ $# -lt 1 -o "$1" == "-h" -o "$1" == "--help" ] ; then
+	printf "$usage";
+	exit 2;
+fi;
+
+pushd "`dirname \"$0\"`"
+TGT="`pwd`";
+popd;
+
+pushd "$1";
+
+echo "Configuring..."
+./configure --prefix="$TGT"
+if [ "$?" -gt 0 ] ; then
+    echo "Configure failed.";
+    exit 1;
+fi;
+
+echo "Patching..."
+patch -p1 <<'EOF'
+diff -u zlib-1.2.2/Makefile zlib-1.2.2-aperios/Makefile
+--- zlib-1.2.2/Makefile	Tue Apr 26 15:44:19 2005
++++ zlib-1.2.2-aperios/Makefile	Tue Apr 26 15:41:09 2005
+@@ -16,7 +16,9 @@
+ # To install in $HOME instead of /usr/local, use:
+ #    make install prefix=$HOME
+ 
+-CC=gcc
++OPENRSDK_ROOT?=/usr/local/OPEN_R_SDK
++ORBIN=$(OPENRSDK_ROOT)/bin/mipsel-linux-
++CC=$(ORBIN)gcc
+ 
+ CFLAGS=-O3 -DUSE_MMAP
+ #CFLAGS=-O -DMAX_WBITS=14 -DMAX_MEM_LEVEL=7
+@@ -25,16 +27,16 @@
+ #           -Wstrict-prototypes -Wmissing-prototypes
+ 
+ LDFLAGS=-L. libz.a
+-LDSHARED=gcc
+-CPP=gcc -E
++LDSHARED=$(ORBIN)gcc
++CPP=$(ORBIN)gcc -E
+ 
+ LIBS=libz.a
+ SHAREDLIB=libz.so
+ SHAREDLIBV=libz.so.1.2.2
+ SHAREDLIBM=libz.so.1
+ 
+-AR=ar rc
+-RANLIB=ranlib
++AR=$(ORBIN)ar rc
++RANLIB=$(ORBIN)ranlib
+ TAR=tar
+ SHELL=/bin/sh
+ EXE=
+@@ -54,7 +56,7 @@
+ 
+ TEST_OBJS = example.o minigzip.o
+ 
+-all: example$(EXE) minigzip$(EXE)
++all: $(LIBS)
+ 
+ check: test
+ test: all
+EOF
+if [ "$?" -gt 0 ] ; then
+    echo "Patching failed.";
+    exit 1;
+fi;
+
+
+echo "Making..."
+make;
+if [ "$?" -gt 0 ] ; then
+    echo "Make failed.";
+    exit 1;
+fi;
+
+echo "Installing..."
+make install;
+if [ "$?" -gt 0 ] ; then
+    echo "Make install failed.";
+    exit 1;
+fi;
+

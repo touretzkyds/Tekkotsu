@@ -1,0 +1,67 @@
+# Tekkotsu WorldBuilder
+# Shape parsing expression grammar
+#
+# Robert Lee (rslee / perihare)
+# 2-14-2011
+
+require "shape"
+
+require "grammar_support"
+
+require "expression_grammar"
+require "string_grammar"
+require "vector_grammar"
+
+grammar ShapeGrammar
+    include ExpressionGrammar
+    include StringGrammar
+    include VectorGrammar
+
+    rule shape
+    type:shape_type
+    parameters:(shape_vector_parameter /
+    shape_number_parameter /
+    shape_string_parameter)*
+    {
+        def eval(env={})
+            s = Shape.new
+            s.set_attr('type', type.eval(env))
+            parameters.elements.each do |p|
+                # Extracts the (key, value) pair
+                parameter = p.eval(env).shift
+                # Assigns the mapping to the new shape object
+                s.set_attr(parameter[0], parameter[1])
+            end
+            ["shape", s]
+        end
+    }
+    end
+
+    rule shape_type
+    ('cube' / 'sphere' / 'cylinder' / 'plane') space
+    {
+        def eval(env={})
+            text_value.rstrip
+        end
+    }
+    end
+  
+    rule shape_vector_parameter
+    keyword:('location' / 'orientation' / 'pointat' / 'scale' /
+    'moffset' / 'mrotation' / 'mscale' /
+    'cmoffset' / 'cmrotation' / 'cmscale' /
+    'centerofmass')
+    space '=' space value:vector space <ShapeParameter>
+    end
+
+    rule shape_number_parameter
+    keyword:('mass')
+    space '=' space value:expression space <ShapeParameter>
+    end
+
+    rule shape_string_parameter
+    keyword:('material' / 'kinematics' / 'name' / 'attachto' / 'group' / 'visible' / 'collision' / 'model' /'cmodel')
+    space '=' space value:string space <ShapeParameter>
+    end
+
+end

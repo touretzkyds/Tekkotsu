@@ -1,0 +1,97 @@
+#include "Behaviors/StateMachine.h"
+
+//! Display the robot's kinematic tree, one joint per line with appropriate indentation.
+$nodeclass DisplayKinTree : StateNode {
+
+  virtual void doStart() {
+    cout << endl;
+    kine->update();  // get latest joint positions from WorldState
+    dispJoint(kine->getRoot());
+  }
+
+  //! Recursively display @a joint and its children
+  void dispJoint(const KinematicJoint *joint) {
+    for (unsigned int indent=0; indent < joint->getDepth(); indent++)
+      cout << "  ";
+
+    // Print the joint index, name, comment, joint type, and q value
+    if ( joint->outputOffset == -1U )
+      cout << "-1";
+    else
+      cout << setw(2) << size_t(joint->outputOffset);  // coerces from plist::OutputSelector to size_t
+    cout << ": " << joint->outputOffset.get();  // joint name
+
+    std::string const comment = joint->getComment("Name");
+    if ( comment.size() > 0 )
+      cout << " {" << comment << "}";
+
+    cout << " (" << joint->jointType.get() << ")";   // revolute or prismatic
+
+    if ( joint->outputOffset != -1U )
+      switch ( joint->jointType ) {
+      case KinematicJoint::REVOLUTE:
+	cout << " q=" << round(10*joint->getQ()*180/M_PI)/10 << " deg";
+	break;
+      case KinematicJoint::PRISMATIC:
+	cout << " q=" << round(10*joint->getQ())/10 << " mm";
+	break;
+      default: // shouldn't get here unless something is corrupted
+	cout << " **** q=" << joint->getQ();
+      }
+
+    {
+      string const &model = joint->model.get();
+      string const &material = joint->material.get();
+      string const &collisionModel = joint->collisionModel.get();
+      cout << " [";
+      bool doneOne = false;
+      if ( !model.empty() ) {
+	if (doneOne) cout << " "; else doneOne=true;
+	cout << "model:" << model;
+      }
+      if ( !material.empty() ) {
+	if (doneOne) cout << " "; else doneOne=true;
+	cout << "material:" << material;
+      }
+      if ( !collisionModel.empty() ) {
+	if (doneOne) cout << " "; else doneOne=true;
+	cout << "collisionModel:" << collisionModel;
+      }
+      cout << "]";
+    }
+
+    // Display the link components that make up this joint
+    if ( joint->components.begin() != joint->components.end() )
+      cout << " components:";
+    for (KinematicJoint::component_iterator c_it = joint->components.begin();
+	 c_it != joint->components.end(); c_it++) {
+      string const &model = (*c_it)->model.get();
+      string const &material = (*c_it)->material.get();
+      string const &collisionModel = (*c_it)->collisionModel.get();
+      cout << " [";
+      bool doneOne = false;
+      if ( !model.empty() ) {
+	if (doneOne) cout << " "; else doneOne=true;
+	cout << "model:" << model;
+      }
+      if ( !material.empty() ) {
+	if (doneOne) cout << " "; else doneOne=true;
+	cout << "material:" << material;
+      }
+      if ( !collisionModel.empty() ) {
+	if (doneOne) cout << " "; else doneOne=true;
+	cout << "collisionModel:" << collisionModel;
+      }
+      cout << "]";
+    }
+    cout << endl;
+
+    // Now recurse on the branches (children)
+    for (KinematicJoint::branch_iterator b_it = joint->getBranches().begin();
+         b_it != joint->getBranches().end(); b_it++)
+      dispJoint(*b_it);
+  }
+
+}
+
+REGISTER_BEHAVIOR_MENU(DisplayKinTree,DEFAULT_TK_MENU"/Kinematics Demos");

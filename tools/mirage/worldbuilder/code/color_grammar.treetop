@@ -1,0 +1,42 @@
+# Tekkotsu WorldBuilder
+# Color parsing expression grammar
+#
+# Robert Lee (rslee / perihare)
+# 2-14-2011
+
+require "color"
+
+grammar ColorGrammar
+    
+    rule color
+    '#'?
+    value:([a-fA-F0-9] [a-fA-F0-9] [a-fA-F0-9] [a-fA-F0-9] [a-fA-F0-9] [a-fA-F0-9])
+    {
+        def eval(env={})
+            c = value.text_value
+            red = c[0,2].hex
+            green = c[2,2].hex
+            blue = c[4,2].hex
+            Color.new(red, green, blue)
+        end
+    } /
+    '#'? value:([a-fA-F0-9] [a-fA-F0-9] [a-fA-F0-9])
+    {
+        def eval(env={})
+            c = value.text_value
+            red = c[0,1].hex * 16 + c[0,1].hex
+            green = c[1,1].hex * 16 + c[1,1].hex
+            blue = c[2,1].hex * 16 + c[2,1].hex
+            Color.new(red, green, blue)
+        end
+    } /
+    '('? x:expression ',' y:expression ',' z:expression ')'?
+    {
+        # XXX: should catch if {x, y, z} > 255
+        def eval(env={})
+            Color.new(x.eval(env).to_i, y.eval(env).to_i, z.eval(env).to_i)
+        end
+    }
+    end
+
+end

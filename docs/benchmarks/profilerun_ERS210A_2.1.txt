@@ -1,0 +1,110 @@
+Setup:
+  Default build for ERS-2xx (TGT_ERS2xx)
+  Pink ball in view (8.5in from snout)
+  Press power button, start timer
+  Telnet to system console (port 59000)
+  Connect ControllerGUI
+  STARTUP script:
+    Launch StareAtBallBehavior (leave E-Stop ON)
+    Navigate to Status Reports -> Profiler
+  Wait until 5 minutes from initial press of power button.
+  Recorded profiler run shown below
+ 
+~~~ Main: ~~~
+Profiling information since: 18.672482 to 302.959106
+ReadySendJoints():
+        2214 calls
+        1.292529 ms avg
+        1.329591 ms exp.avg
+        0.000939 ms avg child time (0.000000%)
+        128.206077 ms avg inter (7.799942 fps)
+        127.928062 ms exp.avg (7.816893 fps)
+        Exec: 0 1 449 1764 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+        Inter: 0 1 1 0 0 0 0 0 0 0 2210 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
+GotSensorFrame():
+        8842 calls
+        0.332026 ms avg
+        0.329539 ms exp.avg
+        0.000000 ms avg child time (0.000000%)
+        32.084602 ms avg inter (31.167599 fps)
+        31.454290 ms exp.avg (31.792164 fps)
+        Exec: 0 0 8398 444 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+        Inter: 0 0 0 0 0 3 1675 5398 1764 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
+GotImage():
+        7052 calls
+        10.114690 ms avg
+        10.314075 ms exp.avg
+        8.653587 ms avg child time (85.500000%)
+        40.220636 ms avg inter (24.862859 fps)
+        40.356495 ms exp.avg (24.779160 fps)
+        Exec: 0 0 5 16 0 6978 52 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+        Inter: 0 0 0 0 0 2 0 1 7047 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
+PowerEvent():
+        27 calls
+        36.724444 ms avg
+        14.618258 ms exp.avg
+        0.000000 ms avg child time (0.000000%)
+        9721.988926 ms avg inter (0.102860 fps)
+        8470.579102 ms exp.avg (0.118056 fps)
+        Exec: 0 0 26 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
+        Inter: 0 0 0 0 0 0 0 0 0 0 0 3 0 2 0 0 0 0 0 0 2 6 0 0 0 2 0 1 0 1 0 9
+BallDetection::processEvent():
+        21123 calls
+        2.889035 ms avg
+        2.430843 ms exp.avg
+        2.781354 ms avg child time (96.200000%)
+        13.358826 ms avg inter (74.856880 fps)
+        11.905966 ms exp.avg (83.991508 fps)
+        Exec: 7000 6987 69 36 0 7027 4 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+        Inter: 9 6908 89 45 0 7029 5 6925 112 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+RegionGenerator::calcImage(...):
+        7031 calls
+        8.355929 ms avg
+        8.288463 ms exp.avg
+        3.942998 ms avg child time (47.100000%)
+        40.109937 ms avg inter (24.931478 fps)
+        40.480179 ms exp.avg (24.703449 fps)
+        Exec: 0 0 0 0 0 7028 3 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+        Inter: 0 0 0 0 0 0 0 1 7029 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+RLEGenerator::calcImage(...):
+        7031 calls
+        3.942998 ms avg
+        4.145589 ms exp.avg
+        2.529170 ms avg child time (64.100000%)
+        40.109973 ms avg inter (24.931455 fps)
+        40.480179 ms exp.avg (24.703449 fps)
+        Exec: 0 0 0 0 7021 10 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+        Inter: 0 0 0 0 0 0 0 1 7029 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+SegmentedColorGenerator::calcImage(...):
+        7031 calls
+        2.529170 ms avg
+        2.700440 ms exp.avg
+        0.018496 ms avg child time (0.700000%)
+        40.110032 ms avg inter (24.931419 fps)
+        40.480179 ms exp.avg (24.703449 fps)
+        Exec: 0 0 0 0 7030 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+        Inter: 0 0 0 0 0 0 0 1 7029 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+RawCameraGenerator::calcImage(...):
+        21093 calls
+        0.006165 ms avg
+        0.005677 ms exp.avg
+        0.000000 ms avg child time (0.000000%)
+        13.367994 ms avg inter (74.805538 fps)
+        11.580246 ms exp.avg (86.353958 fps)
+        Exec: 14057 7031 5 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+        Inter: 6841 7217 4 0 0 0 0 2 7028 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+Bucket distribution (in ms):
+        0<0.00802, <0.133, <0.686, <2.2, <5.43, <11.4, <21.2, <36.4, <58.7, <90, <132, <188, <260, <352, <465, <604, <772, <973, <1.21e+03, <1.49e+03, <1.82e+03, <2.19e+03, <2.63e+03, <3.12e+03, <3.68e+03, <4.31e+03, <5.03e+03, <5.82e+03, <6.71e+03, <7.7e+03, <8.79e+03, <1e+04,
+~~~ Motion: ~~~
+Profiling information since: 18.674357 to 302.969298
+ReadySendJoints():
+        8850 calls
+        1.535671 ms avg
+        1.504879 ms exp.avg
+        0.000000 ms avg child time (0.000000%)
+        32.039534 ms avg inter (31.211441 fps)
+        31.934410 ms exp.avg (31.314184 fps)
+        Exec: 0 0 10 8756 63 3 0 0 0 18 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+        Inter: 0 0 0 0 0 0 0 8830 1 18 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+Bucket distribution (in ms):
+        0<0.00802, <0.133, <0.686, <2.2, <5.43, <11.4, <21.2, <36.4, <58.7, <90, <132, <188, <260, <352, <465, <604, <772, <973, <1.21e+03, <1.49e+03, <1.82e+03, <2.19e+03, <2.63e+03, <3.12e+03, <3.68e+03, <4.31e+03, <5.03e+03, <5.82e+03, <6.71e+03, <7.7e+03, <8.79e+03, <1e+04,

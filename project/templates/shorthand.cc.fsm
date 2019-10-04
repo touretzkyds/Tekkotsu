@@ -1,0 +1,37 @@
+/* State machine shorthand notation provides a concise way to define
+ * state nodes (with $nodeclass) and construct state machines (with
+ * $setupmachine or $statemachine), eliminating some of the errors
+ * people commonly make when attempting these tasks in pure C++.
+ * Modern-style Tekkotsu programming relies heavily on this notation.
+ *
+ * More information about the notation is available on the Tekkotsu
+ * wiki at http://wiki.tekkotsu.org/index.php/State_Machines
+ */
+
+// Replace MACHINENAME, SUPERCLASSNAME, etc., with appropriate
+// identifiers.  The most common choices for SUPERCLASSNAME are
+// StateNode or VisualRoutinesStateNode.
+
+#include "Behaviors/StateMachine.h"
+
+$nodeclass MACHINENAME : SUPERCLASSNAME {
+
+  // Define your derived node classes here.
+  $nodeclass STATE1 : SUPER1 {
+    // ...
+  }
+
+  // Now instantiate the node and transition classes to build the
+  // state machine.
+  $setupmachine{
+    // ...
+  }
+
+}
+
+REGISTER_BEHAVIOR( MACHINENAME );
+
+/*! @file
+ * @brief Defines MACHINENAME, which DESCRIPTION
+ * @author YOURNAMEHERE (Creator)
+ */

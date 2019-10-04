@@ -1,0 +1,76 @@
+#include "Shared/RobotInfo.h"
+#if defined(TGT_HAS_ARMS) && defined(TGT_HAS_HEAD)
+
+#include "Behaviors/StateMachine.h"
+#include "DualCoding/DualCoding.h"
+
+using namespace DualCoding;
+
+//! Finds the biggest ellipse in the image and keeps the gripper centered over it
+class ArmTrackObject : public VisualRoutinesStateNode {
+public:
+	
+	//! Use the MapBuilder to find ellipses
+	class LookForObjects : public MapBuilderNode {
+	public:
+		LookForObjects(const std::string& nodename) : MapBuilderNode(nodename,MapBuilderRequest::localMap) {}
+		virtual void doStart() {
+			mapreq.addObjectColor(ellipseDataType,"pink");
+			mapreq.addObjectColor(ellipseDataType,"orange");
+			mapreq.addObjectColor(ellipseDataType,"blue");
+		}
+	};
+	
+	//! Sort ellipses by size and send the largest one as target for the next state
+	class ChooseObject : public VisualRoutinesStateNode {
+	public:
+		ChooseObject(const std::string& nodename) : VisualRoutinesStateNode(nodename) {}
+		virtual void doStart() {
+			NEW_SHAPEVEC(ellipses, EllipseData, select_type<EllipseData>(localShS));
+			if ( ellipses.size() == 0 )
+				postStateCompletion();
+			else {
+				NEW_SHAPEVEC(bigEllipses, EllipseData, stable_sort(ellipses, not2(EllipseData::AreaLessThan())));
+				postStateSignal<Shape<EllipseData> >(bigEllipses[0]);
+			}
+		}
+	};
+	
+	//! Move the gripper to the position of the target
+	class ReachToObject : public ArmNode {
+	public:
+		ReachToObject(const std::string& nodename) : ArmNode(nodename) {}
+		virtual void doStart() {
+			const DataEvent<Shape<EllipseData> > *datev = dynamic_cast<const DataEvent<Shape<EllipseData> >*>(event);
+			if ( datev != NULL ) {
+				const Point target = datev->getData()->getCentroid();
+				cout << "Reach to " << target << endl;
+				for ( unsigned int i=0; i<NumArmJoints; i++ )
+					getMC()->setMaxSpeed(i, 0.3f);
+				getMC()->moveToPoint(target.coordX(), target.coordY(), 0);
+			} else {
+				std::cout << "ERROR: ReachToObject needs signal trans to provide Shape<EllipseData> to specify reach target" << std::endl;
+			}
+		}
+	};
+	
+	//**************** ArmTrackObject State Machine ****************
+	ArmTrackObject() : VisualRoutinesStateNode("ArmTrackObject") {}
+	
+	virtual void setup() {
+#statemachine
+		// Look for ellipses, choose the largest, put the gripper there, wait 2 seconds, and repeat
+		startnode: LookForObjects() =MAP=>
+			choose: ChooseObject() =S<Shape<EllipseData> >=>
+				ReachToObject() =C=> StateNode =T(2000)=> startnode
+		
+		// If no ellipse found, go back and look again
+		choose =C=> startnode
+#endstatemachine
+	}
+	
+};
+
+REGISTER_BEHAVIOR_MENU(ArmTrackObject,DEFAULT_TK_MENU"/Kinematics Demos");
+
+#endif

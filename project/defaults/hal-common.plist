@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+	
+<!-- This file is loaded when the tekkotsu executable cannot find a
+dedicated file for the current target model -->
+	
+<dict>
+  <!--======== Drivers ========-->
+  <!--Settings for device drivers-->
+  <key>Drivers</key> <dict>
+	
+	<!--======== Logged ========-->
+	<key>Logged</key> <dict>
+		<!--.type: Stores the typename of the class so it can be re-instantiated on load.
+		** Do not edit ** -->
+		<key>.type</key> <string>LoggedData</string>
+	</dict>
+
+  </dict>
+
+</dict></plist>

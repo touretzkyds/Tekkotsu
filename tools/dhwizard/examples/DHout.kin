@@ -1,0 +1,509 @@
+<?xml version="1.0"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>0.0°</real>
+	<key>r</key> <real>0.0</real>
+	<key>Min</key> <real>0.0°</real>
+	<key>Max</key> <real>0.0°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>3.28</real>
+	<key>Model</key> <string>Chiara/Body</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>BaseFrame</string>
+</dict>
+<array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>383.916</real>
+	<key>α</key> <real>0.0°</real>
+	<key>r</key> <real>75.23</real>
+	<key>Min</key> <real>-150.00000000000003°</real>
+	<key>Max</key> <real>150.00000000000003°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.0775</real>
+	<key>Model</key> <string>Chiara/Pan</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>IKSolver</key> <string>IKThreeLink</string>
+	<key>Name</key> <string>NECK:pan</string>
+</dict>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>-39.0</real>
+	<key>α</key> <real>90.0°</real>
+	<key>r</key> <real>22.5</real>
+	<key>Min</key> <real>-92.0°</real>
+	<key>Max</key> <real>75.00000000000001°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.1175</real>
+	<key>Model</key> <string>Chiara/Tilt</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>IKSolver</key> <string>IKThreeLink</string>
+	<key>Name</key> <string>NECK:tilt</string>
+</dict>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>90.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>90.0°</real>
+	<key>r</key> <real>0.0</real>
+	<key>Min</key> <real>0.0°</real>
+	<key>Max</key> <real>0.0°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.0</real>
+</dict>
+<dict>
+	<key>JointType</key> <string>prismatic</string>
+	<key>θ</key> <real>90.0°</real>
+	<key>d</key> <real>41.0</real>
+	<key>α</key> <real>0.0°</real>
+	<key>r</key> <real>0.0</real>
+	<key>Min</key> <real>0.0°</real>
+	<key>Max</key> <real>0.0°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>ReferenceFrame</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>IKSolver</key> <string>IKThreeLink</string>
+	<key>Name</key> <string>CameraFrame</string>
+</dict>
+</array>
+<array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>17.102729°</real>
+	<key>d</key> <real>41.0</real>
+	<key>α</key> <real>0.0°</real>
+	<key>r</key> <real>102.01103</real>
+	<key>Min</key> <real>-95.0°</real>
+	<key>Max</key> <real>95.0°</real>
+	<key>qOffset</key> <real>-0.2984989321263173</real>
+	<key>Mass</key> <real>0.0775</real>
+	<key>Model</key> <string>Chiara/Arm</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>ARM:shldr</string>
+</dict>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>0.0°</real>
+	<key>r</key> <real>93.777</real>
+	<key>Min</key> <real>-95.0°</real>
+	<key>Max</key> <real>95.0°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.0775</real>
+	<key>Model</key> <string>Chiara/Arm</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>ARM:elbow</string>
+</dict>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>0.0°</real>
+	<key>r</key> <real>93.777</real>
+	<key>Min</key> <real>-100.0°</real>
+	<key>Max</key> <real>100.0°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.225</real>
+	<key>Model</key> <string>Chiara/Wrist</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>ARM:wristYaw</string>
+</dict>
+<dict>
+	<key>JointType</key> <string>prismatic</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>0.0°</real>
+	<key>r</key> <real>60.0</real>
+	<key>Min</key> <real>0.0°</real>
+	<key>Max</key> <real>0.0°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>ReferenceFrame</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>GripperFrame</string>
+</dict>
+</array>
+<array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>90.0°</real>
+	<key>d</key> <real>93.5</real>
+	<key>α</key> <real>180.0°</real>
+	<key>r</key> <real>27.5</real>
+	<key>Min</key> <real>-53.0°</real>
+	<key>Max</key> <real>58.0°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.02</real>
+	<key>Model</key> <string>Chiara/Coxa</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>LFr:sweep</string>
+</dict>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>-90.0°</real>
+	<key>r</key> <real>52.0</real>
+	<key>Min</key> <real>-100.0°</real>
+	<key>Max</key> <real>100.0°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.15</real>
+	<key>Model</key> <string>Chiara/Femur</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>LFr:elvtr</string>
+</dict>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>180.0°</real>
+	<key>r</key> <real>86.0</real>
+	<key>Min</key> <real>-59.99999999999999°</real>
+	<key>Max</key> <real>160.0°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.055</real>
+	<key>Model</key> <string>Chiara/Tibia</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>IKSolver</key> <string>IKThreeLink</string>
+	<key>Name</key> <string>LFr:knee</string>
+</dict>
+<dict>
+	<key>JointType</key> <string>prismatic</string>
+	<key>θ</key> <real>-45.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>-90.0°</real>
+	<key>r</key> <real>78.4111</real>
+	<key>Min</key> <real>0.0°</real>
+	<key>Max</key> <real>0.0°</real>
+	<key>qOffset</key> <real>155.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>ReferenceFrame</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>IKSolver</key> <string>IKThreeLink</string>
+	<key>Name</key> <string>LFrFootFrame</string>
+</dict>
+</array>
+<array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>93.5</real>
+	<key>α</key> <real>90.0°</real>
+	<key>r</key> <real>63.0</real>
+	<key>Min</key> <real>-17.0°</real>
+	<key>Max</key> <real>90.0°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.0775</real>
+	<key>Model</key> <string>Chiara/Trochanter</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>RFr:rotor</string>
+</dict>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>65.5</real>
+	<key>α</key> <real>90.0°</real>
+	<key>r</key> <real>0.0</real>
+	<key>Min</key> <real>-102.0°</real>
+	<key>Max</key> <real>67.00000000000001°</real>
+	<key>qOffset</key> <real>1.5707963267948966</real>
+	<key>Mass</key> <real>0.02</real>
+	<key>Model</key> <string>Chiara/Coxa</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>RFr:sweep</string>
+</dict>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>-90.0°</real>
+	<key>r</key> <real>52.0</real>
+	<key>Min</key> <real>-100.0°</real>
+	<key>Max</key> <real>100.0°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.15</real>
+	<key>Model</key> <string>Chiara/Femur</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>RFr:elvtr</string>
+</dict>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>180.0°</real>
+	<key>r</key> <real>86.0</real>
+	<key>Min</key> <real>-59.99999999999999°</real>
+	<key>Max</key> <real>160.0°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.055</real>
+	<key>Model</key> <string>Chiara/Tibia</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>IKSolver</key> <string>IKThreeLink</string>
+	<key>Name</key> <string>RFr:knee</string>
+</dict>
+<dict>
+	<key>JointType</key> <string>prismatic</string>
+	<key>θ</key> <real>-45.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>-90.0°</real>
+	<key>r</key> <real>78.4111</real>
+	<key>Min</key> <real>0.0°</real>
+	<key>Max</key> <real>0.0°</real>
+	<key>qOffset</key> <real>155.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>ReferenceFrame</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>IKSolver</key> <string>IKThreeLink</string>
+	<key>Name</key> <string>RFrFootFrame</string>
+</dict>
+</array>
+<array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>159.61385°</real>
+	<key>d</key> <real>93.5</real>
+	<key>α</key> <real>180.0°</real>
+	<key>r</key> <real>78.944601</real>
+	<key>Min</key> <real>-53.0°</real>
+	<key>Max</key> <real>53.0°</real>
+	<key>qOffset</key> <real>1.2149908002229919</real>
+	<key>Mass</key> <real>0.02</real>
+	<key>Model</key> <string>Chiara/Coxa</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>LMd:sweep</string>
+</dict>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>-90.0°</real>
+	<key>r</key> <real>52.0</real>
+	<key>Min</key> <real>-100.0°</real>
+	<key>Max</key> <real>100.0°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.15</real>
+	<key>Model</key> <string>Chiara/Femur</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>LMd:elvtr</string>
+</dict>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>180.0°</real>
+	<key>r</key> <real>86.0</real>
+	<key>Min</key> <real>-59.99999999999999°</real>
+	<key>Max</key> <real>160.0°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.055</real>
+	<key>Model</key> <string>Chiara/Tibia</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>IKSolver</key> <string>IKThreeLink</string>
+	<key>Name</key> <string>LMd:knee</string>
+</dict>
+<dict>
+	<key>JointType</key> <string>prismatic</string>
+	<key>θ</key> <real>-45.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>-90.0°</real>
+	<key>r</key> <real>78.4111</real>
+	<key>Min</key> <real>0.0°</real>
+	<key>Max</key> <real>0.0°</real>
+	<key>qOffset</key> <real>155.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>ReferenceFrame</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>IKSolver</key> <string>IKThreeLink</string>
+	<key>Name</key> <string>LMdFootFrame</string>
+</dict>
+</array>
+<array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>-143.37867°</real>
+	<key>d</key> <real>93.5</real>
+	<key>α</key> <real>180.0°</real>
+	<key>r</key> <real>46.100434</real>
+	<key>Min</key> <real>-53.0°</real>
+	<key>Max</key> <real>53.0°</real>
+	<key>qOffset</key> <real>-0.9316335941953992</real>
+	<key>Mass</key> <real>0.02</real>
+	<key>Model</key> <string>Chiara/Coxa</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>RMd:sweep</string>
+</dict>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>-90.0°</real>
+	<key>r</key> <real>52.0</real>
+	<key>Min</key> <real>-100.0°</real>
+	<key>Max</key> <real>100.0°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.15</real>
+	<key>Model</key> <string>Chiara/Femur</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>RMd:elvtr</string>
+</dict>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>180.0°</real>
+	<key>r</key> <real>86.0</real>
+	<key>Min</key> <real>-59.99999999999999°</real>
+	<key>Max</key> <real>160.0°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.055</real>
+	<key>Model</key> <string>Chiara/Tibia</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>IKSolver</key> <string>IKThreeLink</string>
+	<key>Name</key> <string>RMd:knee</string>
+</dict>
+<dict>
+	<key>JointType</key> <string>prismatic</string>
+	<key>θ</key> <real>-45.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>-90.0°</real>
+	<key>r</key> <real>78.4111</real>
+	<key>Min</key> <real>0.0°</real>
+	<key>Max</key> <real>0.0°</real>
+	<key>qOffset</key> <real>155.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>ReferenceFrame</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>IKSolver</key> <string>IKThreeLink</string>
+	<key>Name</key> <string>RMdFootFrame</string>
+</dict>
+</array>
+<array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>169.47387°</real>
+	<key>d</key> <real>93.5</real>
+	<key>α</key> <real>180.0°</real>
+	<key>r</key> <real>150.53322</real>
+	<key>Min</key> <real>-73.0°</real>
+	<key>Max</key> <real>53.0°</real>
+	<key>qOffset</key> <real>1.387080700801946</real>
+	<key>Mass</key> <real>0.02</real>
+	<key>Model</key> <string>Chiara/Coxa</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>LBk:sweep</string>
+</dict>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>-90.0°</real>
+	<key>r</key> <real>52.0</real>
+	<key>Min</key> <real>-100.0°</real>
+	<key>Max</key> <real>100.0°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.15</real>
+	<key>Model</key> <string>Chiara/Femur</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>LBk:elvtr</string>
+</dict>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>180.0°</real>
+	<key>r</key> <real>86.0</real>
+	<key>Min</key> <real>-59.99999999999999°</real>
+	<key>Max</key> <real>160.0°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.055</real>
+	<key>Model</key> <string>Chiara/Tibia</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>IKSolver</key> <string>IKThreeLink</string>
+	<key>Name</key> <string>LBk:knee</string>
+</dict>
+<dict>
+	<key>JointType</key> <string>prismatic</string>
+	<key>θ</key> <real>-45.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>-90.0°</real>
+	<key>r</key> <real>78.4111</real>
+	<key>Min</key> <real>0.0°</real>
+	<key>Max</key> <real>0.0°</real>
+	<key>qOffset</key> <real>155.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>ReferenceFrame</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>IKSolver</key> <string>IKThreeLink</string>
+	<key>Name</key> <string>LBkFootFrame</string>
+</dict>
+</array>
+<array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>-166.08527°</real>
+	<key>d</key> <real>93.5</real>
+	<key>α</key> <real>180.0°</real>
+	<key>r</key> <real>114.3558</real>
+	<key>Min</key> <real>-53.0°</real>
+	<key>Max</key> <real>53.0°</real>
+	<key>qOffset</key> <real>-1.3279385435820361</real>
+	<key>Mass</key> <real>0.02</real>
+	<key>Model</key> <string>Chiara/Coxa</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>RBk:sweep</string>
+</dict>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>-90.0°</real>
+	<key>r</key> <real>52.0</real>
+	<key>Min</key> <real>-100.0°</real>
+	<key>Max</key> <real>100.0°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.15</real>
+	<key>Model</key> <string>Chiara/Femur</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>RBk:elvtr</string>
+</dict>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>180.0°</real>
+	<key>r</key> <real>86.0</real>
+	<key>Min</key> <real>-59.99999999999999°</real>
+	<key>Max</key> <real>160.0°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.055</real>
+	<key>Model</key> <string>Chiara/Tibia</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>IKSolver</key> <string>IKThreeLink</string>
+	<key>Name</key> <string>RBk:knee</string>
+</dict>
+<dict>
+	<key>JointType</key> <string>prismatic</string>
+	<key>θ</key> <real>-45.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>-90.0°</real>
+	<key>r</key> <real>78.4111</real>
+	<key>Min</key> <real>0.0°</real>
+	<key>Max</key> <real>0.0°</real>
+	<key>qOffset</key> <real>155.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>ReferenceFrame</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>IKSolver</key> <string>IKThreeLink</string>
+	<key>Name</key> <string>RBkFootFrame</string>
+</dict>
+</array>
+</array>
+</plist>

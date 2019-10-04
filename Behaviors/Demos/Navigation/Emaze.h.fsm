@@ -1,0 +1,112 @@
+#include "Behaviors/Demos/Navigation/PilotDemo.h"
+
+$nodeclass Emaze: PilotDemo {
+	
+  virtual void buildMap() {
+		
+    cout << "Building map..." << endl;
+		
+    // world bounds
+		
+    vector<Point> pts;
+    pts.push_back(Point(   -457.2,      457.2));
+    pts.push_back(Point(   1981.2,      457.2));
+    pts.push_back(Point(   1981.2,    -1524.0));
+    pts.push_back(Point(   1219.2,    -1524.0));
+    pts.push_back(Point(   1219.2,     -355.6));
+    pts.push_back(Point(   1143.0,     -355.6));
+    pts.push_back(Point(   1143.0,    -1524.0));
+    pts.push_back(Point(    381.0,    -1524.0));
+    pts.push_back(Point(    381.0,     -355.6));
+    pts.push_back(Point(    304.8,     -355.6));
+    pts.push_back(Point(    304.8,    -1524.0));
+    pts.push_back(Point(   -457.2,    -1524.0));
+		
+    NEW_SHAPE(worldBounds, PolygonData, new PolygonData(worldShS, pts, true));
+		
+    // add landmarks
+		
+    NEW_SHAPE(tag0, AprilTagData,
+	      new AprilTagData(worldShS, AprilTags::TagDetection(0),
+			       Point(-456.2,    50.8, 177.8)));
+		
+    NEW_SHAPE(tag1, AprilTagData,
+	      new AprilTagData(worldShS, AprilTags::TagDetection(1), 
+			       Point( -76.2,   456.2, 177.8)));
+
+    NEW_SHAPE(tag2, AprilTagData,
+	      new AprilTagData(worldShS, AprilTags::TagDetection(2), 
+			       Point( 762.0,   456.2, 177.8)));
+
+    NEW_SHAPE(tag3, AprilTagData,
+	      new AprilTagData(worldShS, AprilTags::TagDetection(3), 
+			       Point(1600.2,   456.2, 177.8)));
+
+    NEW_SHAPE(tag4, AprilTagData,
+	      new AprilTagData(worldShS, AprilTags::TagDetection(4), 
+			       Point(1980.2,    50.8, 177.8)));
+		
+    NEW_SHAPE(tag5, AprilTagData,
+	      new AprilTagData(worldShS, AprilTags::TagDetection(5), 
+			       Point(1980.2,  -508.0, 177.8)));
+		
+    NEW_SHAPE(tag6, AprilTagData,
+	      new AprilTagData(worldShS, AprilTags::TagDetection(6), 
+			       Point(1980.2, -1371.6, 177.8)));
+		
+    NEW_SHAPE(tag7, AprilTagData,
+	      new AprilTagData(worldShS, AprilTags::TagDetection(7), 
+			       Point(1600.2, -1523.0, 177.8)));
+
+    NEW_SHAPE(tag8, AprilTagData,
+	      new AprilTagData(worldShS, AprilTags::TagDetection(8), 
+			       Point(1220.2, -1371.6, 177.8)));
+
+    NEW_SHAPE(tag9, AprilTagData,
+	      new AprilTagData(worldShS, AprilTags::TagDetection(9), 
+			       Point(1220.2,  -508.0, 177.8)));
+
+    NEW_SHAPE(tag10, AprilTagData,
+	      new AprilTagData(worldShS, AprilTags::TagDetection(10),
+			       Point(1142.0,  -508.0, 177.8)));
+
+    NEW_SHAPE(tag11, AprilTagData,
+	      new AprilTagData(worldShS, AprilTags::TagDetection(11),
+			       Point(1142.0, -1371.6, 177.8)));
+
+    NEW_SHAPE(tag12, AprilTagData,
+	      new AprilTagData(worldShS, AprilTags::TagDetection(12),
+			       Point( 762.0, -1523.0, 177.8)));
+
+    NEW_SHAPE(tag13, AprilTagData,
+	      new AprilTagData(worldShS, AprilTags::TagDetection(13),
+			       Point( 382.0, -1371.6, 177.8)));
+
+    NEW_SHAPE(tag14, AprilTagData,
+	      new AprilTagData(worldShS, AprilTags::TagDetection(14),
+			       Point( 382.0,  -508.0, 177.8)));
+
+    NEW_SHAPE(tag15, AprilTagData,
+	      new AprilTagData(worldShS, AprilTags::TagDetection(15),
+			       Point( 303.8,  -508.0, 177.8)));
+
+    NEW_SHAPE(tag16, AprilTagData,
+	      new AprilTagData(worldShS, AprilTags::TagDetection(16),
+			       Point( 303.8, -1371.6, 177.8)));
+
+    NEW_SHAPE(tag17, AprilTagData,
+	      new AprilTagData(worldShS, AprilTags::TagDetection(17),
+			       Point( -76.2, -1523.0, 177.8)));
+
+    NEW_SHAPE(tag18, AprilTagData,
+	      new AprilTagData(worldShS, AprilTags::TagDetection(18),
+			       Point(-456.2, -1371.6, 177.8)));
+
+    NEW_SHAPE(tag19, AprilTagData,
+	      new AprilTagData(worldShS, AprilTags::TagDetection(19), 
+			       Point(-456.2,  -508.0, 177.8)));
+
+    pilot->setWorldBounds(worldBounds);
+  };
+	
+}

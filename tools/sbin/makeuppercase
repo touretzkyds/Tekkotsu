@@ -1,0 +1,42 @@
+#!/bin/sh
+
+# will convert specified files to uppercase names
+
+if [ "$1" = "-r" ] ; then
+	recurse=1; shift;
+else
+	recurse=0;
+fi;
+
+for x in $* ; do
+	dir=`dirname "$x"`;
+	file=`basename "$x"`;
+	if [ "$file" = "CVS" ] ; then
+		continue;
+	fi;
+	if echo "$file" | grep -q '\\..*' ; then
+		continue;
+	fi;
+	if [ ! -r "$x" ] ; then
+		if [ "$file" != "*" ] ; then
+			echo "WARNING: Could not read '$x'";
+		fi;
+	else
+		conv="$dir/`echo $file | tr '[a-z]' '[A-Z]'`";
+		if [ "$dir/$file" != "$conv" ] ; then
+			if [ -e "$conv" -a ! "$dir/$file" -ef "$conv" ] ; then
+				echo "ERROR: $conv already exists (from $x)";
+				echo "exiting..."
+				exit 1;
+			fi;
+			#wish i could do this:
+			# mv "$x" "$conv";
+			#but cygwin doesn't like that...
+			mv "$dir/$file" "$dir/$file"_tmp;
+			mv "$dir/$file"_tmp "$conv";
+		fi;
+		if [ $recurse -gt 0 -a -d "$conv" ] ; then
+			"$0" -r "$conv"/*;
+		fi;
+	fi;
+done;

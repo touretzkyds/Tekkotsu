@@ -1,0 +1,63 @@
+# Tekkotsu WorldBuilder
+# Light parsing expression grammar
+#
+# Robert Lee (rslee / perihare)
+# 2-14-2011
+
+require "light"
+
+require "grammar_support"
+
+require "expression_grammar"
+require "string_grammar"
+require "vector_grammar"
+require "color_grammar"
+
+grammar LightGrammar
+    include ExpressionGrammar
+    include StringGrammar
+    include VectorGrammar
+    include ColorGrammar
+
+    rule light
+    'light'
+    space
+    parameters:(light_vector_parameter /
+    light_number_parameter /
+    light_color_parameter /
+    light_string_parameter)*
+    {
+        def eval(env={})
+            l = Light.new
+            parameters.elements.each do |p|
+                # Extracts the (key, value) pair
+                parameter = p.eval(env).shift
+                # Assigns the mapping to the new shape object
+                l.set_attr(parameter[0], parameter[1])
+            end
+            ["light", l]
+        end
+    }
+    end
+  
+    rule light_vector_parameter
+    keyword:('location' / 'orientation' / 'pointat')
+    space '=' value:vector space <LightParameter>
+    end
+
+    rule light_number_parameter
+    keyword:('attenuateconst' / 'attentuatelinear' / 'attenuatequad' / 'attenuaterange')
+    space '=' value:expression space <LightParameter>
+    end
+
+    rule light_color_parameter
+    keyword:('color')
+    space '=' value:color space <LightParameter>
+    end
+
+    rule light_string_parameter
+    keyword:('name')
+    space '=' value:string space <LightParameter>
+    end
+
+end

@@ -1,0 +1,234 @@
+#!/usr/bin/perl
+#
+# mstreeput 
+#
+# Copyright 2002 Sony Corporation
+#
+$|=1;
+
+use Socket;
+$username = "ftpinst";
+$password = "ftpinst";
+
+#----- set default options -----
+$message        = "\n ftpinstall - install MS tree using TinyFTP\n\n"
+	."  usage:\n       ftpinstall [options] addr dir\n"
+	."  options:\n"
+	."      -u    : username\n"
+	."      -p    : password\n"
+	."      -a    : use active mode (defaults to 'passive' mode)\n"
+	."      -h    : help\n"
+	."\n";
+
+use Getopt::Std;
+getopts('a:u:p:hHz');
+die $message if ($opt_h || $opt_H);
+$username = $opt_u if ($opt_u);
+$password = $opt_p if ($opt_p);
+
+
+#----- main -----
+die $message if @ARGV <= 1;
+$hostname = shift(@ARGV);
+$localdir = shift(@ARGV);
+$numoflist=0;
+
+$copiedtimestamp = ".copied.timestamp.$hostname";
+
+chdir($localdir);
+makecopylist(".");
+
+login();
+for ($i = 0; $i < $numoflist; $i++) {
+	if ($LIST[$i] =~ /\/$/) {
+		ftpmkdir($LIST[$i]);
+	} else {
+		($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
+		 $atime,$mtime,$ctime,$blksize,$blocks)
+			= stat($LIST[$i]);
+
+		print "$LIST[$i]";
+		if ($opt_a) {
+			listenData();
+		} else {
+			connectData();
+		}
+		ftpput($LIST[$i]);
+		
+	}
+}
+logout();
+$ans=`touch "$copiedtimestamp"`;
+
+#----- sub -----
+sub makecopylist {
+	my $directory = shift(@_);
+	my $numofdir;
+	my @DIRLIST;
+	my $i;
+
+	opendir(DIR, $directory);
+	while ($filename = readdir(DIR)) {
+		next if ($filename =~ /^\./);
+		next if ($filename =~ /^CVS$/);
+		$path = "$directory/$filename";
+		$LIST[$numoflist++] = $path if -f $path;
+		if (-d $path) {
+			$LIST[$numoflist++] = "$path/";
+			$DIRLIST[$numofdir++] = $path;
+		}
+	}
+	close(DIR);
+
+	for ($i = 0; $i < $numofdir; $i++) {
+		makecopylist($DIRLIST[$i]);
+	}
+}
+
+sub login {
+	$proto = getprotobyname('tcp');
+	$port = getservbyname('ftp', 'tcp');
+	socket(COMMAND, PF_INET, SOCK_STREAM, $proto)
+		|| die "can't creat socket.\n";
+    
+	$sock_addr = pack_sockaddr_in($port, inet_aton($hostname));
+	connect(COMMAND, $sock_addr) || die "cant't connect\n";
+	select(COMMAND); $|=1; select(STDOUT);
+
+	while (<COMMAND>) {
+		die $_ if (/^[^123]\d+\s/);
+		last if (/^\d+\s/);
+	}
+    
+	print COMMAND "USER $username\r\n";
+	while (<COMMAND>) {
+		die $_ if (/^[^123]\d+\s/);
+		last if (/^\d+\s/);
+	}
+    
+	print COMMAND "PASS $password\r\n";
+	while (<COMMAND>) {
+		die $_ if (/^[^123]\d+\s/);
+		last if (/^\d+\s/);
+	}
+}
+
+sub logout {
+	print COMMAND "REBT\r\n";
+	close(COMMAND);
+}
+
+sub setType {
+	print COMMAND "TYPE I\r\n";
+	while (<COMMAND>) {
+#		print ">$_";
+		die $_ if (/^[^123]\d+\s/);
+		last if (/^\d+\s/);
+	}
+}
+
+sub connectData {
+	socket(IN, PF_INET, SOCK_STREAM, $proto)
+		|| die "can't connect\n";
+	print COMMAND "PASV\r\n";
+	while (<COMMAND>) {
+#		print "$_\n";
+		die $_ if (/^[^123]\d+\s/);
+		if (/^\d+\s/) {
+			s/,/./g;
+			/(\d+\.\d+\.\d+\.\d+)\.(\d+)\.(\d+)/;
+			$pasvhost="$1";
+			$pasvport=$2*256+$3;
+#			print "Passive on $pasvhost:$pasvport\n";
+			$pasv_sock_addr = pack_sockaddr_in($pasvport, inet_aton($pasvhost));
+			last;
+		}
+	}
+}
+
+sub listenData {
+	for ($data_port = 5000; $data_port < 65536; $data_port++) {
+		socket(DATA, PF_INET, SOCK_STREAM, $proto)
+			|| die "cant't connect\n";
+        
+		if (bind(DATA, pack_sockaddr_in($data_port, INADDR_ANY))) {
+			last;
+		} else {
+			die "can't bind port\n" if ($data_port == 65535);
+		}
+	}
+
+	listen(DATA, 1) || die "listen: $!";
+	$local_sock_addr = getsockname(COMMAND);
+	($local_port, $local_addr) = unpack_sockaddr_in($local_sock_addr);
+	$local_ip = inet_ntoa($local_addr);
+	$local_ip =~ s/\./,/g;
+
+	printf COMMAND "PORT $local_ip,%d,%d\r\n" 
+		,$data_port/256,$data_port%256;
+	while (<COMMAND>) {
+		die $_ if (/^[^123]\d+\s/);
+		last if (/^\d+\s/);
+	}
+}
+
+sub ftpmkdir {
+	my $direstory = shift(@_);
+
+	print COMMAND "MKD $direstory\r\n";
+	while (<COMMAND>) {
+		last if (/^\d+\s/);
+	}
+}
+
+sub ftpput {
+	my $filename = shift(@_);
+
+	setType();
+#	print "sending filename $filename\n";
+	if ($filename =~ /^.*\/\w{1,8}\.?\w{0,3}$/) {
+		print COMMAND "STOR $filename\r\n";
+	} else {
+		my $trunc = "";
+		if ($filename =~ /\./) {
+			$filename =~ /^(.*\/)(\w{1,8}).*\.(\w{0,3})[^\/]*$/;
+			$trunc = "$1$2.$3";
+		} else {
+			$filename =~ /^(.*\/)(\w{1,8})(\w{0,3})[^\/]*$/;
+			$trunc = "$1$2.$3";
+		}
+		print " truncated to $trunc\n";
+		print COMMAND "STOR $trunc\r\n";
+	}
+	if ($opt_a) {
+#		print "accepting...";
+		accept(IN, DATA);
+#		print "done\n";
+	} else {			
+#		print "connecting...";
+		connect(IN, $pasv_sock_addr) || die "cant't connect\n";
+#		print "done\n";
+	}
+	while (<COMMAND>) {
+#		print ">$_";
+		die $_ if (/^[^123]\d+\s/);
+		last if (/^\d+\s/);
+	}
+#	print "opening file\n";
+	open (FILE, "$filename");
+	binmode(FILE);
+
+#	print "sending data\n";
+	while (read(FILE, $tmp, 1024)) {
+#		print ".";
+		print IN "$tmp";
+	}
+	print "\n";
+#	print "closing up\n";
+	close(IN);
+	close(DATA);
+	while (<COMMAND>) {
+		die $_ if (/^[^123]\d+\s/);
+		last if (/^\d+\s/);
+	}
+}

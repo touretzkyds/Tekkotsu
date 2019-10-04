@@ -1,0 +1,52 @@
+#include "DualCoding/DualCoding.h"
+#include "Sound/SoundManager.h"
+#include "Crew/MapBuilderNode.h"
+#include "Behaviors/Transitions/EventTrans.h"
+
+using namespace DualCoding;
+
+$nodeclass LookForBiColorMarkers : VisualRoutinesStateNode {
+
+  $nodeclass Looker : MapBuilderNode($,MapBuilderRequest::localMap) : constructor {
+      mapreq.maxDist = 100000;
+      mapreq.addAllObjectColors(markerDataType);
+      mapreq.markerTypes.insert(BiColorMarkerData::biColorMarkerType);
+      mapreq.userGroundProcessing = &deleteGroundBlobs;
+    $endnodemethod;
+
+    // leave blobs in camShS but don't project to ground
+    static void deleteGroundBlobs() {
+      NEW_SHAPEVEC(blobs, BlobData, select_type<BlobData>(groundShS));
+      SHAPEVEC_ITERATE(blobs, BlobData, b)
+        b.deleteShape();
+      END_ITERATE;
+    }
+  }
+  
+  $nodeclass Reporter : VisualRoutinesStateNode : doStart {
+    NEW_SHAPEVEC(bimarkers, BiColorMarkerData, select_type<BiColorMarkerData>(localShS));
+    SHAPEVEC_ITERATE(bimarkers, BiColorMarkerData, b)
+      Shape<BiColorMarkerData> &marker = b;
+      string const topcol = ProjectInterface::getColorName(marker->topColor);
+      string const botcol = ProjectInterface::getColorName(marker->bottomColor);
+      sndman->speak("Saw a "+topcol+" and "+botcol+" marker");
+      cout << "   " << b << endl;
+    END_ITERATE;
+    if ( bimarkers.empty() ) {
+      cout << "Found no markers.  Found " << camShS.allShapes().size() << " cam shapes." << endl;
+      SHAPEROOTVEC_ITERATE(camShS, s)
+        s->V();  // make blobs visible, for debugging
+        cout << "   " << s << endl;
+      END_ITERATE;
+    }
+  }
+
+  virtual void setup() {
+    $statemachine{
+      Looker =MAP=> Reporter
+    }
+  }
+
+}
+
+REGISTER_BEHAVIOR_MENU(LookForBiColorMarkers,DEFAULT_TK_MENU"/Navigation Demos");

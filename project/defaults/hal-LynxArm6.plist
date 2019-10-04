@@ -1,0 +1,277 @@
+<?xml version="1.0"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<!--InitialRunlevel: Specifies how far startup should proceed before pausing for user interaction.
+This value only affects startup, and setting this value from the simulator command prompt will have no effect.  (Use the 'runlevel' command instead.)-->
+<key>InitialRunlevel</key> <string>RUNNING</string>
+
+<!--InitialTime: The value to initialize the simulator's clock (in milliseconds)-->
+<key>InitialTime</key> <integer>0</integer>
+
+<!--======== Motion ========-->
+<!--Parameters for motion simulation-->
+<key>Motion</key> <dict>
+	<!--FeedbackDelay: Delay (in milliseconds) to apply to motion output before feeding back to sensor values (simulates (very roughly) inertia and system response time); 0 indicates instantaneous/perfect joint control, negative values indicate no feedback (only sensor data sets joint positions)-->
+	<key>FeedbackDelay</key> <integer>0</integer>
+	
+	<!--OverrideSensors: Allows motion feedback to override position values from sensor data loaded from disk.
+	If false, feedback is only provided when no other sensor data is being provided-->
+	<key>OverrideSensors</key> <false/>
+	
+	<!--Verbose: Report whenever motion commands are being processed or joints are updated
+	0 - nothing, 1 - errors, 2 - warnings (e.g. dropped frames), 3 - notification every frame-->
+	<key>Verbose</key> <integer>1</integer>
+	
+	<!--ZeroPIDFeedback: When set to false, if PIDs are set to zero, then sensor values are used to set joint positions; otherwise joint position sensors would only be used if FeedbackDelay is negative-->
+	<key>ZeroPIDFeedback</key> <false/>
+</dict>
+
+<!--Multiprocess: The processing/threading model to use - true to use real process forks a la Aibo/Aperios, or false to just more threads like a sane person would do-->
+<key>Multiprocess</key> <false/>
+
+<!--Speed: The speed at which to run the simulation, as a multiple of "real-time".
+For example, '1' is normal, '0.5' is half-speed, '0' is paused.
+Any negative value requests non-realtime mode, where the clock is moved as fast as processing (or manual control) allows.-->
+<key>Speed</key> <real>1</real>
+
+<!--WaitForSensors: If true, wait for initial sensor readings before triggering the startup behavior or starting the motion polling thread.  On some platforms, sensed output values can be used to initialize output positions.  On others, you may be unable to get any feedback, or can only expect feedback if the robot was left running and the executable is reconnecting.-->
+<key>WaitForSensors</key> <false/>
+
+<!--======== CommPorts ========-->
+<!--Communication portals for use by device drivers-->
+<key>CommPorts</key> <dict>
+	<!--======== Net ========-->
+	<key>Net</key> <dict>
+		<!--.type: Stores the typename of the class so it can be re-instantiated on load.
+		** Do not edit ** -->
+		<key>.type</key> <string>NetworkCommPort</string>
+		
+		<!--Hostname to connect to, or interface to listen on (blank for INADDR_ANY)-->
+		<key>Host</key> <string></string>
+		
+		<!--Port number to connect to or listen on-->
+		<key>Port</key> <integer>0</integer>
+		
+		<!--Server: If true, should listen for incoming connections instead of making an outgoing one.-->
+		<key>Server</key> <false/>
+		
+		<!--Transport protocol to use-->
+		<key>Transport</key> <string>TCP</string>
+	</dict>
+	
+	<!--======== Serial ========-->
+	<key>Serial</key> <dict>
+		<!--.type: Stores the typename of the class so it can be re-instantiated on load.
+		** Do not edit ** -->
+		<key>.type</key> <string>SerialCommPort</string>
+		
+		<!--Flags: Configuration string to pass to stty-->
+		<key>Flags</key> <string>115200 sane raw -echo</string>
+		
+		<!--Mode bitmask to pass to the open() call, defaults to 'w+b': in|out|trunc|binary (see std::ios_base::openmode)-->
+		<key>Mode</key> <integer>60</integer>
+		
+		<!--Path of file system object being accessed-->
+		<key>Path</key> <string>/dev/ttyS0</string>
+	</dict>
+</dict>
+
+<!--======== Drivers ========-->
+<!--Settings for device drivers-->
+<key>Drivers</key> <dict>
+	<!--======== SSC32 ========-->
+	<key>SSC32</key> <dict>
+		<!--.type: Stores the typename of the class so it can be re-instantiated on load.
+		** Do not edit ** -->
+		<key>.type</key> <string>SSC32</string>
+		
+		<!--======== ButtonMode ========-->
+		<!--Controls interpretation of the input pin.
+		False means directly measure voltage, true means test for high (1),
+		high now but low was detected in interval (0.5), or low (0).
+		Button mode implies interpreting inputMap value as a button index instead of sensor index.-->
+		<key>ButtonMode</key> <array>
+			<false/>
+			<false/>
+			<false/>
+			<false/>
+		</array>
+		
+		<!--CommPort: The name of the comm port where output will be sent-->
+		<key>CommPort</key> <string>Serial</string>
+		
+		<!--======== InputMap ========-->
+		<!--For each of the SSC32's input pins, lists the sensor index it should send its value to; -1 to mark unused-->
+		<key>InputMap</key> <array>
+			<integer>0</integer>
+			<integer>1</integer>
+			<integer>2</integer>
+			<integer>3</integer>
+		</array>
+		
+		<!--======== MaxPulseWidth ========-->
+		<!--The high end of the servo's legal pulse width range (may correspond to unreachable position, use RobotInfo's outputRange[] to limit motion, not this)-->
+		<key>MaxPulseWidth</key> <array>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+		</array>
+		
+		<!--======== MinPulseWidth ========-->
+		<!--The low end of the servo's legal pulse width range (may correspond to unreachable position, use RobotInfo's outputRange[] to limit motion, not this)-->
+		<key>MinPulseWidth</key> <array>
+			<integer>500</integer>
+			<integer>500</integer>
+			<integer>500</integer>
+			<integer>500</integer>
+			<integer>500</integer>
+			<integer>500</integer>
+			<integer>500</integer>
+			<integer>500</integer>
+			<integer>500</integer>
+			<integer>500</integer>
+			<integer>500</integer>
+			<integer>500</integer>
+			<integer>500</integer>
+			<integer>500</integer>
+			<integer>500</integer>
+			<integer>500</integer>
+			<integer>500</integer>
+			<integer>500</integer>
+			<integer>500</integer>
+			<integer>500</integer>
+			<integer>500</integer>
+			<integer>500</integer>
+			<integer>500</integer>
+			<integer>500</integer>
+			<integer>500</integer>
+			<integer>500</integer>
+			<integer>500</integer>
+			<integer>500</integer>
+			<integer>500</integer>
+			<integer>500</integer>
+			<integer>500</integer>
+			<integer>500</integer>
+		</array>
+		
+		<!--======== OutputMap ========-->
+		<!--For each of the SSC32's servo pins, lists the output index it should take its values from; -1 to mark unused-->
+		<key>OutputMap</key> <array>
+			<integer>0</integer>
+			<integer>1</integer>
+			<integer>2</integer>
+			<integer>3</integer>
+			<integer>4</integer>
+			<integer>5</integer>
+			<integer>-1</integer>
+			<integer>-1</integer>
+			<integer>-1</integer>
+			<integer>-1</integer>
+			<integer>-1</integer>
+			<integer>-1</integer>
+			<integer>-1</integer>
+			<integer>-1</integer>
+			<integer>-1</integer>
+			<integer>-1</integer>
+			<integer>-1</integer>
+			<integer>-1</integer>
+			<integer>-1</integer>
+			<integer>-1</integer>
+			<integer>-1</integer>
+			<integer>-1</integer>
+			<integer>-1</integer>
+			<integer>-1</integer>
+			<integer>-1</integer>
+			<integer>-1</integer>
+			<integer>-1</integer>
+			<integer>-1</integer>
+			<integer>-1</integer>
+			<integer>-1</integer>
+			<integer>-1</integer>
+			<integer>-1</integer>
+		</array>
+		
+		<!--QueryServos: If set to true, will attempt to query the servo positions with each sensor update.
+		This may decrease the sampling frequency-->
+		<key>QueryServos</key> <false/>
+		
+		<!--SparseUpdates: If true, only send servo positions to SSC when they change, instead of all servos on every update (don't use a lossy transport like UDP if you turn this on!)-->
+		<key>SparseUpdates</key> <false/>
+	</dict>
+</dict>
+
+<!--======== Sensors ========-->
+<!--Settings for the loading of sensor values-->
+<key>Sensors</key> <dict>
+	<!--Framerate: The rate at which images should be loaded.  This is passed as a hint to the source, which may be limited to multiples of its capture device frequency.-->
+	<key>Framerate</key> <real>31.25</real>
+	
+	<!--Frozen: If true, no frames will be sent, except via explicit 'advance' commands; if false, the thread will run and send messages at the requested times automatically-->
+	<key>Frozen</key> <false/>
+	
+	<!--Heartbeat: If enabled, an empty "heartbeat" message is sent at the appropriate framerate, even if no data is being processed (i.e. frozen, no data loaded, or out of frames); this will cause an update event within the simulator, repeating processing on the previous data.-->
+	<key>Heartbeat</key> <true/>
+	
+	<key>Sources</key> <array><string>SSC32</string></array>
+	
+	<!--Verbose: Controls how much feedback to give on the console regarding progress
+	  0 - none
+	  1 - report when messages are dropped
+	  2 - also report when a message is sent
+	  3 - also report when heartbeat is sent/dropped, and when loop occurs
+	  4 - also report when each message is preloaded-->
+	<key>Verbose</key> <integer>0</integer>
+</dict>
+
+<!--======== Vision ========-->
+<!--Settings for the loading of camera frames-->
+<key>Vision</key> <dict>
+	<!--Framerate: The rate at which images should be loaded.  This is passed as a hint to the source, which may be limited to multiples of its capture device frequency.-->
+	<key>Framerate</key> <real>30</real>
+	
+	<!--Frozen: If true, no frames will be sent, except via explicit 'advance' commands; if false, the thread will run and send messages at the requested times automatically-->
+	<key>Frozen</key> <false/>
+	
+	<!--Heartbeat: If enabled, an empty "heartbeat" message is sent at the appropriate framerate, even if no data is being processed (i.e. frozen, no data loaded, or out of frames); this will cause an update event within the simulator, repeating processing on the previous data.-->
+	<key>Heartbeat</key> <true/>
+	
+	<key>Sources</key> <array></array>
+	
+	<!--Verbose: Controls how much feedback to give on the console regarding progress
+	  0 - none
+	  1 - report when messages are dropped
+	  2 - also report when a message is sent
+	  3 - also report when heartbeat is sent/dropped, and when loop occurs
+	  4 - also report when each message is preloaded-->
+	<key>Verbose</key> <integer>0</integer>
+</dict>
+</dict></plist>

@@ -1,0 +1,8 @@
+AddType video/mp4 mp4 mpg4
+#Order Deny,Allow
+#Deny from all
+#Allow from 128.2
+#Allow from 146.215
+#Allow from 202.238.104
+#Allow from 211.125.129
+#Allow from 137.153

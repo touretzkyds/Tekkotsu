@@ -1,0 +1,82 @@
+material Tapia/Grid
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			texture_unit
+			{
+				texture grid.png
+				tex_address_mode wrap
+				filtering anisotropic point none
+				max_anisotropy 6
+				scale 0.0333333 0.05
+				scroll -.001 -.001
+			}
+			depth_bias -10
+		}
+	}
+}
+material Tapia/Black
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			texture_unit
+			{
+				colour_op_ex source1 src_manual src_current 0 0 0
+			}
+		}
+	}
+}
+material Tapia/Blue
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient .25 .25 .25 1
+			diffuse 0 0 1 1
+			//texture_unit
+			//{
+			//	colour_op_ex source1 src_manual src_current 0 0 1
+			//}
+		}
+	}
+}
+material Tapia/Purple
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient .25 .25 .25 1
+			diffuse 1 0 1 1
+			//texture_unit
+			//{
+			//	colour_op_ex source1 src_manual src_current 1 0 1
+			//}
+		}
+	}
+}
+material Tapia/Yellow
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient .25 .25 .25 1
+			diffuse 1 1 0 1
+			//texture_unit
+			//{
+			//	colour_op_ex source1 src_manual src_current 1 1 0
+			//}
+		}
+	}
+}

@@ -1,0 +1,449 @@
+material AprilTag/tag16h5/00
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture AprilTags/tag16h5/tag16h5_00000.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material AprilTag/tag16h5/01
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture AprilTags/tag16h5/tag16h5_00001.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material AprilTag/tag16h5/02
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture AprilTags/tag16h5/tag16h5_00002.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material AprilTag/tag16h5/03
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture AprilTags/tag16h5/tag16h5_00003.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material AprilTag/tag16h5/04
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture AprilTags/tag16h5/tag16h5_00004.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material AprilTag/tag16h5/05
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture AprilTags/tag16h5/tag16h5_00005.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material AprilTag/tag16h5/06
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture AprilTags/tag16h5/tag16h5_00006.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material AprilTag/tag16h5/07
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture AprilTags/tag16h5/tag16h5_00007.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material AprilTag/tag16h5/08
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture AprilTags/tag16h5/tag16h5_00008.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material AprilTag/tag16h5/09
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture AprilTags/tag16h5/tag16h5_00009.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material AprilTag/tag16h5/10
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture AprilTags/tag16h5/tag16h5_00010.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material AprilTag/tag16h5/11
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture AprilTags/tag16h5/tag16h5_00011.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material AprilTag/tag16h5/12
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture AprilTags/tag16h5/tag16h5_00012.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material AprilTag/tag16h5/13
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture AprilTags/tag16h5/tag16h5_00013.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material AprilTag/tag16h5/14
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture AprilTags/tag16h5/tag16h5_00014.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material AprilTag/tag16h5/15
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture AprilTags/tag16h5/tag16h5_00015.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material AprilTag/tag16h5/16
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture AprilTags/tag16h5/tag16h5_00016.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material AprilTag/tag16h5/17
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture AprilTags/tag16h5/tag16h5_00017.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material AprilTag/tag16h5/18
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture AprilTags/tag16h5/tag16h5_00018.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material AprilTag/tag16h5/19
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture AprilTags/tag16h5/tag16h5_00019.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material AprilTag/tag16h5/20
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture AprilTags/tag16h5/tag16h5_00020.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material AprilTag/tag16h5/21
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture AprilTags/tag16h5/tag16h5_00021.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material AprilTag/tag16h5/22
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture AprilTags/tag16h5/tag16h5_00022.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material AprilTag/tag16h5/23
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture AprilTags/tag16h5/tag16h5_00023.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material AprilTag/tag16h5/24
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture AprilTags/tag16h5/tag16h5_00024.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material AprilTag/tag16h5/25
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture AprilTags/tag16h5/tag16h5_00025.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material AprilTag/tag16h5/26
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture AprilTags/tag16h5/tag16h5_00026.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material AprilTag/tag16h5/27
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture AprilTags/tag16h5/tag16h5_00027.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material AprilTag/tag16h5/28
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture AprilTags/tag16h5/tag16h5_00028.png
+        rotate -90
+      }
+    }
+  }
+}
+
+material AprilTag/tag16h5/29
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture AprilTags/tag16h5/tag16h5_00029.png
+        rotate -90
+      }
+    }
+  }
+}

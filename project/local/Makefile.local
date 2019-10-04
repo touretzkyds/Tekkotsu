@@ -1,0 +1,54 @@
+ifeq ($(TEKKOTSU_ENVIRONMENT_CONFIGURATION),)
+$(error This makefile is not meant to be run directly.  It is intended to contain local-specific build instructions.  Please run 'make' from the main project directory.);
+endif
+
+# Each directory which contains a source file of the same name is considered
+# a separate executable, and its subdirectory is specific to it
+
+# check project directory
+PROJ_EXECS:=$(patsubst local/%,%,$(shell find local -mindepth 1 -maxdepth 1 -type d -name '[a-z]*'))
+EXECS:=$(sort $(PROJ_EXECS) tekkotsu)
+
+$(EXECS): %: checkLibs %-$(subst TGT_,,$(TEKKOTSU_TARGET_MODEL))
+
+.PHONY: $(EXECS)
+
+LSRC_SKIP:=$(foreach x,$(PROJ_EXECS),\! -path local/$(x)/\*)
+LSRCS:=$(shell find local $(LSRC_SKIP) -name "[^.]*$(SRCSUFFIX)")
+SRCS:=$(SRCS) $(LSRCS)
+
+TGTEXECS:=$(addsuffix $(subst TGT_,-,$(TEKKOTSU_TARGET_MODEL)),$(EXECS))
+
+ifeq ($(shell uname | grep -ci cygwin),0)
+  PLATFORM_FLAGS:=$(PLATFORM_FLAGS) -DHAVE_READDIR_R
+endif
+
+$(PROJ_BD)/local/local.d: $(shell find local -name "[^.]*$(SRCSUFFIX)") $(wildcard $(TK_BD)/local/*)
+	@echo Generating $@...
+	@mkdir -p $(dir $@)
+	@rm -f $@;
+	@for dir in $(EXECS) ; do \
+		unset curobj curdir tkdir tkobj; \
+		if [ -d "local/$$dir" ] ; then \
+			curdir="local/$$dir"; \
+			curobj=`find local/$$dir -name "[^.]*$(SRCSUFFIX)" | sed 's@\(.*\)$(SRCSUFFIX)$$@$(PROJ_BD)/\1.o@' | xargs` ; \
+		fi; \
+		if [ -d "$(TEKKOTSU_ROOT)/local/$$dir" ] ; then \
+			tkdir="$(TEKKOTSU_ROOT)/local/$$dir"; \
+			tkobj=`find "$(TEKKOTSU_ROOT)/local/$$dir" -name "[^.]*$(SRCSUFFIX)" | sed 's@^$(TEKKOTSU_ROOT)\(.*\)$(SRCSUFFIX)$$@$(TK_BD)\1.o@' | xargs`; \
+		fi; \
+		printf "$${dir}$(subst TGT_,-,$(TEKKOTSU_TARGET_MODEL))_OBJS:=$$curobj $$tkobj\n\n$${dir}$(subst TGT_,-,$(TEKKOTSU_TARGET_MODEL)): \$$($${dir}$(subst TGT_,-,$(TEKKOTSU_TARGET_MODEL))_OBJS)\n\n" >> $@ ; \
+	done;
+
+compile compile-sim: tekkotsu-$(subst TGT_,,$(TEKKOTSU_TARGET_MODEL))
+	@echo "Build successful."
+
+$(TGTEXECS): $(PROJ_BD)/project.a $(filter-out %.dylib %.so,$(USERLIBS)) | $(filter %.dylib %.so,$(USERLIBS))
+	@echo "Creating executable binary..."
+	@objs="$($@_OBJS)" ; \
+	libdirs="-L$(TK_LIB_BD) -Wl,-rpath,$(TK_LIB_BD)" ; \
+	libs="$(PROJ_BD)/project.a $(patsubst $(TK_LIB_BD)/lib%$(suffix $(LIBTEKKOTSU)),-l%,$(USERLIBS)) $(LDFLAGS)" ; \
+	undef=`nm -g "$(PROJ_BD)/project.a" | grep autoRegister | grep "^[0-9]" | cut -f 3 -d ' ' | sort -u | sed 's/^/-u /'`; \
+	echo "$@ <- $${objs} $${libs}" | sed 's@$(PROJ_BD)/@@g'; \
+	$(CXX) -o $@ $$undef $$objs $$libdirs $$libs  ;
+	@echo "You probably now want to run './$@'";

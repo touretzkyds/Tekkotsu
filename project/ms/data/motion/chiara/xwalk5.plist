@@ -1,0 +1,161 @@
+<?xml version="1.0"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+
+<!--======== NonLegJoints ========-->
+<key>NonLegJoints</key><dict>
+
+	<!--======== RFr:rotor ========-->
+	<key>RFr:rotor</key><dict>
+		<key>FreqScale</key> <real>2</real>
+		<key>LegLink</key>   <integer>-1</integer>
+		<key>Magnitude</key> <real>0</real>
+		<key>Phase</key>     <real>0</real>
+	</dict>
+</dict>
+
+<!--======== Bounce ========-->
+<!--Movement up and down while walking-->
+<key>Bounce</key>             <dict>
+	<key>FreqScale</key> <real>1</real>
+	<key>Magnitude</key> <real>0</real>
+	<key>Phase</key>     <real>0</real>
+	<key>LegLink</key>   <integer>-1</integer>
+</dict>
+
+<!--======== GravityVector ========-->
+<!--Specifies an offset to be added to the GroundPlane normal vector to specify
+the direction of gravity.  This influences the projection of the foot positions
+onto the ground plane, magnitude is arbitrary.-->
+<key>GravityVector</key>      <array>
+	<real>0</real>
+	<real>0</real>
+	<real>0</real>
+</array>
+
+<!--======== GroundPlane ========-->
+<!--Specifies the ground plane relative to the base frame (in millimeters),
+of the form: p₁·x + p₂·y + p₃·z = p₄
+The first 3 entries should be normalized, so that the fourth is the
+distance from the origin.-->
+<key>GroundPlane</key>        <array>
+	<real>0.025</real>
+	<real>0.02</real>
+	<real>1</real>
+	<real>-10</real>
+</array>
+
+<!--======== LegParameters ========-->
+<key>LegParameters</key>      <array>
+	<dict>
+		<key>Usable</key> <false/>
+		<key>FlightDuration</key> <integer>500</integer>
+		<key>FlightHeight</key> <real>35</real>
+		<key>FlightPhase</key>    <real>0.333333</real>
+		<key>LowerDuration</key>       <integer>700</integer>
+		<key>RaiseDuration</key>       <integer>400</integer>
+		<key>StanceWidth</key>    <real>140</real>
+		<key>StrideBias</key>     <real>50</real>
+		<key>StrideMargin</key>   <real>75</real>
+	</dict>
+	<dict>
+		<key>FlightDuration</key> <integer>500</integer>
+		<key>FlightHeight</key> <real>35</real>
+		<key>FlightPhase</key>    <real>0.833333</real>
+		<key>LowerDuration</key>       <integer>700</integer>
+		<key>RaiseDuration</key>       <integer>400</integer>
+		<key>StanceWidth</key>    <real>150</real>
+		<key>StrideBias</key>     <real>70</real>
+		<key>StrideMargin</key>   <real>75</real>
+	</dict>
+	<dict>
+		<key>FlightDuration</key> <integer>500</integer>
+		<key>FlightHeight</key> <real>35</real>
+		<key>FlightPhase</key>    <real>0.666667</real>
+		<key>LowerDuration</key>       <integer>700</integer>
+		<key>RaiseDuration</key>       <integer>400</integer>
+		<key>StanceWidth</key>    <real>170</real>
+		<key>StrideBias</key>     <real>-10</real>
+		<key>StrideMargin</key>   <real>75</real>
+	</dict>
+	<dict>
+		<key>FlightDuration</key> <integer>500</integer>
+		<key>FlightHeight</key> <real>35</real>
+		<key>FlightPhase</key>    <real>0.166667</real>
+		<key>LowerDuration</key>       <integer>700</integer>
+		<key>RaiseDuration</key>       <integer>400</integer>
+		<key>StanceWidth</key>    <real>170</real>
+		<key>StrideBias</key>     <real>10</real>
+		<key>StrideMargin</key>   <real>75</real>
+	</dict>
+	<dict>
+		<key>FlightDuration</key> <integer>500</integer>
+		<key>FlightHeight</key> <real>35</real>
+		<key>FlightPhase</key>    <real>0</real>
+		<key>LowerDuration</key>       <integer>700</integer>
+		<key>RaiseDuration</key>       <integer>400</integer>
+		<key>StanceWidth</key>    <real>160</real>
+		<key>StrideBias</key>     <real>-65</real>
+		<key>StrideMargin</key>   <real>75</real>
+	</dict>
+	<dict>
+		<key>FlightDuration</key> <integer>500</integer>
+		<key>FlightHeight</key> <real>35</real>
+		<key>FlightPhase</key>    <real>0.5</real>
+		<key>LowerDuration</key>       <integer>700</integer>
+		<key>RaiseDuration</key>       <integer>400</integer>
+		<key>StanceWidth</key>    <real>160</real>
+		<key>StrideBias</key>     <real>-55</real>
+		<key>StrideMargin</key>   <real>75</real>
+	</dict>
+</array>
+
+<!--OffsetX: Bias the position of the body relative to the ground (in millimeters), so increasing this parameter moves the robot forward, parallel to the ground.-->
+<key>OffsetX</key>            <real>0</real>
+
+<!--OffsetY: Bias the position of the body relative to the ground (in millimeters), so increasing this parameter moves the robot left, parallel to the ground.-->
+<key>OffsetY</key>            <real>0</real>
+
+<!--ResetOnStop: Causes the feet to redistribute to their central positions when motion stops.-->
+<key>ResetOnStop</key>        <true/>
+
+<!--======== Surge ========-->
+<!--Movement forward and backward while walking-->
+<key>Surge</key>              <dict>
+	<key>FreqScale</key> <real>2</real>
+	<key>Magnitude</key> <real>0</real>
+	<key>Phase</key>     <real>0</real>
+	<key>LegLink</key>   <integer>-1</integer>
+</dict>
+
+<!--======== Sway ========-->
+<!--Movement left and right while walking-->
+<key>Sway</key>               <dict>
+	<key>FreqScale</key> <real>1</real>
+	<key>Magnitude</key> <real>0</real>
+	<key>Phase</key>     <real>0</real>
+	<key>LegLink</key>   <integer>-1</integer>
+</dict>
+
+<!--TransitionDuration: How much time to use getting into initial position, or when parameters change (milliseconds)-->
+<key>TransitionDuration</key> <integer>1500</integer>
+
+<!--AdaptiveLegOrder: If true, re-orders the leg flights based on direction of motion-->
+<key>AdaptiveLegOrder</key>   <true/>
+
+<!--RotateBodyMotion: If true, rotate the sway and surge motions to match direction of motion-->
+<key>RotateBodyMotion</key>   <true/>
+
+<!--FrictionCoefficient: Coefficient of friction with the ground (aka µ), limits the amount of non-normal force which can be applied-->
+<key>FrictionCoefficient</key> <real>0</real>
+
+<!--OffsetA: Bias the orientation of the body relative to the ground (in radians), so increasing this parameter turns the robot counter-clockwise.-->
+<key>OffsetA</key>             <real>0</real>
+
+<!--StrideLengthX: The size of forward (x-axis) step (mm) to take with each leg (all legs have the same period and travel same speed, so must have the same length of stride)-->
+<key>StrideLengthX</key>       <real>100</real>
+
+<!--StrideLengthY: The size of sideways (y-axis) step (mm) to take with each leg (all legs have the same period and travel same speed, so must have the same length of stride)-->
+<key>StrideLengthY</key>       <real>60</real>
+</dict></plist>
+

@@ -1,0 +1,190 @@
+#include "Motion/WalkMC.h"
+#ifdef TGT_HAS_WALK
+
+#ifdef TGT_HAS_HEAD
+#  include "Localization/LookAtMarkers.h"
+#endif
+#include "Shared/mathutils.h"
+#include "Shared/Measures.h"
+#include "Behaviors/StateMachine.h"
+#include "Behaviors/Nodes/SpeechNode.h"
+#include "Behaviors/Nodes/WalkNode.h"
+#include "Behaviors/Transitions/CompletionTrans.h"
+#include "Behaviors/Transitions/EventTrans.h"
+#include "Behaviors/Transitions/NullTrans.h"
+#include "Behaviors/Transitions/SignalTrans.h"
+#include "Behaviors/Transitions/TextMsgTrans.h"
+#include "Behaviors/Transitions/TimeOutTrans.h"
+#include <cmath>
+
+using namespace DualCoding;
+using namespace std;
+using namespace mathutils;
+
+//! Localization in a box defined by four landmarks at the corners
+$nodeclass FourCorners :  VisualRoutinesStateNode {
+
+  $nodeclass TakeSnapshot : PilotNode($,PilotTypes::localize) : doStart {
+    MapBuilderRequest *mapreq = new MapBuilderRequest(MapBuilderRequest::localMap);
+    mapreq->rawY = true;
+    mapreq->addMarkerType(BiColorMarkerData::biColorMarkerType);
+    mapreq->addAllObjectColors(markerDataType);
+    mapreq->clearVerbosity = MapBuilder::MBVprojectionFailed;
+    pilotreq.landmarkExtractor = mapreq;
+  }
+
+  //================ VisitMarkerMachine: a self-contained state machine for visiting markers in sequence
+  $nodeclass VisitMarkersMachine : VisualRoutinesStateNode {
+
+    $nodeclass CheckForMarker : VisualRoutinesStateNode : turnCounter(0), turnDir(0) {
+      AngTwoPi turnCounter;
+      int turnDir;
+
+      virtual void doStart() {
+	NEW_SHAPEVEC(markers, MarkerData, select_type<MarkerData>(localShS));
+	// If no markers, fail or searched enough, or continue search if already searching, or start a new search
+	if ( markers.empty() ) {
+	  if ( abs(turnCounter) >= 2*M_PI ) {
+	    turnCounter = 0;
+	    postStateFailure();
+	  }
+	  else {
+	    AngPi turnAmount = M_PI/6;
+	    if ( turnCounter == 0 )
+	      turnDir = 1;  // should be random
+	    turnCounter += turnDir * turnAmount;
+	    postStateSignal<AngSignPi>(turnDir*turnAmount);
+	  }
+	  return;
+	}
+	// We see some markers, so find the one closest to straight ahead, and either turn or move forward
+	turnCounter = 0;
+	float bestBearing = 999, bestDistance=0;
+	SHAPEVEC_ITERATE(markers, MarkerData, m)
+	  Point targcoords = m->getCentroid();
+          AngSignPi bearing = atan2(targcoords.coordY(),targcoords.coordX());
+	  float distance = targcoords.xyNorm();
+	  if ( abs(bearing) < abs(bestBearing) ) {
+	    bestBearing = bearing;
+	    bestDistance = distance;
+	  }
+	END_ITERATE;
+	float bearingTolerance = deg2rad(10.f);
+	if ( abs(bestBearing) <= bearingTolerance )  // marker bearing close enough?
+	  postStateSignal<float>(float(bestDistance));
+	else
+	  postStateSignal<AngSignPi>(bestBearing);  // turn to face the marker
+      }
+    }
+
+    $nodeclass TurnToSearch : WalkNode : doStart {
+      int dir = extractSignal<int>(event);
+      float const turnAmount = deg2rad(30.f); // turn by this many degrees to search for a landmark
+      getMC()->setTargetVelocity(0, 0, turnAmount*dir, turnAmount*dir/0.9f);
+    }
+
+    $nodeclass TurnToMarker : WalkNode : doStart {
+      const AngSignPi turn = extractSignal<AngSignPi>(event);
+      const AngSignPi correctedTurn = turn - AngSignPi(copysignf(deg2rad(8.f),turn));
+      cout << "Bearing to marker = " << rad2deg(float(turn)) << " deg; turning by " << rad2deg(float(correctedTurn)) << " deg" << endl;
+      setDisplacement(0, 0, correctedTurn, correctedTurn/0.9f);
+    }
+
+    $nodeclass ApproachMarker : WalkNode : doStart {
+      const float distance = extractSignal<float>(event);
+      const float closestApproachDistance = 300; // distance in mm
+      const float correctedDistance = max(0.f, distance - closestApproachDistance);
+      cout << "Distance to marker = " << distance << " mm; traveling forwward by " << correctedDistance << endl;
+      if ( distance < closestApproachDistance )
+	postStateCompletion();
+      else
+	setDisplacement(distance-closestApproachDistance, 0, 0, 1);
+    }
+
+    virtual void setup() {
+      $statemachine{
+        lookAgain: StateNode =T(3000)=> startnode
+
+        startnode: TakeSnapshot =PILOT=> check
+
+	check: CheckForMarker
+	check =F=> SpeechNode("I could not find any landmarks") =C=> PostMachineCompletion
+	check =S<int>=> TurnToSearch =C=> lookAgain
+	check =S<AngSignPi>=> TurnToMarker =C=> lookAgain
+	check =S<float>=> ApproachMarker =C=>
+	    SpeechNode("Arrived at marker") =C=> WalkNode($, 0, 0, (float)M_PI/3, 1, WalkNode::DISP) =C=> lookAgain
+      }
+    }
+
+  }   // VisitMarkersMachine
+
+#ifdef TGT_HAS_HEAD
+  $nodeclass MaybeLookAtMarkers : LookAtMarkers {}
+#else
+  $nodeclass MaybeLookAtMarkers : StateNode {}
+#endif
+
+  $nodeclass PrintInstructions : StateNode : doStart {
+    cout << "FourCorners demo commands:" << endl;
+    cout << "   f/b = move forward/back 100 mm" << endl;
+    cout << "   l/r = turn left/right 30 degrees" << endl;
+    cout << "   v = vision (force landmark processing now)" << endl;
+    cout << "   a = automatic mode: find and approach markers" << endl;
+    cout << "   q = quit from automatic mode" << endl;
+  }
+
+  virtual void setup() {
+    $statemachine {
+      startnode: PrintInstructions =N=> {speak, look}
+      speak: SpeechNode($, "Walk around!") =N=> waitForCommand: StateNode
+      look: MaybeLookAtMarkers
+
+      waitForCommand =TM("f")=> moveForward: WalkNode($, 100,0,0,1, WalkNode::DISP) =C=> snap
+      waitForCommand =TM("b")=> moveBackward: WalkNode($,-100,0,0,1, WalkNode::DISP) =C=> snap
+      waitForCommand =TM("l")=> turnLeft: WalkNode($,0,0, (float)M_PI/6,1, WalkNode::DISP) =C=> snap
+      waitForCommand =TM("r")=> turnRight: WalkNode($,0,0,-(float)M_PI/6,1, WalkNode::DISP) =C=> snap
+      waitForCommand =TM("v")=> snap: TakeSnapshot =N=> waitForCommand
+      waitForCommand =TM("a")=> visit: VisitMarkersMachine =C=> waitForCommand
+      waitForCommand =TM("q")=> SpeechNode("Not in automatic mode") =C=> waitForCommand
+
+      visit =TM("q")=> SpeechNode("quit") =N=> waitForCommand
+	}
+  }
+
+  virtual void doStart() {
+    worldShS.clear();
+    buildMap();
+    pilot->setAgent(Point(0,0), 0);
+  }
+
+  virtual void buildMap() {
+    cout << "Building map..." << endl;
+    float const s = 18.0f * 25.4f;   // scale factor in mm: we choose s equals 18 inches
+    float const h = MapBuilderRequest::defaultMarkerHeight;
+
+    NEW_SHAPE(markerNW, BiColorMarkerData,
+	      new BiColorMarkerData(worldShS, Point(s, s, h),
+				  ProjectInterface::getColorRGB("orange"),
+				  ProjectInterface::getColorRGB("green")));
+    NEW_SHAPE(markerSW, BiColorMarkerData,
+	      new BiColorMarkerData(worldShS, Point(-s, s, h),
+				  ProjectInterface::getColorRGB("pink"),
+				  ProjectInterface::getColorRGB("blue")));
+    NEW_SHAPE(markerNE, BiColorMarkerData,
+	      new BiColorMarkerData(worldShS, Point(s, -s, h),
+				  ProjectInterface::getColorRGB("blue"),
+				  ProjectInterface::getColorRGB("orange")));
+    NEW_SHAPE(markerSE, BiColorMarkerData,
+	      new BiColorMarkerData(worldShS, Point(-s, -s, h),
+				  ProjectInterface::getColorRGB("green"),
+				  ProjectInterface::getColorRGB("pink")));
+  }
+
+  static std::string getClassDescription() {
+    return "A test of the localization node.";
+  }
+
+}
+
+REGISTER_BEHAVIOR_MENU(FourCorners,DEFAULT_TK_MENU"/Navigation Demos");
+#endif

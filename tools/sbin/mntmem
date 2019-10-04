@@ -1,0 +1,42 @@
+#!/bin/sh
+
+default_pt=false;
+if [ $# -gt 0 ] ; then
+	pt="$1";
+elif [ "$MEMSTICK_ROOT" ] ; then
+	pt="$MEMSTICK_ROOT";
+else
+	default_pt=true;
+	case "`uname`" in
+		CYGWIN*) pt="/cygdrive/e";;
+		Darwin) d="`dirname $0`"; pt="`$d/osx_find_memstick`";;
+		*) pt="/mnt/memstick";;
+	esac
+fi;
+
+case "`uname`" in
+	Darwin)
+		#osx_find_memstick shouldn't have returned until it was mounted
+		exit 0;
+		;;
+	CYGWIN*)
+		until [ -d "$pt" ] ; do
+			printf "\\a";
+			sleep 1;
+		done
+		exit 0;
+		;;
+	*)
+		mount | grep -q "$pt"
+		if [ $? -gt 0 ] ; then
+			mount "$pt";
+			if [ $? -gt 0 ] ; then
+				echo "Please insert the memory stick...";
+				until mount "$pt" &> /dev/null || mount | grep -q "$pt" ; do
+					printf "\\a";
+					sleep 1;
+				done
+			fi;
+		fi;
+		;;
+esac

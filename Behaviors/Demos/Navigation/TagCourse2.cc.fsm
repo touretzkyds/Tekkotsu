@@ -1,0 +1,80 @@
+#include "Motion/WalkMC.h"
+#ifdef TGT_HAS_WALK
+
+#include "Behaviors/Demos/Navigation/PilotDemo.h"
+
+$nodeclass TagCourse2 : PilotDemo {
+
+  $nodeclass LookForTags : MapBuilderNode(MapBuilderRequest::worldMap) : constructor {
+    mapreq.setAprilTagFamily();
+  }
+
+  $nodeclass CheckTags : VisualRoutinesStateNode : doStart {
+    NEW_SHAPEVEC(tags, AprilTagData, select_type<AprilTagData>(camShS));
+    if ( tags.size() < 2 ) {
+      postStateFailure();
+    } else if ( tags.size() > 2 ) {
+      postStateSuccess();
+    } else {
+      if ( IsLeftOf()(tags[0],tags[1]) ) {
+	tags[0]->setName("leftTag");
+	tags[1]->setName("rightTag");
+      } else {
+	tags[0]->setName("rightTag");
+	tags[1]->setName("leftTag");
+      }
+      postStateCompletion();
+    }
+  }    
+
+  $nodeclass ExecuteTag(bool chooseLeft) : PilotNode(PilotTypes::walk) : doStart {
+    GET_SHAPE(leftTag, AprilTagData, camShS);
+    GET_SHAPE(rightTag, AprilTagData, camShS);
+    Shape<AprilTagData> tag = chooseLeft ? leftTag : rightTag;
+    pilotreq.dx = pilotreq.da = 0;  		
+    switch ( tag->getTagID() ) {
+    case 0: // forward 1000
+      pilotreq.dx = 1000;
+      break;
+    case 1: //forward 2000
+      pilotreq.dx = 2000;
+      break;
+    case 2: //left 90
+      pilotreq.da = M_PI/2;
+      break;
+    case 3: //right 90
+      pilotreq.da = -M_PI/2;
+      break;
+    case 4: // stop
+      cancelThisRequest();
+      break;
+    case 5: //backward 1000
+      pilotreq.dx = -1000;
+      break;
+    case 6: //backward 2000
+      pilotreq.dx = -2000;
+      break;
+    }
+  }
+
+  $setupmachine{
+
+    startdemo: LookForTags =C=> check
+ 
+    check: CheckTags
+    check =C=> exec1
+    check =F=> SpeechNode("I see fewer than two tags")
+    check =S=> SpeechNode("I see more than two tags")
+ 
+    exec1: ExecuteTag(true) =C=> exec2
+    exec1 =F=> SpeechNode("Early finish.  Last tag ignored.")
+ 
+    exec2: ExecuteTag(false) =C=> startdemo
+    exec2 =F=> SpeechNode("Stop tag reached. I'm done.")
+  }
+   
+}
+
+REGISTER_BEHAVIOR_MENU(TagCourse2,DEFAULT_TK_MENU"/Navigation Demos");
+
+#endif

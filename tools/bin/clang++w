@@ -1,0 +1,20 @@
+#!/bin/bash
+
+declare -a args
+
+while [ $# -gt 0 ] ; do
+	case $1 in
+		-MG) ;;
+		-Wlarger-than-*) ;;
+		-frename-registers) ;;
+		-ftree-vectorize) ;;
+		*) args[${#args[*]}]="$1";;
+	esac
+	shift;
+done
+
+args[${#args[*]}]="-Wno-shadow"
+args[${#args[*]}]="-Wno-mismatched-tags"
+args[${#args[*]}]="-Wno-tautological-compare"
+
+"${CLANG_PREFIX}"clang++ "${args[@]}"

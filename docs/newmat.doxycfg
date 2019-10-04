@@ -1,0 +1,17 @@
+@INCLUDE = doxygencfg
+
+PROJECT_NAME = newmat
+PROJECT_NUMBER = 11b
+INPUT = ../Shared/newmat
+EXCLUDE = 
+EXCLUDE_PATTERNS = */extra/*
+OUTPUT_DIRECTORY = generated/html
+EXTRACT_ALL = YES
+ALWAYS_DETAILED_SEC = NO
+GENERATE_TREEVIEW = YES
+HTML_OUTPUT = newmat
+SEARCHENGINE = YES
+GENERATE_TAGFILE = generated/newmat.tag
+HTML_HEADER = exthead.html
+HTML_FOOTER = newmatfoot.html
+PREDEFINED += use_namespace

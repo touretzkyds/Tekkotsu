@@ -1,0 +1,623 @@
+<?xml version="1.0"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<!--======== Drivers ========-->
+<!--Settings for device drivers-->
+<key>Drivers</key> <dict>
+	
+	<!--======== Logged ========-->
+	<key>Logged</key> <dict>
+		<!--.type: Stores the typename of the class so it can be re-instantiated on load.
+		** Do not edit ** -->
+		<key>.type</key> <string>LoggedData</string>
+	</dict>
+	
+	<!--======== Camera ========-->
+	<key>Camera</key> <dict>
+		<!--.type: Stores the typename of the class so it can be re-instantiated on load.
+		** Do not edit ** -->
+		<key>.type</key> <string>Camera</string>
+	</dict>
+	
+	<!--======== DynamixelAX ========-->
+	<key>DynamixelAX</key>  <dict>
+		<!--.type: Stores the typename of the class so it can be re-instantiated on load.
+		** Do not edit ** -->
+		<key>.type</key>        <string>Dynamixel</string>
+		
+		<!--CommPort: The name of the comm port where output will be sent-->
+		<key>CommPort</key>     <string>SerialAX</string>
+		
+		<!--======== Servos ========-->
+		<!--Maps servo IDs to Tekkotsu output offsets, use command line new/delete commands to add/remove mappings.-->
+		<key>Servos</key>       <dict>
+			<!--======== 001 ========-->
+			<key>001</key>  <dict>
+				<key>LED</key>                <string></string>
+			</dict>
+			
+			<!--======== 002 ========-->
+			<key>002</key>  <dict>
+				<key>LED</key>                <string></string>
+			</dict>
+			
+			<!--======== 003 ========-->
+			<key>003</key>  <dict>
+				<key>LED</key>                <string></string>
+				<key>Output</key>             <string></string>
+			</dict>
+			
+			<!--======== 004 ========-->
+			<key>004</key>  <dict>
+				<key>LED</key>                <string></string>
+				<key>Output</key>             <string></string>
+			</dict>
+			
+			<!--======== 005 ========-->
+			<key>005</key>  <dict>
+				<key>LED</key>                <string></string>
+			</dict>
+			
+			<!--======== 006 ========-->
+			<key>006</key>  <dict>
+				<key>LED</key>                <string></string>
+				<key>Output</key>             <string></string>
+			</dict>
+			
+			<!--======== 007 ========-->
+			<key>007</key>  <dict>
+				<key>LED</key>                <string></string>
+				<key>Output</key>             <string></string>
+			</dict>
+			
+			<!--======== 008 ========-->
+			<key>008</key>  <dict>
+				<key>LED</key>                <string></string>
+			</dict>
+			
+			<!--======== 009 ========-->
+			<key>009</key>  <dict>
+				<key>LED</key>                <string></string>
+				<key>Output</key>             <string></string>
+			</dict>
+			
+			<!--======== 010 ========-->
+			<key>010</key>  <dict>
+				<key>LED</key>                <string></string>
+				<key>Output</key>             <string></string>
+			</dict>
+			
+			<!--======== 011 ========-->
+			<key>011</key>  <dict>
+				<key>LED</key>                <string></string>
+			</dict>
+			
+			<!--======== 012 ========-->
+			<key>012</key>  <dict>
+				<key>LED</key>                <string></string>
+				<key>Output</key>             <string></string>
+			</dict>
+			
+			<!--======== 013 ========-->
+			<key>013</key>  <dict>
+				<key>LED</key>                <string></string>
+				<key>Output</key>             <string></string>
+			</dict>
+			
+			<!--======== 014 ========-->
+			<key>014</key>  <dict>
+				<key>LED</key>                <string></string>
+			</dict>
+			
+			<!--======== 015 ========-->
+			<key>015</key>  <dict>
+				<key>LED</key>                <string></string>
+				<key>Output</key>             <string></string>
+			</dict>
+			
+			<!--======== 016 ========-->
+			<key>016</key>  <dict>
+				<key>LED</key>                <string></string>
+				<key>Output</key>             <string></string>
+			</dict>
+			
+			<!--======== 017 ========-->
+			<key>017</key>  <dict>
+				<key>LED</key>                <string></string>
+			</dict>
+			
+			<!--======== 018 ========-->
+			<key>018</key>  <dict>
+				<key>LED</key>                <string></string>
+				<key>Output</key>             <string></string>
+			</dict>
+			
+			<!--======== 019 ========-->
+			<key>019</key>  <dict>
+				<key>LED</key>                <string></string>
+				<key>Output</key>             <string></string>
+			</dict>
+			
+			<!--======== 020 ========-->
+			<key>020</key>  <dict>
+				<key>LED</key>                <string></string>
+			</dict>
+			
+			<!--======== 021 ========-->
+			<key>021</key>  <dict>
+				<key>LED</key>                <string></string>
+			</dict>
+			
+			<!--======== 022 ========-->
+			<key>022</key>  <dict>
+				<key>LED</key>                <string></string>
+			</dict>
+			
+			<!--======== 023 ========-->
+			<key>023</key>  <dict>
+				<key>LED</key>                <string></string>
+			</dict>
+			
+			<!--======== 024 ========-->
+			<key>024</key>  <dict>
+				<key>LED</key>                <string></string>
+				<key>Output</key>             <string></string>
+			</dict>
+			
+			<!--======== 025 ========-->
+			<key>025</key>  <dict>
+				<key>LED</key>                <string></string>
+				<key>Output</key>             <string></string>
+			</dict>
+			
+			<!--======== 026 ========-->
+			<key>026</key>  <dict>
+				<key>LED</key>                <string>LED:NECK:pan</string>
+				<key>InvertRotation</key>     <true/>
+			</dict>
+			
+			<!--======== 027 ========-->
+			<key>027</key>  <dict>
+				<key>LED</key>                <string></string>
+			</dict>
+			
+			<!--======== 100 ========-->
+			<key>100</key>  <dict>
+				<key>LeftIRDistOffset</key>   <string>RightIRDist</string>
+				<key>RightIRDistOffset</key>   <string>LeftIRDist</string>
+				<key>LeftLuminosityOffset</key>   <string>RightLuminosity</string>
+				<key>RightLuminosityOffset</key>   <string>LeftLuminosity</string>
+			</dict>
+		</dict>
+	</dict>
+
+	<!--======== DynamixelRX ========-->
+	<key>DynamixelRX</key>  <dict>
+		<!--.type: Stores the typename of the class so it can be re-instantiated on load.
+		** Do not edit ** -->
+		<key>.type</key>        <string>Dynamixel</string>
+		
+		<!--CommPort: The name of the comm port where output will be sent-->
+		<key>CommPort</key>     <string>SerialRX</string>
+		
+		<!--======== Servos ========-->
+		<!--Maps servo IDs to Tekkotsu output offsets, use command line new/delete commands to add/remove mappings.-->
+		<key>Servos</key>       <dict>
+			<!--======== 001 ========-->
+			<key>001</key>  <dict>
+				<key>LED</key>                <string></string>
+				<key>Output</key>             <string></string>
+			</dict>
+			
+			<!--======== 002 ========-->
+			<key>002</key>  <dict>
+				<key>LED</key>                <string></string>
+				<key>Output</key>             <string></string>
+			</dict>
+		
+			<!--======== 003 ========-->
+			<key>003</key>  <dict>
+				<key>LED</key>                <string></string>
+			</dict>
+			
+			<!--======== 004 ========-->
+			<key>004</key>  <dict>
+				<key>ZeroAngle</key>          <string>-90°</string>
+				<key>LED</key>                <string>LED:RFr:knee</string>
+			</dict>
+			
+			<!--======== 005 ========-->
+			<key>005</key>  <dict>
+				<key>LED</key>                <string></string>
+				<key>Output</key>             <string></string>
+			</dict>
+			
+			<!--======== 006 ========-->
+			<key>006</key>  <dict>
+				<key>LED</key>                <string></string>
+			</dict>
+			
+			<!--======== 007 ========-->
+			<key>007</key>  <dict>
+				<key>ZeroAngle</key>          <string>-90°</string>
+				<key>LED</key>                <string>LED:LFr:knee</string>
+			</dict>
+			
+			<!--======== 008 ========-->
+			<key>008</key>  <dict>
+				<key>LED</key>                <string></string>
+				<key>Output</key>             <string></string>
+			</dict>
+			
+			<!--======== 009 ========-->
+			<key>009</key>  <dict>
+				<key>LED</key>                <string></string>
+			</dict>
+			
+			<!--======== 010 ========-->
+			<key>010</key>  <dict>
+				<key>ZeroAngle</key>          <string>-90°</string>
+				<key>LED</key>                <string>LED:RMd:knee</string>
+			</dict>
+			
+			<!--======== 011 ========-->
+			<key>011</key>  <dict>
+				<key>LED</key>                <string></string>
+				<key>Output</key>             <string></string>
+			</dict>
+			
+			<!--======== 012 ========-->
+			<key>012</key>  <dict>
+				<key>LED</key>                <string></string>
+			</dict>
+			
+			<!--======== 013 ========-->
+			<key>013</key>  <dict>
+				<key>ZeroAngle</key>          <string>-90°</string>
+				<key>LED</key>                <string>LED:LMd:knee</string>
+			</dict>
+			
+			<!--======== 014 ========-->
+			<key>014</key>  <dict>
+				<key>LED</key>                <string></string>
+				<key>Output</key>             <string></string>
+			</dict>
+			
+			<!--======== 015 ========-->
+			<key>015</key>  <dict>
+				<key>LED</key>                <string></string>
+			</dict>
+			
+			<!--======== 016 ========-->
+			<key>016</key>  <dict>
+				<key>ZeroAngle</key>          <string>-90°</string>
+				<key>LED</key>                <string>LED:RBk:knee</string>
+			</dict>
+			
+			<!--======== 017 ========-->
+			<key>017</key>  <dict>
+				<key>LED</key>                <string></string>
+				<key>Output</key>             <string></string>
+			</dict>
+			
+			<!--======== 018 ========-->
+			<key>018</key>  <dict>
+				<key>LED</key>                <string></string>
+			</dict>
+			
+			<!--======== 019 ========-->
+			<key>019</key>  <dict>
+				<key>ZeroAngle</key>          <string>-90°</string>
+				<key>LED</key>                <string>LED:LBk:knee</string>
+			</dict>
+			
+			<!--======== 020 ========-->
+			<key>020</key>  <dict>
+				<key>LED</key>                <string></string>
+				<key>Output</key>             <string></string>
+			</dict>
+			
+			<!--======== 021 ========-->
+			<key>021</key>  <dict>
+				<key>LED</key>                <string></string>
+				<key>Output</key>             <string></string>
+			</dict>
+			
+			<!--======== 022 ========-->
+			<key>022</key>  <dict>
+				<key>LED</key>                <string></string>
+				<key>Output</key>             <string></string>
+			</dict>
+			
+			<!--======== 023 ========-->
+			<key>023</key>  <dict>
+				<key>LED</key>                <string></string>
+				<key>Output</key>             <string></string>
+			</dict>
+			
+			<!--======== 024 ========-->
+			<key>024</key>  <dict>
+				<key>LED</key>                <string></string>
+				<key>Output</key>             <string></string>
+			</dict>
+			
+			<!--======== 025 ========-->
+			<key>025</key>  <dict>
+				<key>LED</key>                <string></string>
+				<key>Output</key>             <string></string>
+			</dict>
+			
+			<!--======== 026 ========-->
+			<key>026</key>  <dict>
+				<key>LED</key>                <string></string>
+				<key>Output</key>             <string></string>
+			</dict>
+			
+			<!--======== 027 ========-->
+			<key>027</key>  <dict>
+				<key>LED</key>                <string></string>
+				<key>Output</key>             <string></string>
+			</dict>
+			
+			<!--======== 100 ========-->
+			<key>100</key>  <dict>
+				<key>LED</key>                <string></string>
+				<key>Output</key>             <string></string>
+			</dict>
+		</dict>
+	</dict>
+	
+	<!--======== SSC ========-->
+	<key>SSC</key>        <dict>
+		<!--.type: Stores the typename of the class so it can be re-instantiated on load.
+		** Do not edit ** -->
+		<key>.type</key>          <string>SSC32</string>
+		
+		<!--======== ButtonMode ========-->
+		<!--Controls interpretation of the input pin.
+		False means directly measure voltage, true means test for high (1),
+		high now but low was detected in interval (0.5), or low (0).
+		Button mode implies interpreting inputMap value as a button index instead of sensor index.-->
+		<key>ButtonMode</key>     <array>
+			<true/>
+			<true/>
+			<true/>
+			<false/>
+		</array>
+		
+		<!--CommPort: The name of the comm port where output will be sent-->
+		<key>CommPort</key>       <string>Artigo</string>
+		
+		<!--======== InputMap ========-->
+		<!--For each of the SSC32's input pins, lists the sensor index it should send its value to; -1 to mark unused-->
+		<key>InputMap</key>       <array>
+			<integer>0</integer>
+			<integer>1</integer>
+			<integer>2</integer>
+			<integer>-1</integer>
+		</array>
+		
+		<!--======== MaxPulseWidth ========-->
+		<!--The high end of the servo's legal pulse width range (may correspond to unreachable position, use RobotInfo's outputRange[] to limit motion, not this)-->
+		<key>MaxPulseWidth</key>  <array>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>0</integer>
+			<integer>0</integer>
+			<integer>0</integer>
+			<integer>0</integer>
+			<integer>0</integer>
+			<integer>0</integer>
+			<integer>0</integer>
+			<integer>0</integer>
+			<integer>0</integer>
+			<integer>0</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>2500</integer>
+			<integer>0</integer>
+			<integer>0</integer>
+			<integer>0</integer>
+			<integer>0</integer>
+			<integer>0</integer>
+			<integer>0</integer>
+			<integer>0</integer>
+			<integer>0</integer>
+			<integer>0</integer>
+			<integer>0</integer>
+			<integer>0</integer>
+			<integer>0</integer>
+			<integer>0</integer>
+			<integer>0</integer>
+			<integer>0</integer>
+			<integer>0</integer>
+		</array>
+		
+		<!--======== OutputMap ========-->
+		<!--For each of the SSC32's servo pins, lists the output index it should take its values from; -1 to mark unused-->
+		<key>OutputMap</key>      <array>
+			<string>ARM:gripperRight</string>
+			<string>ARM:gripperLeft</string>
+			<string></string>
+			<string></string>
+			<string></string>
+			<string></string>
+			<string></string>
+			<string></string>
+			<string></string>
+			<string></string>
+			<string></string>
+			<string></string>
+			<string>LED:green</string>
+			<string>LED:red</string>
+			<string>LED:yellow</string>
+			<string>LED:blue</string>
+			<string></string>
+			<string></string>
+			<string></string>
+			<string></string>
+			<string></string>
+			<string></string>
+			<string></string>
+			<string></string>
+			<string></string>
+			<string></string>
+			<string></string>
+			<string></string>
+			<string></string>
+			<string></string>
+			<string></string>
+			<string></string>
+		</array>
+	</dict>
+</dict>
+
+<!--======== Vision ========-->
+<!--Settings for the loading of camera frames-->
+<key>Vision</key> <dict>
+	<key>Sources</key> <array>
+		<string>Camera</string>
+	</array>
+</dict>
+
+<!--InitialRunlevel: Specifies how far startup should proceed before pausing for user interaction.
+This value only affects startup, and setting this value from the simulator command prompt will have no effect.  (Use the 'runlevel' command instead.)-->
+<key>InitialRunlevel</key> <string>RUNNING</string>
+
+<!--InitialTime: The value to initialize the simulator's clock (in milliseconds)-->
+<key>InitialTime</key>     <integer>0</integer>
+
+<!--======== Motion ========-->
+<!--Parameters for motion simulation-->
+<key>Motion</key>          <dict>
+	<!--FeedbackDelay: Delay (in milliseconds) to apply to motion output before feeding back to sensor values (simulates (very roughly) inertia and system response time); 0 indicates instantaneous/perfect joint control, negative values indicate no feedback (only sensor data sets joint positions)-->
+	<key>FeedbackDelay</key>   <integer>0</integer>
+	
+	<!--OverrideSensors: Allows motion feedback to override position values from sensor data loaded from disk.
+	If false, feedback is only provided when no other sensor data is being provided-->
+	<key>OverrideSensors</key> <false/>
+	
+	<!--Verbose: Report whenever motion commands are being processed or joints are updated
+	0 - nothing, 1 - errors, 2 - warnings (e.g. dropped frames), 3 - notification every frame-->
+	<key>Verbose</key>         <integer>1</integer>
+	
+	<!--ZeroPIDFeedback: When set to false, if PIDs are set to zero, then sensor values are used to set joint positions; otherwise joint position sensors would only be used if FeedbackDelay is negative-->
+	<key>ZeroPIDFeedback</key> <false/>
+</dict>
+
+<!--Multiprocess: The processing/threading model to use - true to use real process forks a la Aibo/Aperios, or false to just more threads like a sane person would do-->
+<key>Multiprocess</key>    <false/>
+
+<!--Speed: The speed at which to run the simulation, as a multiple of "real-time".
+For example, '1' is normal, '0.5' is half-speed, '0' is paused.
+Any negative value requests full-speed mode, where the clock is moved as fast as processing (or manual control) allows.-->
+<key>Speed</key>           <real>1</real>
+
+<!--WaitForSensors: If true, wait for initial sensor readings before triggering the startup behavior or starting the motion polling thread.  On some platforms (e.g. Dynamixel based actuators), sensed output values can be used to initialize output positions.  On others, you may be unable to get any feedback, or can only expect feedback if the robot was left running and the executable is reconnecting (e.g. SSC-32).-->
+<key>WaitForSensors</key>  <true/>
+
+<!--======== CommPorts ========-->
+<!--Communication portals for use by device drivers-->
+<key>CommPorts</key>       <dict>
+	<!--======== Serial ========-->
+	<key>SerialAX</key>  <dict>
+		<!--.type: Stores the typename of the class so it can be re-instantiated on load.
+		** Do not edit ** -->
+		<key>.type</key>    <string>SerialCommPort</string>
+		
+		<!--Baud: Communication frequency (bits per second)-->
+		<key>Baud</key>     <integer>1000000</integer>
+		
+		<!--DataBits: Number of data bits to send at a time (5-8)-->
+		<key>DataBits</key> <integer>8</integer>
+		
+		<!--Mode bitmask to pass to the open() call, defaults to 'w+b': in|out|trunc|binary (see std::ios_base::openmode)-->
+		<key>Mode</key>     <integer>60</integer>
+		
+		<!--Parity bit can be sent for error checking
+		Value is one of: { EVEN | ODD | NONE } -->
+		<key>Parity</key>   <string>NONE</string>
+		
+		<!--Path of file system object being accessed-->
+		<key>Path</key>     <string>/dev/ttyUSB0</string>
+		
+		<!--StopBits: Number of stop bits to send between data bits (1-2)-->
+		<key>StopBits</key> <integer>1</integer>
+		
+		<!--TTYFlags: Additional configuration string to pass to stty
+		(may not work when using non-standard baud rates on OS X)-->
+		<key>TTYFlags</key> <string></string>
+	</dict>
+	
+	<!--======== Serial ========-->
+	<key>SerialRX</key>  <dict>
+		<!--.type: Stores the typename of the class so it can be re-instantiated on load.
+		** Do not edit ** -->
+		<key>.type</key>    <string>SerialCommPort</string>
+		
+		<!--Baud: Communication frequency (bits per second)-->
+		<key>Baud</key>     <integer>1000000</integer>
+		
+		<!--DataBits: Number of data bits to send at a time (5-8)-->
+		<key>DataBits</key> <integer>8</integer>
+		
+		<!--Mode bitmask to pass to the open() call, defaults to 'w+b': in|out|trunc|binary (see std::ios_base::openmode)-->
+		<key>Mode</key>     <integer>60</integer>
+		
+		<!--Parity bit can be sent for error checking
+		Value is one of: { EVEN | ODD | NONE } -->
+		<key>Parity</key>   <string>NONE</string>
+		
+		<!--Path of file system object being accessed-->
+		<key>Path</key>     <string>/dev/ttyUSB1</string>
+		
+		<!--StopBits: Number of stop bits to send between data bits (1-2)-->
+		<key>StopBits</key> <integer>1</integer>
+		
+		<!--TTYFlags: Additional configuration string to pass to stty
+		(may not work when using non-standard baud rates on OS X)-->
+		<key>TTYFlags</key> <string></string>
+	</dict>
+	
+	<!--======== Artigo ========-->
+	<key>Artigo</key>  <dict>
+		<!--.type: Stores the typename of the class so it can be re-instantiated on load.
+		** Do not edit ** -->
+		<key>.type</key>    <string>SerialCommPort</string>
+		
+		<!--Baud: Communication frequency (bits per second)-->
+		<key>Baud</key>     <integer>115200</integer>
+		
+		<!--DataBits: Number of data bits to send at a time (5-8)-->
+		<key>DataBits</key> <integer>8</integer>
+		
+		<!--Mode bitmask to pass to the open() call, defaults to 'w+b': in|out|trunc|binary (see std::ios_base::openmode)-->
+		<key>Mode</key>     <integer>60</integer>
+		
+		<!--Parity bit can be sent for error checking
+		Value is one of: { EVEN | ODD | NONE } -->
+		<key>Parity</key>   <string>NONE</string>
+		
+		<!--Path of file system object being accessed-->
+		<key>Path</key>     <string>/dev/ttyS1</string>
+		
+		<!--StopBits: Number of stop bits to send between data bits (1-2)-->
+		<key>StopBits</key> <integer>1</integer>
+		
+		<!--TTYFlags: Additional configuration string to pass to stty
+		(may not work when using non-standard baud rates on OS X)-->
+		<key>TTYFlags</key> <string></string>
+	</dict>
+</dict>
+
+<!--======== Sensors ========-->
+<!--Settings for the loading of sensor values-->
+<key>Sensors</key>         <dict>
+	<key>Sources</key>    <array>
+		<string>DynamixelAX</string>
+		<string>DynamixelRX</string>
+		<string>SSC</string>
+	</array>
+</dict>
+</dict></plist>

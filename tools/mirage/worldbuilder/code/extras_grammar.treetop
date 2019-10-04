@@ -1,0 +1,107 @@
+# Tekkotsu WorldBuilder
+# Extras parsing expression grammar
+#
+# Robert Lee (rslee / perihare)
+# 2-14-2011
+
+require "shape"
+
+require "grammar_support"
+
+require "expression_grammar"
+require "string_grammar"
+require "vector_grammar"
+require "shape_grammar"
+
+grammar ExtrasGrammar
+    include ExpressionGrammar
+    include StringGrammar
+    include VectorGrammar
+    include ShapeGrammar
+
+    rule define
+    (define1 / define2 / defined)
+    end
+
+    # use for "define myshape cube ..."
+    rule define1
+    keyword:'define' space
+    name:string space
+    shape
+    {
+        def eval(env={})
+            return ['define1',
+                {'name' => name.eval(env),
+                'shape' => shape.eval(env)[1]}]
+        end
+    }
+    end
+
+    # use for "define myshape otherdefinedshape ..."    
+    rule define2
+    keyword:'define' space
+    name:string space
+    old_shape:string space
+    parameters:(shape_vector_parameter /
+    shape_number_parameter /
+    shape_string_parameter)*
+    {
+        def eval(env={})
+            return ['define2',
+                {'name' => name.eval(env),
+                 'old_shape' => old_shape.eval(env),
+                 'parameters' => parameters.elements.map { |e| e.eval(env) }
+                }]
+        end
+    }
+    end
+
+    # use for "myshape ..."
+    rule defined
+    old_shape:string &{|s| $defines.key? s[0].text_value} space
+    parameters:(shape_vector_parameter /
+    shape_number_parameter /
+    shape_string_parameter)*
+    {
+        def eval(env={})
+            return ['defined',
+                {'old_shape' => old_shape.eval(env),
+                 'parameters' => parameters.elements.map { |e| e.eval(env) }}]
+        end
+    }
+    end
+
+    rule copy
+    keyword:'copy' space
+    group:string space
+    offset:vector space
+    flags:(space ('flipx' / 'flipy' / 'keepgroup'))*
+    {
+        def eval(env={})
+            return [keyword.text_value,
+                {'group' => group.eval(env),
+                 'offset' => offset.eval(env),
+                 'flags' => flags.elements.map { |e| e.text_value.lstrip }}]
+        end
+    }
+    end
+    
+    rule set
+    keyword:('set' / 'const') space variables:(set_variable)*
+    {
+        def eval(env={})
+            return ['set', variables.elements]
+        end
+    }
+    end
+    
+    rule set_variable
+    name:string space '=' space expression space
+    {
+        def eval(env={})
+            return {name.eval(env) => expression.eval(env)}
+        end
+    }
+    end
+
+end

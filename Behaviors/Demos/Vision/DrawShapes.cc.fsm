@@ -1,0 +1,36 @@
+#include "Shared/RobotInfo.h"
+#ifdef TGT_HAS_CAMERA
+
+#include "Behaviors/StateMachine.h"
+
+$nodeclass DrawShapes : VisualRoutinesStateNode {
+
+  $nodeclass BuildMap : MapBuilderNode(MapBuilderRequest::worldMap) : doStart {
+    mapreq.addAllObjectColors(ellipseDataType);
+  }
+
+  $nodeclass ExamineMap : SpeechNode : doStart {
+    NEW_SHAPEVEC(ellipses, EllipseData, select_type<EllipseData>(worldShS));
+    int const numEllipses = ellipses.size();
+    if ( numEllipses == 0 )
+      textstream << "I did not see any ellipses.  Try again.";
+    else
+      textstream << "I saw " << numEllipses
+		 << " ellipse" << ( numEllipses != 1 ? "s" : "")
+		 << ". Look in raw cam.";
+    SHAPEVEC_ITERATE(ellipses, EllipseData, e) {
+      rgb ecol = e->getColor();
+      e->setColor(rgb(~ecol.red, ~ecol.green, ~ecol.blue));
+      VRmixin::drawShapes.push_back(e);
+    } END_ITERATE;
+  }
+
+  $setupmachine{
+    BuildMap =MAP=> ExamineMap
+  }
+
+}
+
+REGISTER_BEHAVIOR_MENU(DrawShapes,DEFAULT_TK_MENU"/Vision Demos");
+
+#endif

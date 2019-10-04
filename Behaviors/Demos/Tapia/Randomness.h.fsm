@@ -1,0 +1,70 @@
+//-*-c++-*-
+#ifndef INCLUDED_Randomness_h_
+#define INCLUDED_Randomness_h_
+
+#include "Behaviors/StateMachine.h"
+
+using namespace std;
+
+/* 
+Random behavior is useful for preventing a robot from getting stuck in
+an infinite loop, such as by wandering into a corner and not being
+able to get out because it keeps doing the same thing over and over.
+This program demonstrates two ways to get random bebavior:
+
+  1. Use a RandomTrans, denoted =RND=> in shorthand notation, to
+  randomly select from among several destination nodes.
+
+  2. Use the random number generator rand() to produce a random
+  parameter value for an action such as a WalkMC.
+
+*/
+
+//! Turn by a random amount between -90 and +90 degrees
+class RandomTurn : public WalkNode {
+public:
+  RandomTurn() : WalkNode("RandomTurn",0,0,0) {}
+
+  virtual void doStart() {
+    float turn = M_PI*(rand()/(RAND_MAX+1.0)) - M_PI/2;
+    cout << "Turn by " << turn*180/M_PI << " degrees\n";
+    setDisplacement(0, 0, turn);
+  }
+};
+
+//! Travel forward by a random distance between 100 and 400 millimeters
+class RandomForward : public WalkNode {
+public:
+  RandomForward() : WalkNode("RandomForward",0,0,0) {}
+
+  virtual void doStart() {
+    float const minDist = 100, maxDist = 400;
+    float const dist = minDist + (rand()/(RAND_MAX+1.0)) * (maxDist-minDist);
+    cout << "Forward by " << dist << " mm\n";
+    setDisplacement(dist, 0, 0);
+  }
+};
+
+//! Parent state machine should always be a VisualRoutinesStateNode
+class Randomness : public VisualRoutinesStateNode {
+public:
+  Randomness() : VisualRoutinesStateNode("Randomness") {}
+
+  virtual void setup() {
+#statemachine
+
+  startnode: StateNode =RND=> {random_turn, random_fwd}
+
+  random_turn: RandomTurn() =C=> startnode
+
+  random_fwd: RandomForward() =C=> startnode
+
+  random_fwd =E(buttonEGID)=> random_turn  // turn if either bump sensor triggered
+
+#endstatemachine
+  }
+
+};
+
+#endif
+

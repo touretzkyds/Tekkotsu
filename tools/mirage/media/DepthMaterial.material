@@ -1,0 +1,38 @@
+// GLSL Vertex shader definition
+vertex_program DepthMaterial_VS glsl           
+{
+    source depthShaderVertexProgram.txt
+
+//    default_params                    
+//    {
+//      param_named_auto worldViewProj worldviewproj_matrix
+//			param_named_auto texelOffsets texel_offsets
+//			param_named_auto cameraPos camera_position
+//    }
+}
+ 
+// GLSL Pixel shader definition
+fragment_program DepthMaterial_PS glsl       
+{
+    source depthShaderFragmentProgram.txt
+}
+ 
+material DepthMaterial
+{
+        // Material has one technique
+    technique                    
+    {
+                // This technique has one pass
+        pass                    
+        {
+                        // Make this pass use the vertex shader defined above
+            vertex_program_ref DepthMaterial_VS    
+            {
+            }
+                        // Make this pass use the pixel shader defined above
+            fragment_program_ref DepthMaterial_PS    
+            {
+            }
+        }
+    }
+}

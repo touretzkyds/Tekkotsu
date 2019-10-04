@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+	<!--numeric contains two numeric values,
+	with a comment split
+	over several lines-->
+    <key>numeric</key>
+    <dict>
+      <key>fooF</key>
+      <real>1.5</real>
+      <key>fooI</key>
+      <integer>16</integer>
+    </dict>
+
+<!--This is a common string-->
+    <key>test str</key>
+    <string>Once upon a time</string>
+  </dict>
+</plist>

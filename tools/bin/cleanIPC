@@ -1,0 +1,31 @@
+#!/bin/sh
+
+if [ "`whoami`" = "root" ] ; then
+	all=true;
+else
+	all=false;
+fi;
+
+if $all ; then
+	echo "Removing semaphores from all users"
+	for x in `ipcs -s | sed -n 's/^[0-9x]* *\([0-9]*\) .*/\1/p'`; do
+		echo "Removing $x...";
+		ipcrm -s $x;
+	done;
+else
+	echo "Removing semaphores for `whoami`"
+	if [ "`uname`" = "Darwin" ] ; then
+		sedarg='s/^s \([0-9]*\) .*/\1/p'
+	else
+		sedarg='s/^[0-9x]* *\([0-9]*\) .*/\1/p';
+	fi;
+	for x in `ipcs -s | grep \`whoami\` | sed -n "$sedarg"`; do
+		echo "Removing $x...";
+		ipcrm -s $x;
+	done;
+	remain="`ipcs -s | sed -n "$sedarg"`";
+	if [ "$remain" ] ; then
+		echo "Semaphores remain for other users:";
+		ipcs -s
+	fi;
+fi;

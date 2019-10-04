@@ -1,0 +1,53 @@
+ifeq ($(TEKKOTSU_ENVIRONMENT_CONFIGURATION),)
+$(error This makefile is not meant to be run directly.  It is intended to contain local-specific build instructions.  Please run 'make' from the main project directory.);
+endif
+
+.PHONY: 
+
+# The local directory contains files that are useful for 'local' execution on a unix-based host
+# The tekkotsu directory is files common to all 'projects', but do not apply to 'tools', so should not be linked into the shared library
+
+EXECS:=tekkotsu
+LSRC_SKIP:=$(foreach x,$(EXECS),\! -path local/$(x)/\*)
+LSRCS:=$(shell find local $(LSRC_SKIP) -name "[^.]*$(SRCSUFFIX)")
+
+ifneq ($(ISMACOSX),)
+  OBJCPPSRCS:=$(shell find local $(LSRC_SKIP) -name "[^.]*.mm")
+  OBJCPPDEPENDS:=$(addprefix $(TK_BD)/,$(OBJCPPSRCS:.mm=.d) )
+endif
+
+SRCS:=$(SRCS) $(LSRCS) $(OBJCPPSRCS)
+
+ESRCS:=$(filter-out $(LSRCS),$(shell find local -name "[^.]*$(SRCSUFFIX)"))
+EDEPS:=$(patsubst %$(SRCSUFFIX),$(TK_BD)/%.d,$(ESRCS))
+PLATFORM_OBJS:=$(patsubst %$(SRCSUFFIX),$(TK_BD)/%.o,$(ESRCS))
+
+ifeq ($(filter fsms clean% distclean docs dox doc alldocs newstick,$(MAKECMDGOALS)),)
+-include $(EDEPS)
+endif
+
+ifeq ($(shell uname | grep -ci cygwin),0)
+  PLATFORM_FLAGS:=$(PLATFORM_FLAGS) -DHAVE_READDIR_R
+endif
+
+platformBuild: $(TK_BD)/$(LIBTEKKOTSU) $(PLATFORM_OBJS)
+
+$(patsubst %.mm,$(TK_BD)/%.d,$(OBJCPPSRCS)) : $(TK_BD)/%.d: %.mm
+	@mkdir -p $(dir $@)
+	@src=$(if $(filter %-fsm.d,$@),$(@:.d=.mm),$*.mm); \
+	if [ ! -f "$$src" ] ; then \
+		echo "ERROR: Missing source file '$$src'... you shouldn't be seeing this"; \
+		exit 1; \
+	fi; \
+	echo "$@..." | sed 's@.*$(TK_BD)/@Generating @'; \
+	$(CXX) $(CXXFLAGS) -MP -MG -MT "$@" -MT "$(@:.d=.o)" -MM "$$src" > "$@" || (rm -f "$@"; exit 1)
+
+$(patsubst %.mm,$(TK_BD)/%.o,$(OBJCPPSRCS)) : $(TK_BD)/%.o: | $(TOOLS_BUILT_FLAG)
+	@mkdir -p $(dir $@)
+	@src=$(if $(filter %-fsm.o,$@),$(subst $(PWD)/,,$(@:.o=.mm)),$*.mm); \
+	echo "Compiling $$src..."; \
+	$(CXX) $(CXXFLAGS) -o $@ -c $$src > $(TK_BD)/$*.log 2>&1; \
+	retval=$$?; \
+	cat $(TK_BD)/$*.log | $(FILTERSYSWARN) | $(COLORFILT) | $(TEKKOTSU_LOGVIEW); \
+	test $$retval -eq 0;
+

@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<!--======== center ========-->
+<key>center</key>  <array>
+	<real>0</real>
+	<real>0</real>
+</array>
+
+<!--fcol: testing floating point colors (0 to 1)-->
+<key>fcol</key>    <string>rgba(34,128,255,0.75)</string>
+
+<!--icol: testing integral colors (0 to 255)-->
+<key>icol</key>    <string>rgb(13,128,255)</string>
+<key>radius</key>  <real>-inf</real>
+</dict></plist>

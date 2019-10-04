@@ -1,0 +1,84 @@
+# environment settings
+background material=CloudySky model=Dome
+light location=[-100,3000,4000]
+define Wall cube material=Wood
+define Tag cube scale=[1,152.400000,152.400000]
+
+# From  -457.2 ,   457.2  to   1981.2 ,   457.2
+Wall location=[762.000000,457.200000,304.800000] scale=[2438.400000,1,609.600000] orientation=[0,0,0.000000]
+# From  1981.2 ,   457.2  to   1981.2 , -1524.0
+Wall location=[1981.200000,-533.400000,304.800000] scale=[1981.200000,1,609.600000] orientation=[0,0,0.707107]
+# From  1981.2 , -1524.0  to   1219.2 , -1524.0
+Wall location=[1600.200000,-1524.000000,304.800000] scale=[762.000000,1,609.600000] orientation=[0,0,1.000000]
+# From  1219.2 , -1524.0  to   1219.2 ,  -355.6
+Wall location=[1219.200000,-939.800000,304.800000] scale=[1168.400000,1,609.600000] orientation=[0,0,0.707107]
+# From  1219.2 ,  -355.6  to   1143.0 ,  -355.6
+Wall location=[1181.100000,-355.600000,304.800000] scale=[76.200000,1,609.600000] orientation=[0,0,1.000000]
+# From  1143.0 ,  -355.6  to   1143.0 , -1524.0
+Wall location=[1143.000000,-939.800000,304.800000] scale=[1168.400000,1,609.600000] orientation=[0,0,0.707107]
+# From  1143.0 , -1524.0  to    381.0 , -1524.0
+Wall location=[762.000000,-1524.000000,304.800000] scale=[762.000000,1,609.600000] orientation=[0,0,1.000000]
+# From   381.0 , -1524.0  to    381.0 ,  -355.6
+Wall location=[381.000000,-939.800000,304.800000] scale=[1168.400000,1,609.600000] orientation=[0,0,0.707107]
+# From   381.0 ,  -355.6  to    304.8 ,  -355.6
+Wall location=[342.900000,-355.600000,304.800000] scale=[76.200000,1,609.600000] orientation=[0,0,1.000000]
+# From   304.8 ,  -355.6  to    304.8 , -1524.0
+Wall location=[304.800000,-939.800000,304.800000] scale=[1168.400000,1,609.600000] orientation=[0,0,0.707107]
+# From   304.8 , -1524.0  to   -457.2 , -1524.0
+Wall location=[-76.200000,-1524.000000,304.800000] scale=[762.000000,1,609.600000] orientation=[0,0,1.000000]
+# From  -457.2 , -1524.0  to   -457.2 ,   457.2
+Wall location=[-457.200000,-533.400000,304.800000] scale=[1981.200000,1,609.600000] orientation=[0,0,0.707107]
+
+define Threshold cube scale=[762.000000,20.000000,1] material=Pink collision=false
+Threshold location=[-76.200000,-365.600000,0.5]
+Threshold location=[762.000000,-365.600000,0.5]
+Threshold location=[1600.200000,-365.600000,0.5]
+
+# Tag  0 at  -456.2 ,    50.8
+Tag location=[-456.200000,50.800000,177.800000] scale=[203.200000,1,203.200000] orientation=[0,0,0.707107] material="AprilTag/tag16h5/00"
+# Tag  4 at  1980.2 ,    50.8
+Tag location=[1980.200000,50.800000,177.800000] scale=[203.200000,1,203.200000] orientation=[0,0,0.707107] material="AprilTag/tag16h5/04"
+# Tag  1 at   -76.2 ,   456.2
+Tag location=[-76.200000,456.200000,177.800000] scale=[152.400000,1,152.400000] orientation=[0,0,1.000000] material="AprilTag/tag16h5/01"
+# Tag  2 at   762.0 ,   456.2
+Tag location=[762.000000,456.200000,177.800000] scale=[152.400000,1,152.400000] orientation=[0,0,1.000000] material="AprilTag/tag16h5/02"
+# Tag  3 at  1600.2 ,   456.2
+Tag location=[1600.200000,456.200000,177.800000] scale=[152.400000,1,152.400000] orientation=[0,0,1.000000] material="AprilTag/tag16h5/03"
+# Tag 17 at   -76.2 , -1523.0
+Tag location=[-76.200000,-1523.000000,177.800000] scale=[152.400000,1,152.400000] orientation=[0,0,1.000000] material="AprilTag/tag16h5/17"
+# Tag 12 at   762.0 , -1523.0
+Tag location=[762.000000,-1523.000000,177.800000] scale=[152.400000,1,152.400000] orientation=[0,0,1.000000] material="AprilTag/tag16h5/12"
+# Tag  7 at  1600.2 , -1523.0
+Tag location=[1600.200000,-1523.000000,177.800000] scale=[152.400000,1,152.400000] orientation=[0,0,1.000000] material="AprilTag/tag16h5/07"
+# Tag 19 at  -456.2 ,  -508.0
+Tag location=[-456.200000,-508.000000,177.800000] scale=[152.400000,1,152.400000] orientation=[0,0,0.707107] material="AprilTag/tag16h5/19"
+# Tag 15 at   303.8 ,  -508.0
+Tag location=[303.800000,-508.000000,177.800000] scale=[152.400000,1,152.400000] orientation=[0,0,0.707107] material="AprilTag/tag16h5/15"
+# Tag 14 at   382.0 ,  -508.0
+Tag location=[382.000000,-508.000000,177.800000] scale=[152.400000,1,152.400000] orientation=[0,0,0.707107] material="AprilTag/tag16h5/14"
+# Tag 10 at  1142.0 ,  -508.0
+Tag location=[1142.000000,-508.000000,177.800000] scale=[152.400000,1,152.400000] orientation=[0,0,0.707107] material="AprilTag/tag16h5/10"
+# Tag  9 at  1220.2 ,  -508.0
+Tag location=[1220.200000,-508.000000,177.800000] scale=[152.400000,1,152.400000] orientation=[0,0,0.707107] material="AprilTag/tag16h5/09"
+# Tag  5 at  1980.2 ,  -508.0
+Tag location=[1980.200000,-508.000000,177.800000] scale=[152.400000,1,152.400000] orientation=[0,0,0.707107] material="AprilTag/tag16h5/05"
+# Tag 18 at  -456.2 , -1371.6
+Tag location=[-456.200000,-1371.600000,177.800000] scale=[152.400000,1,152.400000] orientation=[0,0,0.707107] material="AprilTag/tag16h5/18"
+# Tag 16 at   303.8 , -1371.6
+Tag location=[303.800000,-1371.600000,177.800000] scale=[152.400000,1,152.400000] orientation=[0,0,0.707107] material="AprilTag/tag16h5/16"
+# Tag 13 at   382.0 , -1371.6
+Tag location=[382.000000,-1371.600000,177.800000] scale=[152.400000,1,152.400000] orientation=[0,0,0.707107] material="AprilTag/tag16h5/13"
+# Tag 11 at  1142.0 , -1371.6
+Tag location=[1142.000000,-1371.600000,177.800000] scale=[152.400000,1,152.400000] orientation=[0,0,0.707107] material="AprilTag/tag16h5/11"
+# Tag  8 at  1220.2 , -1371.6
+Tag location=[1220.200000,-1371.600000,177.800000] scale=[152.400000,1,152.400000] orientation=[0,0,0.707107] material="AprilTag/tag16h5/08"
+# Tag  6 at  1980.2 , -1371.6
+Tag location=[1980.200000,-1371.600000,177.800000] scale=[152.400000,1,152.400000] orientation=[0,0,0.707107] material="AprilTag/tag16h5/06"
+
+define Target cube scale=[101.600000,101.600000,101.600000] orientation=[0,0,0.200000]
+# Target 29 at   203.2 , -1422.4
+Target location=[203.200000,-1422.400000,50.800000] material="AprilTag/tag16h5/29"
+# Target 27 at  1041.4 , -1422.4
+Target location=[1041.400000,-1422.400000,50.800000] material="AprilTag/tag16h5/27"
+# Target 23 at  1320.8 , -1422.4
+Target location=[1320.800000,-1422.400000,50.800000] material="AprilTag/tag16h5/23"

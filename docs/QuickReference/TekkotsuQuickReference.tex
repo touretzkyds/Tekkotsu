@@ -1,0 +1,440 @@
+\documentclass[10pt]{article}
+\usepackage{amssymb}
+\usepackage{ifthen}
+\usepackage{multicol}
+\usepackage{url}
+\ifx\pdfoutput\undefined
+\usepackage[hypertex]{hyperref}
+%\usepackage[ps2pdf,bookmarks=true]{hyperref}
+\else
+\usepackage[pdftex,hypertexnames=false]{hyperref}
+\fi
+\ifx\pdfoutput\undefined
+\usepackage{graphicx}
+\else
+\usepackage[pdftex]{graphicx}
+\fi
+
+\usepackage{pslatex}
+
+\hypersetup{
+  pdfauthor   = {Ethan Tira-Thompson},
+  pdftitle    = {Tekkotsu Quick Reference}
+}
+%  pdfkeywords = {},
+%  pdfsubject  = {Seminar Title, SS/WS 20xx RWTH Aachen University},
+%  pdfcreator  = {LaTeX with hyperref package},
+%  pdfproducer = {dvips + ps2pdf}
+
+\topmargin -.5in
+\oddsidemargin -.25in
+\evensidemargin -.25in
+\textwidth 7in
+\textheight 10in
+\headsep 0pt
+\headheight 0pt
+\topskip 0pt
+\footskip .25in
+
+\pagestyle{empty}
+\parskip 7.2pt
+%\renewcommand{\baselinestretch}{1.5}
+\parindent 0pt
+\setlength{\fboxsep}{8pt}
+\setlength{\columnsep}{.25in}
+
+%\setlength{\floatsep}{0in}
+%\setlength{\textfloatsep}{0in}
+%\setlength{\intextsep}{0in}
+%\setlength{\dbltextfloatsep}{0in}
+%\setlength{\dblfloatsep}{0in}
+%\setlength{\abovedisplayskip}{0in}
+%\setlength{\topsep}{0in}
+\setlength{\partopsep}{-.2in}
+%\setlength{\parskip}{0in}
+
+%\renewcommand{\ttdefault}{cmtt}
+
+\input{ModelSpecific}
+
+\renewcommand{\labelitemi}{{\tiny $\blacklozenge$}}
+\newlength{\QRsubindent}
+
+\newenvironment{keylist}
+	{\begin{list}{}{
+		\flushleft
+		\providecommand{\keyliststyle}{\tt}
+		\renewcommand{\makelabel}[1]{\labelitemi\ {\keyliststyle ##1} - }
+		\setlength{\QRsubindent}{6pt}
+		\setlength{\itemsep}{2pt}
+		\setlength{\parsep}{0pt}
+		\setlength{\labelsep}{0pt}
+		\setlength{\leftmargin}{12pt}
+		\setlength{\labelwidth}{9pt}
+		\setlength{\parindent}{0pt}
+		\setlength{\listparindent}{0pt}}}
+	{\end{list}}
+
+\newenvironment{keyenum}
+	{\begin{list}{}{
+		\flushleft
+		\providecommand{\keyliststyle}{\tt}
+		\renewcommand{\makelabel}[1]{\labelitemi\ {\keyliststyle ##1} - }
+		\setlength{\QRsubindent}{6pt}
+		\setlength{\itemsep}{2pt}
+		\setlength{\parsep}{0pt}
+		\setlength{\labelsep}{0pt}
+		\setlength{\leftmargin}{12pt}
+		\setlength{\labelwidth}{9pt}
+		\setlength{\parindent}{0pt}
+		\setlength{\listparindent}{0pt}}}
+	{\end{list}}
+
+\newenvironment{QRitemize}
+	{\begin{list}{}{
+		\flushleft
+		\providecommand{\itemstyle}{\tt}
+		\renewcommand{\makelabel}[1]{\labelitemi\ {\itemstyle ##1}}
+		\setlength{\QRsubindent}{6pt}
+		\setlength{\itemsep}{2pt}
+		\setlength{\parsep}{0pt}
+		\setlength{\labelsep}{0pt}
+		\setlength{\leftmargin}{12pt}
+		\setlength{\labelwidth}{9pt}
+		\setlength{\parindent}{0pt}
+		\setlength{\listparindent}{0pt}}}
+	{\end{list}}
+
+\makeatletter
+\renewcommand{\section}[1]{\@startsection%
+	{section}{1}{-10pt}{6pt}{0pt}{\Large\bf\hspace{6pt}\rule[.2\lineheight]{24pt}{2pt}\hspace{-30pt}}%
+	{\hspace{28pt}#1}%
+}
+\renewcommand{\subsection}[1]{\@startsection{subsection}{2}{0pt}{3pt}{0.01pt}{\large\bf}{#1}}
+\renewcommand{\subsubsection}[1]{\@startsection{subsubsection}{3}{0pt}{0pt}{0.01pt}{\bf}{#1}}
+\makeatother
+
+\newenvironment{QRsection}[1]
+	{\section{#1}\hspace{6pt}\rule[.2\lineheight]{72pt}{2pt}}
+	{}
+
+\newenvironment{QRsubsection}[1]
+	{\subsection{#1}}
+	{}
+
+\title{Tekkotsu Quick Reference}
+\date{\model, Tekkotsu \release}
+\author{Ethan Tira-Thompson}
+
+\renewcommand{\maketitle}{\begin{center}%
+\large{\huge Tekkotsu Quick Reference} \vspace{6pt} \\%
+\model, Tekkotsu \release \vspace{6pt} \\%
+Ethan Tira-Thompson \vspace{12pt}%
+\end{center}
+}
+
+\begin{document}         
+% Start your text
+
+
+\raggedcolumns
+\begin{multicols}{2}[\maketitle]
+\raggedcolumns
+
+
+\begin{QRsection}{Building}
+\begin{QRsubsection}{Environment Variables}
+Values can be set in {\tt project/Environment.conf}, a shell environment variable, or the {\tt make} command line.
+Each configuration method overrides values from prior methods.
+
+\begin{keylist}
+\item[OPENRSDK\_\,ROOT] Location of OPEN-R SDK installation {\footnotesize (default {\tt /usr/local/OPEN\_\,R\_SDK})}
+\item[TEKKOTSU\_\,ROOT] Location of Tekkotsu installation {\footnotesize (default {\tt /usr/local/Tekkotsu})}
+\item[MEMSTICK\_\,ROOT] Location of memory stick mount point {\footnotesize (default tries to autodetect -- Mac OS X users should get something in {\tt /Volumes/}..., Cygwin users will want something like {\tt /cygdrive/e}, Linux defaults to {\tt /mnt/memstick})}
+\item[TEKKOTSU\_TARGET\_\,PLATFORM] Can be set to either {\tt PLATFORM\_APERIOS} {\footnotesize (the Aibo's OS, default)} or {\tt PLATFORM\_\,LOCAL} {\footnotesize (host machine's OS, local execution)}.
+\item[TEKKOTSU\_TARGET\_\,MODEL] Can be set to one of the supported robot models: {\tt TGT\_\,ERS210}, {\tt TGT\_\,ERS220}, {\tt TGT\_\,ERS2xx} {\footnotesize (dual boot either 210 or 220)}, {\tt TGT\_\,ERS7} {\footnotesize (default)}.
+\item[TEKKOTSU\_ALWAYS\_BUILD] If any non-empty string (default), update {\tt libtekkotsu.a} prior to each project build.  Turn off if {\tt TEKKOTSU\_ROOT} is in a read-only location, such as a shared directory in a computer lab.
+\end{keylist}
+See also additional options and documentation in {\tt project/Environment.conf}
+\end{QRsubsection}
+
+
+\begin{QRsubsection}{Build Targets}
+The following targets are available as targets to the {\tt make} command, from within a project directory:
+
+\begin{keylist}
+\item[all] Builds source into binary executables.
+\item[newstick] Erases memory stick, copies fresh system files
+\item[install] Builds {\tt all}, copies project's {\tt ms} directory to memory stick (may require previous {\tt make newstick})
+\item[update] Builds {\tt all}, selectively copies newer files from {\tt ms} to memory stick (requires rsync)
+\item[sim] Builds the project for local simulation, equivalent to {\tt all} with {\tt TEKKOTSU\_TARGET\_PLATFORM} set to {\tt PLATFORM\_LOCAL}
+\item[clean, cleanProj, cleanDeps] Erases all, just project, or dependancy (.d) build files
+\end{keylist}
+
+The following targets are available to {\tt make} from within the main Tekkotsu directory:
+
+\begin{keylist}
+\item[all] Updates {[build/.../]\tt libtekkotsu.a} for each supported platform 
+\item[compile] Updates {[build/.../]\tt libtekkotsu.a} for only the current platform (see {\tt TEKKOTSU\_TARGET\_PLATFORM})
+\end{keylist}
+
+\end{QRsubsection}
+\end{QRsection}
+
+
+
+
+\columnbreak
+\begin{QRsection}{Execution}
+\begin{QRsubsection}{Console}
+You can view text output from code running on the AIBO by using a telnet connection.  You can filter the output you wish to receive by selecting a port number below.  Any output sent to a port which is unconnected will be redirected to the one listed below it.
+
+\begin{keylist}
+\item[10002] Output from Main process's {\tt serr} (e.g. {\tt serr->printf(...)}).  Theoretically "blocking", but some output can still be lost in the system network buffers during a crash.  Input from client is ignored.
+\item[10001] Output from Main process's {\tt sout}.  Non-blocking for fast thoroughput, but will lose most recent data sent if crash occurs.  Input is interpreted as ControllerGUI commands if no GUI is connected, otherwise each line of input is broadcast as a TextMsgEvent.
+\item[59000] The system output console, catches all output from the operating system itself, {\tt cout}, {\tt cerr} or basic {\tt printf}.  Non-blocking, buffered output, {\em blocking input} (don't use {\tt cin}).
+\end{keylist}
+\end{QRsubsection}
+
+
+\begin{QRsubsection}{Controller}
+You can send these commands to port 10001 (assuming tekkotsu.cfg's main.consoleMode default setting), the GUI port 10020 (if GUI not connected), or the GUI's scripts or ``Send Input'' field.  All commands start with `{\tt !}'.  The input field will prefix non-commands with {\tt !input}.  Use quotes around multi-word arguments.
+
+\begin{keylist}
+\item[!reset] return to the root menu
+\item[!next] hilight the next menu item
+\item[!prev] hilight the previous menu item
+\item[!select {\rm[{\em item}]}] trigger activate of currently hilighted menu items, unless {\em item} is specified, in which case Controller will search from the root for an entry of the same name and trigger it if found
+\item[!cancel] move up/back a menu level
+\item[!msg {\rm\em text}] broadcasts {\em text} as a TextMsgEvent
+\item[!root {\rm {\em item} [{\em subitem} ...]}] triggers indicated items to drill down from root to a specified subitem.  Doesn't change current menu location unless final item is a menu itself.
+\item[!hilight {\rm [{\em n1} [{\em n2} ...]]}] Selects listed item indicies, can select multiple at once
+\item[!input {\rm\em text}] Passes {\em text} as input to the currently hilighted item(s), can be used to move directly to a submenu, specify a filename to save data into, set a corresponding variable, etc., depending on the context.
+\item[!set {\rm\em section.key}={\rm\em value}] sets a configuration variable, overriding the default found in {\tt tekkotsu.cfg} for remainder of the current session only
+\end{keylist}
+\end{QRsubsection}
+\end{QRsection}
+
+
+
+
+
+\begin{QRsection}{Model Specification}
+Each supported robot model is specified by an ``Info'' header file in {\tt Shared}, e.g. {\tt Shared/\condensedmodel Info.h}, which defines the constants shown in this section.  These files can also alias symbols found on other models to aid in portability between models.  {\tt Shared/RobotInfo.h} should be used to automatically include the proper header for the current target model and bring its constants into the global namespace.
+
+\begin{QRsubsection}{Output Offsets}
+``Outputs'' (i.e. Joints, LEDs) are refered to by index (``offset'') value.
+These values are formed by specifying a {\em section} offset, plus a {\em specific} offset.  Sections are typically general across robot models, whereas the specifics are model-dependent (but can be aliased to provide compatability).
+
+For most joints, the positive direction is ``up'', and the 0 position yields a forward looking, fully extended standing posture.
+
+\begin{QRitemize}{\small
+\item \{{\tt L},{\tt R}\}\{{\tt Fr},{\tt Bk}\}{\tt LegOffset} - {\tt NumLegs} combinations, each with {\tt JointsPerLeg} items \\
+{\footnotesize
+\hspace*{\QRsubindent}{\tt + RotatorOffset}: positive moves ``out'', away from body \\
+\hspace*{\QRsubindent}{\tt + ElevatorOffset}: positive moves up, away from body \\
+\hspace*{\QRsubindent}{\tt + KneeOffset}: positive bends knee (slight negative possible)
+}
+
+\item {\tt HeadOffset} - {\tt NumHeadJoints} items \\
+{\footnotesize
+\hspace*{\QRsubindent}{\tt + TiltOffset}: positive looks up \\
+\hspace*{\QRsubindent}{\tt + PanOffset}: positive looks left \\
+\ifthenelse{\equal{\model}{ERS-7}}{
+	\hspace*{\QRsubindent}{\tt + NodOffset}: positive looks up
+}{
+	\hspace*{\QRsubindent}{\tt + RollOffset}: positive rotates view counter-clockwise
+}
+}
+
+\ifthenelse{\equal{\model}{ERS-220}}{}{\item {\tt TailOffset} - {\tt NumTailJoints} items \\
+{\footnotesize
+\hspace*{\QRsubindent}{\tt + TiltOffset}: positive raises the joint \ifthenelse{\equal{\model}{ERS-7}}{(lowers the tail itself)}{} \\
+\hspace*{\QRsubindent}{\tt + PanOffset}: positive points the tail to the Aibo's right
+}}
+
+\ifthenelse{\equal{\model}{ERS-220}}{}{\item {\tt MouthOffset} - {\tt NumMouthJoints} items (no specific)}
+
+\item LEDs: these are all direct offsets, and do not need to be added to anything else \\
+\ifthenelse{\equal{\model}{ERS-7}}{
+\begin{QRitemize}
+\footnotesize
+\item {\tt HeadColorLEDOffset}, {\tt HeadWhiteLEDOffset}, {\tt ModeRedLEDOffset}, {\tt ModeGreenLEDOffset}, {\tt ModeBlueLEDOffset}, {\tt WirelessLEDOffset}, {\tt FrBackColorLEDOffset} (blue), {\tt FrBackWhiteLEDOffset}, {\tt MdBackColorLEDOffset} (orange), {\tt MdBackWhiteLEDOffset}, {\tt RrBackColorLEDOffset} (red), {\tt RrBackWhiteLEDOffset} \\
+\item {\tt FaceLEDPanelOffset} - 14 items, individually unnamed.  See Sony's model documentation for panel diagram. \\
+\item {\tt LEDABModeOffset} - this is a ``virtual'' LED, which changes how the AIBO interprets certain face panel LEDs \\
+\end{QRitemize}
+}{}
+\ifthenelse{\equal{\model}{ERS-210}}{
+\begin{QRitemize}
+\footnotesize
+\item Face LEDs: {\tt BotLLEDOffset}, {\tt BotRLEDOffset} - red/sad, {\tt MidLLEDOffset}, {\tt MidRLEDOffset} - green/happy, {\tt TopLLEDOffset}, {\tt TopRLEDOffset} - red/angry \\
+\item {\tt TopBrLEDOffset} - the green bar LED near the top of the face \\
+\item Tail LEDs: {\tt TlRedLEDOffset}, {\tt TlBluLEDOffset} \\
+\end{QRitemize}
+}{}
+\ifthenelse{\equal{\model}{ERS-220}}{
+\begin{QRitemize}
+\footnotesize
+\item {\tt FaceFrontLeftLEDOffset}, {\tt FaceFrontRightLEDOffset}, {\tt FaceCenterLeftLEDOffset}, {\tt FaceCenterRightLEDOffset} - blue, {\tt FaceBackLeftLEDOffset}, {\tt FaceBackRightLEDOffset} - red
+\item {\tt ModeLEDOffset} - mode indicator (back of the head - orange)
+\item {\tt BackLeft1LEDOffset}, {\tt BackLeft2LEDOffset}, {\tt BackLeft3LEDOffset}, {\tt BackRight3LEDOffset}, {\tt BackRight2LEDOffset}, {\tt BackRight1LEDOffset}
+\item {\tt TailLeftLEDOffset} (blue), {\tt TailCenterLEDOffset} (red), {\tt TailRightLEDOffset} (blue)
+\item {\tt FaceFrontALEDOffset} (blue), {\tt FaceFrontBLEDOffset} (blue), {\tt FaceFrontCLEDOffset} (red)
+\item {\tt RetractableHeadLEDOffset} - retractable head light
+\end{QRitemize}
+}{}
+\ifthenelse{\equal{\model}{ERS-2xx}}{
+Available LEDs depend on actual model running the code -- sensible mapping is done of LEDs from the other model.
+ERS-210:
+\begin{QRitemize}
+\footnotesize
+\item Face LEDs: {\tt BotLLEDOffset}, {\tt BotRLEDOffset} - red/sad, {\tt MidLLEDOffset}, {\tt MidRLEDOffset} - green/happy, {\tt TopLLEDOffset}, {\tt TopRLEDOffset} - red/angry \\
+\item {\tt TopBrLEDOffset} - the green bar LED near the top of the face \\
+\item Tail LEDs: {\tt TlRedLEDOffset}, {\tt TlBluLEDOffset} \\
+\end{QRitemize}
+ERS-220:
+\begin{QRitemize}
+\footnotesize
+\item {\tt FaceFrontLeftLEDOffset}, {\tt FaceFrontRightLEDOffset}, {\tt FaceCenterLeftLEDOffset}, {\tt FaceCenterRightLEDOffset} - blue, {\tt FaceBackLeftLEDOffset}, {\tt FaceBackRightLEDOffset} - red
+\item {\tt ModeLEDOffset} - mode indicator (back of the head - orange)
+\item {\tt BackLeft1LEDOffset}, {\tt BackLeft2LEDOffset}, {\tt BackLeft3LEDOffset}, {\tt BackRight3LEDOffset}, {\tt BackRight2LEDOffset}, {\tt BackRight1LEDOffset}
+\item {\tt TailLeftLEDOffset} (blue), {\tt TailCenterLEDOffset} (red), {\tt TailRightLEDOffset} (blue)
+\item {\tt FaceFrontALEDOffset} (blue), {\tt FaceFrontBLEDOffset} (blue), {\tt FaceFrontCLEDOffset} (red)
+\item {\tt RetractableHeadLEDOffset} - retractable head light
+\end{QRitemize}
+}{}
+
+\ifthenelse{\equal{\model}{ERS-220}}{}{\item {\tt EarOffset} - {\tt NumEarJoints} items}
+}\end{QRitemize}
+
+It happens that these joints can also be grouped by the {\em type} of joint, so there are additionally a few other offsets that can be used in order to loop across a group of joints:
+
+\begin{keylist}\small
+\item[PIDJointOffset] {\tt NumPIDJoints} items, servos using PID control \\
+\item[LegOffset] {\tt NumLegJoints} items, a subset of PID servos corresponding to the leg joints \\
+\item[LEDOffset] {\tt NumLEDs} items \\
+\item[BinJointOffset] {\tt NumBinJoints} items, solenoids, such as the ears (if any) which flip between two positions\\
+\item[NumOutputs] total number of outputs available
+\end{keylist}
+
+LEDs are often handled in groups to display patterns.  Some functions take an {\tt LEDBitMask\_t} parameter, which allows you to specify a set of LEDs in a single parameter.  
+For any given LED offset {\em foo}{\tt LEDOffset}, the corresponding bitmask constant is {\em foo}{\tt LEDMask}.  Alternatively, you could calculate the bitmask of {\em foo} by {\tt 1<<({\rm\em foo}-LEDOffset)}.
+
+\end{QRsubsection}
+
+\begin{QRsubsection}{Reference Frames}
+Every PID joint has an associated reference frame, with the {\em z} axis along the axis of rotation.  You can use the Output Offsets previously listed to refer to these reference frames.  However, there are a few additional reference frames you may wish to refer, which do not correspond to any particular joint:
+
+\begin{keylist}\small
+\item[BaseFrameOffset] body center, {\em x} forward, {\em y} Aibo's left, {\em z} up
+\item[PawFrameOffset] {\tt NumLegs} items, in the usual {\tt LegOrder\_t}, defines the reference frame of the passive ankle joint
+\item[CameraFrameOffset] The coordinate system used for vision, origin in the center of the image, {\em x} right, {\em y} down, {\em z} into the scene
+\ifthenelse{\equal{\model}{ERS-7}}{
+\item[NearIRFrameOffset, FarIRFrameOffset, ChestIRFrameOffset] {\em z} axis aligned with each IR beam
+}{
+\item[IRFrameOffset] {\em z} axis aligned with the IR beam
+}
+\end{keylist}
+\end{QRsubsection}
+
+\begin{QRsubsection}{Buttons}
+Primarily used with WorldState, i.e. {\tt state->buttons[{\rm\em x}]}.
+\ifthenelse{\equal{\model}{ERS-220}}{
+The antenna buttons (marked with a *) are ``pressure'' sensitive, but jump between threshold values (not a continuous response).
+}{
+Buttons marked with a * are ``pressure'' sensitive (range 0-1), the rest are boolean.
+}
+\ifthenelse{\equal{\model}{ERS-2xx}}{Buttons marked with a {\dag} are 220-specific.}{}
+
+\ifthenelse{\equal{\model}{ERS-210}}{
+\begin{tabular}{ll}
+\multicolumn{2}{l}{\small{\tt LFrPawOffset \ RFrPawOffset \ LBkPawOffset \ RBkPawOffset}} \\
+\small{\tt HeadFrButOffset}* & \small{\tt HeadBkButOffset}* \\
+\small{\tt ChinButOffset} & \small{\tt BackButOffset} %
+}{%
+\begin{tabular}{lll}
+}%
+\ifthenelse{\equal{\model}{ERS-7}}{%
+\small{\tt LFrPawOffset} & \small{\tt ChinButOffset} & \small{\tt FrontBackButOffset}*\\
+\small{\tt RFrPawOffset} & \small{\tt HeadButOffset}* & \small{\tt MiddleBackButOffset}*\\
+\small{\tt LBkPawOffset} & \small{\tt WirelessSwOffset} & \small{\tt RearBackButOffset}*\\
+\small{\tt RBkPawOffset} && %
+}{}%
+\ifthenelse{\equal{\model}{ERS-220}}{%
+\small{\tt LFrPawOffset} & \small{\tt ChinButOffset} & \small{\tt BackButOffset}\\
+\small{\tt RFrPawOffset} & \small{\tt HeadFrButOffset}* & \small{\tt TailLeftButOffset}\\
+\small{\tt LBkPawOffset} & \small{\tt HeadBkButOffset}* & \small{\tt TailCenterButOffset}\\
+\small{\tt RBkPawOffset} & & \small{\tt TailRightButOffset}%
+}{}%
+\ifthenelse{\equal{\model}{ERS-2xx}}{%
+\small{\tt LFrPawOffset} & \small{\tt ChinButOffset} & \small{\tt BackButOffset}\\
+\small{\tt RFrPawOffset} & \small{\tt HeadFrButOffset}* & \small{\tt TailLeftButOffset}\dag\\
+\small{\tt LBkPawOffset} & \small{\tt HeadBkButOffset}* & \small{\tt TailCenterButOffset}\dag\\
+\small{\tt RBkPawOffset} & & \small{\tt TailRightButOffset}\dag%
+}{}%
+\end{tabular}
+\end{QRsubsection}
+
+\vspace{-.5\lineheight}
+\begin{QRsubsection}{Sensors}
+Primarily used with WorldState, i.e. {\tt state->sensors[{\rm\em x}]}
+
+\begin{tabular}{lll}
+\ifthenelse{\equal{\model}{ERS-7}}{%
+\small{\tt NearIRDistOffset} & \small{\tt BAccelOffset} & \small{\tt PowerRemainOffset} \\
+\small{\tt FarIRDistOffset} & \small{\tt LAccelOffset} & \small{\tt PowerThermoOffset} \\
+\small{\tt ChestIRDistOffset} & \small{\tt DAccelOffset} &\small{\tt PowerCapacityOffset} \\
+& & \small{\tt PowerVoltageOffset}, \\
+& & \small{\tt PowerCurrentOffset} %
+}{}%
+\ifthenelse{\equal{\model}{ERS-210}}{%
+\small{\tt BAccelOffset} & \small{\tt IRDistOffset} & \small{\tt PowerCapacityOffset} \\
+\small{\tt LAccelOffset} & \small{\tt PowerRemainOffset} & \small{\tt PowerVoltageOffset} \\
+\small{\tt DAccelOffset} & \small{\tt PowerThermoOffset} &\small{\tt PowerCurrentOffset} %
+}{}%
+\ifthenelse{\equal{\model}{ERS-220}}{%
+\small{\tt BAccelOffset} & \small{\tt IRDistOffset} & \small{\tt PowerCapacityOffset} \\
+\small{\tt LAccelOffset} & \small{\tt PowerRemainOffset} & \small{\tt PowerVoltageOffset} \\
+\small{\tt DAccelOffset} & \small{\tt PowerThermoOffset} &\small{\tt PowerCurrentOffset} %
+}{}%
+\ifthenelse{\equal{\model}{ERS-2xx}}{%
+\small{\tt BAccelOffset} & \small{\tt IRDistOffset} & \small{\tt PowerCapacityOffset} \\
+\small{\tt LAccelOffset} & \small{\tt PowerRemainOffset} & \small{\tt PowerVoltageOffset} \\
+\small{\tt DAccelOffset} & \small{\tt PowerThermoOffset} &\small{\tt PowerCurrentOffset} %
+}{}%
+\end{tabular}
+\end{QRsubsection}
+
+
+\ifthenelse{\equal{\model}{ERS-7}}{
+\vspace{-1.5\lineheight}
+}{
+\vspace{-.5\lineheight}
+}
+\begin{QRsubsection}{Limits}
+{\tt outputRanges} defines the range of values available for each output.  {\tt MaxOutputSpeed} defines the maximum recommended speed for each output (0 indicates no limit, e.g LEDs).
+%{\tt outputRanges[NumOutputs][{\rm\{}MinRange,MaxRange{\rm\}}]} defines the range of values available for each output.  {\tt MaxOutputSpeed[NumOutputs]} defines the maximum recommended speed for each output (0 indicates no limit, e.g LEDs).
+\end{QRsubsection}
+\end{QRsection}
+
+
+
+\vspace{.5\lineheight}
+\begin{QRsection}{Development}
+\begin{QRsubsection}{Events}
+These constants are defined by the {\tt EventBase::EventGeneratorID\_t} enumeration.
+For more information about the events sent by each generator, see {\tt EventBase} documentation.  Each of these constants will need to be prefixed with {\tt EventBase::}.
+\vspace{-1\lineheight}
+\setlength{\columnsep}{30pt}
+\flushbottom
+\begin{multicols}{3}\small
+\input{EventGenerators}
+\end{multicols}
+\vspace{-1\lineheight}
+The value and meaning of the event's `source' field is defined by its generator, but the `type' field is restricted to one of {\tt activateETID}, {\tt statusETID}, or {\tt deactivateETID}.
+\end{QRsubsection}
+\end{QRsection}
+
+\end{multicols}
+% Stop your text
+\end{document}

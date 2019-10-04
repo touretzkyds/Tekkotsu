@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+
+<!--
+  This file lists default speeds for wheeled locomotion via WheeledWalkMC.  You can override it
+  by creating a directory named for your model and placing a 'wheeledwalk.plist'.
+  For example, for TGT_CREATE, you would use ms/data/motion/create/wheeledwalk.plist
+-->
+
+<plist version="1.0"><dict>
+	
+<!--PreferredAngVel: optimal angular velocity for unspecified displacements (rad/s)-->
+<key>PreferredAngVel</key> <real>0.9</real>
+
+<!--PreferredXVel: optimal X velocity for unspecified displacements (mm/s)-->
+<key>PreferredXVel</key>   <real>120</real>
+
+<!--PreferredYVel: optimal Y velocity for unspecified displacements (mm/s)-->
+<key>PreferredYVel</key>   <real>0</real>
+
+</dict></plist>

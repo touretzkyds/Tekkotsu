@@ -1,0 +1,13 @@
+define gridcube cube scale=[20,20,20] material=Pink
+
+gridcube location=[0,0,0]
+gridcube location=[-40,0,0]
+gridcube location=[40,0,0]
+
+gridcube location=[0,40,0]
+gridcube location=[-40,40,0]
+gridcube location=[40,40,0]
+
+gridcube location=[0,-40,0]
+gridcube location=[-40,-40,0]
+gridcube location=[40,-40,0]

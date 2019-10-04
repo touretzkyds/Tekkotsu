@@ -1,0 +1,153 @@
+#include "Motion/WalkMC.h"
+#ifdef TGT_HAS_WALK
+
+#include "Behaviors/Nodes/SpeechNode.h"
+#include "Behaviors/Transitions/NullTrans.h"
+#include "DualCoding/DualCoding.h"
+
+#ifdef TGT_HAS_HEAD
+#  include "Localization/LookAtMarkers.h"
+#endif
+
+using namespace std;
+using namespace DualCoding;
+
+$nodeclass GlobalLocalization :  VisualRoutinesStateNode {
+
+#ifdef TGT_HAS_HEAD
+  $nodeclass MaybeLookAtMarkers : LookAtMarkers {}
+#else
+  $nodeclass MaybeLookAtMarkers : StateNode {}
+#endif
+
+  virtual void setup() {
+    MapBuilderRequest mapreq(MapBuilderRequest::localMap);
+    mapreq.rawY = true;
+    mapreq.addMarkerType(BiColorMarkerData::biColorMarkerType);
+    mapreq.addAllObjectColors(markerDataType);
+    mapreq.immediateRequest = true;
+    $statemachine{
+      startnode: StateNode =N=> {speak, look}
+
+      speak: SpeechNode($, "Walk around!")
+
+      look: MaybeLookAtMarkers
+
+    }
+  }
+
+  virtual void doStart() {
+    buildMap();
+  }
+
+  // This should build whatever map you want to localize in
+  // Currently uses a large demo map from the Tekkotsu demos
+  // at IJCAI 2009
+  virtual void buildMap()
+    {
+      cout << "Building map..." << endl;
+
+      float const s = 770;   // scale factor in mm
+      float const h = MapBuilderRequest::defaultMarkerHeight;
+
+      // world bounds
+      vector<Point> pts;
+      pts.push_back(Point(   0,    0));
+      pts.push_back(Point( 2*s,    0));
+      // bump 1
+      pts.push_back(Point( 2*s,   -s));
+      pts.push_back(Point( 3*s,   -s));
+      pts.push_back(Point( 3*s, -2*s));
+      pts.push_back(Point( 2*s, -2*s));
+      // bump 2
+      pts.push_back(Point( 2*s, -3*s));
+      pts.push_back(Point( 3*s, -3*s));
+      pts.push_back(Point( 3*s, -4*s));
+      pts.push_back(Point( 2*s, -4*s));
+      // bump 3
+      pts.push_back(Point( 2*s, -5*s));
+      pts.push_back(Point(   0, -5*s));
+      pts.push_back(Point(   0, -4*s));
+      pts.push_back(Point(   s, -4*s));
+      // bump 4
+      pts.push_back(Point(   s, -3*s));
+      pts.push_back(Point(   0, -3*s));
+      pts.push_back(Point(   0, -2*s));
+      pts.push_back(Point(   s, -2*s));
+      // bump 5
+      pts.push_back(Point(   s,   -s));
+      pts.push_back(Point(   0,   -s));
+      //		pts.push_back(Point(   0,    0));
+      //		pts.push_back(Point(   s,    0));
+      NEW_SHAPE(worldBounds, PolygonData, new PolygonData(worldShS, pts, true));
+
+      NEW_SHAPE(marker1, BiColorMarkerData,
+		new BiColorMarkerData(worldShS, Point(1.5*s, 0*s, h),
+				      ProjectInterface::getColorRGB("blue"),
+				      ProjectInterface::getColorRGB("yellow")));
+    
+      NEW_SHAPE(marker2, BiColorMarkerData,
+		new BiColorMarkerData(worldShS, Point(2*s, -0.5*s,  h),
+				      ProjectInterface::getColorRGB("green"),
+				      ProjectInterface::getColorRGB("yellow")));
+    
+      NEW_SHAPE(marker3, BiColorMarkerData,
+		new BiColorMarkerData(worldShS, Point(3*s, -1.5*s,  h),
+				      ProjectInterface::getColorRGB("green"),
+				      ProjectInterface::getColorRGB("blue")));
+    
+      NEW_SHAPE(marker4, BiColorMarkerData,
+		new BiColorMarkerData(worldShS, Point(2*s, -2.5*s,  h),
+				      ProjectInterface::getColorRGB("orange"),
+				      ProjectInterface::getColorRGB("green")));
+    
+      NEW_SHAPE(marker5, BiColorMarkerData,
+		new BiColorMarkerData(worldShS, Point(3*s, -3.5*s,  h),
+				      ProjectInterface::getColorRGB("orange"),
+				      ProjectInterface::getColorRGB("blue")));
+    
+      NEW_SHAPE(marker6, BiColorMarkerData,
+		new BiColorMarkerData(worldShS, Point(2*s, -4.5*s,  h),
+				      ProjectInterface::getColorRGB("pink"),
+				      ProjectInterface::getColorRGB("orange")));
+    
+      NEW_SHAPE(marker7, BiColorMarkerData,
+		new BiColorMarkerData(worldShS, Point(1.5*s, -5*s,  h),
+				      ProjectInterface::getColorRGB("green"),
+				      ProjectInterface::getColorRGB("pink")));
+    
+      NEW_SHAPE(marker8, BiColorMarkerData,
+		new BiColorMarkerData(worldShS, Point(0,-4.5*s,  h),
+				      ProjectInterface::getColorRGB("yellow"),
+				      ProjectInterface::getColorRGB("orange")));
+    
+      NEW_SHAPE(marker9, BiColorMarkerData,
+		new BiColorMarkerData(worldShS, Point(1*s, -3.5*s,  h),
+				      ProjectInterface::getColorRGB("blue"),
+				      ProjectInterface::getColorRGB("pink")));
+    
+      NEW_SHAPE(marker10, BiColorMarkerData,
+		new BiColorMarkerData(worldShS, Point(0*s, -2.5*s,  h),
+				      ProjectInterface::getColorRGB("pink"),
+				      ProjectInterface::getColorRGB("yellow")));
+    
+      NEW_SHAPE(marker11, BiColorMarkerData,
+		new BiColorMarkerData(worldShS, Point(1*s, -1.5*s,  h),
+				      ProjectInterface::getColorRGB("pink"),
+				      ProjectInterface::getColorRGB("blue")));
+    
+      NEW_SHAPE(marker12, BiColorMarkerData,
+		new BiColorMarkerData(worldShS, Point(0*s, -0.5*s,  h),
+				      ProjectInterface::getColorRGB("pink"),
+				      ProjectInterface::getColorRGB("green")));
+    }
+
+  static std::string getClassDescription() {
+    return "A test of the localization node.";
+  }
+
+}
+
+REGISTER_BEHAVIOR_MENU(GlobalLocalization,DEFAULT_TK_MENU"/Navigation Demos");
+
+#endif

@@ -1,0 +1,29 @@
+#include "Behaviors/StateMachine.h"
+
+//! SIFT test example from the YouTube video http://www.youtube.com/watch?v=2QVSTtjenCs
+/*! First use SiftDemoTrain to train an object database.  Then point
+ *  the camera at the object and run this SiftDemoTest behavior to
+ *  look for the object in the camera image.  Use the sketchGUI viewer
+ *  (click on the "C" in the ControllerGUI) to see the result.
+ */
+
+$nodeclass SiftDemoTest : VisualRoutinesStateNode {
+
+  $nodeclass Looker : MapBuilderNode : doStart {
+    mapreq.siftDatabasePath = "sift-demo.dat";
+  }
+
+  $nodeclass Display : VisualRoutinesStateNode : doStart {
+    NEW_SHAPEVEC(siftobjects, SiftData, select_type<SiftData>(camShS));
+    if ( siftobjects.size() > 0 )
+      siftobjects[0]->displayMatchedFeatures();
+  }
+
+  virtual void setup() {
+    $statemachine{
+      Looker =MAP=> Display
+    }
+  }
+}
+
+REGISTER_BEHAVIOR_MENU(SiftDemoTest,DEFAULT_TK_MENU"/Vision Demos");

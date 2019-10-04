@@ -1,0 +1,113 @@
+#!/bin/sh
+
+usage="\
+$0 <libpng-dir>
+    will cause libpng to be built and installed into the
+    directory which contains this script.
+    
+    You will need to have OPENRSDK installed, either at
+    /usr/local/OPEN_R_SDK, or else set the OPENRSDK_ROOT
+    environment variable.
+    
+    The patch contained within this script was relative to
+    the libpng2-1.2.8 release, and may need to be tweaked
+    or replaced to support newer versions...
+";
+
+
+if [ $# -lt 1 -o "$1" == "-h" -o "$1" == "--help" ] ; then
+	printf "$usage";
+	exit 2;
+fi;
+
+pushd "`dirname \"$0\"`"
+TGT="`pwd`";
+popd;
+
+pushd "$1";
+
+cp scripts/makefile.linux Makefile
+
+echo "Patching..."
+patch -p0 <<'EOF'
+--- scripts/makefile.linux	Thu Dec  2 19:14:31 2004
++++ Makefile	Thu Mar 17 13:37:59 2005
+@@ -8,18 +8,21 @@
+ PNGMIN = 1.2.8
+ PNGVER = $(PNGMAJ).$(PNGMIN)
+ 
+-CC=gcc
++OPENRSDK_ROOT?=/usr/local/OPEN_R_SDK
++ORBIN=$(OPENRSDK_ROOT)/bin/mipsel-linux-
++
++CC=$(ORBIN)gcc
+ 
+ # where "make install" puts libpng12.a, libpng12.so*,
+ # libpng12/png.h and libpng12/pngconf.h
+ # Prefix must be a full pathname.
+-prefix=/usr/local
++#prefix=Will be defined as an environment variable by build script
+ 
+ # Where the zlib library and include files are located.
+ #ZLIBLIB=/usr/local/lib
+ #ZLIBINC=/usr/local/include
+-ZLIBLIB=../zlib
+-ZLIBINC=../zlib
++ZLIBLIB=$(prefix)/lib
++ZLIBINC=$(prefix)/include
+ 
+ ALIGN=
+ # for i386:
+@@ -37,7 +40,7 @@
+ LDFLAGS=-L. -Wl,-rpath,. -L$(ZLIBLIB) -Wl,-rpath,$(ZLIBLIB) -lpng12 -lz -lm
+ LDFLAGS_A=-L$(ZLIBLIB) -Wl,-rpath,$(ZLIBLIB) libpng.a -lz -lm
+ 
+-RANLIB=ranlib
++RANLIB=$(ORBIN)ranlib
+ #RANLIB=echo
+ 
+ INCPATH=$(prefix)/include
+@@ -71,10 +74,10 @@
+ .c.pic.o:
+ 	$(CC) -c $(CFLAGS) -fPIC -o $@ $*.c
+ 
+-all: libpng.a $(LIBNAME).so pngtest pngtest-static libpng.pc libpng-config
++all: libpng.a libpng.pc libpng-config
+ 
+ libpng.a: $(OBJS)
+-	ar rc $@ $(OBJS)
++	$(ORBIN)ar rc $@ $(OBJS)
+ 	$(RANLIB) $@
+ 
+ libpng.pc:
+@@ -181,7 +184,7 @@
+ 	chmod 755 $(DB)/$(LIBNAME)-config
+ 	(cd $(DB); ln -sf $(LIBNAME)-config libpng-config)
+ 
+-install: install-static install-shared install-man install-config
++install: install-static install-man install-config
+ 
+ # If you installed in $(DESTDIR), test-installed won't work until you
+ # move the library to its final location.  Use test-dd to test it
+EOF
+if [ "$?" -gt 0 ] ; then
+    echo "Patching failed.";
+    exit 1;
+fi;
+
+export prefix="$TGT"
+
+echo "Making..."
+make;
+if [ "$?" -gt 0 ] ; then
+    echo "Make failed.";
+    exit 1;
+fi;
+
+echo "Installing..."
+make install;
+if [ "$?" -gt 0 ] ; then
+    echo "Make install failed.";
+    exit 1;
+fi;
+

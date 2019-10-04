@@ -1,0 +1,65 @@
+#include "Shared/RobotInfo.h"
+#if defined(TGT_HAS_ARMS) && defined(TGT_HAS_HEAD)
+
+#include "Behaviors/Nodes/PIDNode.h"
+#include "Behaviors/Nodes/HeadPointerNode.h"
+#include "Behaviors/Nodes/SpeechNode.h"
+#include "Behaviors/Transitions/EventTrans.h"
+#include "Behaviors/Transitions/NullTrans.h"
+#include "Behaviors/Transitions/TextMsgTrans.h"
+#include "Motion/Kinematics.h"
+#include "Motion/MotionPtr.h"
+
+//! Makes the camera track the gripper.
+/*! Press green button (Play button on a Calliope) to relax or unrelax the arm.
+    Send a text message to display the current base-to-gripper transform matrix.
+*/
+$nodeclass CameraTrackGripper : StateNode {
+
+  $nodeclass HeadMover : HeadPointerNode : doStart {
+    fmat::Transform Tgripper = kine->linkToBase(GripperFrameOffset);
+    fmat::Column<3> Pgripper = Tgripper.translation();
+    getMC()->lookAtPoint(Pgripper[0], Pgripper[1], Pgripper[2]);
+  }
+
+	$nodeclass ShowTransform : StateNode : doStart {
+    fmat::Transform Tgripper = kine->linkToBase(GripperFrameOffset);
+		std::cout << "Gripper to base transform:\n" << Tgripper.fmt("%8.3f") << std::endl;
+  }
+
+  virtual void doStart() {
+		std::cout << "Press the Green button (Play button on Calliope) to relax/unrelax the arm." << std::endl;
+  }
+
+  virtual void setup() {
+		// We make the head motion command here and supply it to the
+		// HeadPointerNode via setMC() so that it only has to be
+		// registered with the MotionManager once. Registering and
+		// deregistering a HeadPointerMC inside a tight sensor loop is
+		// inefficient and leads to crashes.
+		MotionManager::MC_ID headmc = addMotion(MotionPtr<HeadPointerMC>());
+
+    $statemachine{
+      startnode: StateNode =N=> {headmover, unrelaxed, showtransform}
+
+    	headmover: HeadMover[setMC(headmc)] =E(sensorEGID)=> headmover
+
+      unrelaxed: SpeechNode("arm not relaxed") =N=> unrelaxer
+
+      relaxarm: SpeechNode("arm is relaxed") =N=> relaxer
+
+			relaxer: PIDNode(ArmOffset, ArmOffset+NumArmJoints, 0.f)
+      relaxer =B(GreenButOffset)=> unrelaxed
+
+			unrelaxer: PIDNode(ArmOffset, ArmOffset+NumArmJoints, 1.f)
+			unrelaxer =B(GreenButOffset)=> relaxarm
+
+      showtransform: ShowTransform =TM=> showtransform
+    }
+  }
+
+}
+
+REGISTER_BEHAVIOR_MENU(CameraTrackGripper,DEFAULT_TK_MENU"/Kinematics Demos");
+
+#endif

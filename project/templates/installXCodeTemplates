@@ -1,0 +1,238 @@
+#!/bin/sh
+
+# installXCodeTemplates
+# Created by Ethan Tira-Thompson on 3/8/05.
+
+DEFAULT="/Library/Application Support/Developer/Shared/Xcode/File Templates/Tekkotsu"
+cd "`dirname \"$0\"`";
+SOURCE="`pwd`"
+TIFILE="TemplateInfo.plist"
+
+INSTALL="$1"
+ISSYSTEMWIDE=false
+ISHOME=false
+if [ "$INSTALL" == "--system" ] ; then
+	INSTALL="$DEFAULT"
+	ISSYSTEMWIDE=true
+elif [ -z "$INSTALL" ] ; then
+	cd;
+	INSTALL="`pwd`/$DEFAULT"
+	ISHOME=true
+fi
+
+FWREP=filewordreplace
+if which -s $FWREP ; then :; else
+	if [ -x "$SOURCE/../../tools/bin/filewordreplace" ] ; then
+		FWREP="$SOURCE/../../tools/bin/filewordreplace";
+	elif [ -x "$TEKKOTSU_ROOT/tools/bin/filewordreplace" ] ; then
+		FWREP="$TEKKOTSU_ROOT/tools/bin/filewordreplace"
+	else
+		echo "Cannot find Tekkotsu framework to access tools/bin/filewordreplace"
+		echo "Set TEKKOTSU_ROOT environment variable, or put Tekkotsu/tools/bin on your $PATH"
+	fi
+fi
+
+echo "This will install the template files from:"
+echo "  $SOURCE"
+echo "to:"
+echo "  $INSTALL"
+if $ISSYSTEMWIDE ; then
+	echo "This will allow systemwide usage";
+fi;
+if $ISHOME ; then
+	echo "This will only provide access for the current user";
+	echo "(pass --system flag to install into the system-wide directory)";
+fi;
+
+if [ -d "$INSTALL" ] ; then
+	echo "";
+	echo "WARNING: The target directory already exists, continuing will replace it";
+fi;
+
+echo "";
+echo "Press enter to continue, ctl-C to cancel";
+read;
+
+if [ -d "$INSTALL" ] ; then
+	rm -r "$INSTALL";
+fi;
+
+mkdir -p "$INSTALL";
+
+CUR="$INSTALL/Generic Class.pbfiletemplate"
+mkdir "$CUR";
+echo "Made dir $CUR";
+cp "$SOURCE/header.h" "$SOURCE/implementation.cc" "$CUR";
+cat > "$CUR/$TIFILE" << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Description</key>
+	<string>A C++ class, with an optional implementation file.</string>
+	<key>MainTemplateFile</key>
+	<string>implementation.cc</string>
+	<key>FileToDisplay</key>
+	<string>%@.h</string>
+	<key>ImplicitCounterpartTemplateFiles</key>
+	<dict>
+		<key>header.h</key>
+		<string>%@.h</string>
+	</dict>
+</dict>
+</plist>
+EOF
+
+CUR="$INSTALL/Behavior.pbfiletemplate"
+mkdir "$CUR";
+echo "Made dir $CUR";
+printf "«OPTIONALHEADERINCLUDELINE»" > "$CUR/behavior.cc"
+tail +5 "$SOURCE/behavior.cc" >> "$CUR/behavior.cc";
+cp "$SOURCE/behavior.h" "$CUR";
+cat > "$CUR/$TIFILE" << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Description</key>
+	<string>A blank Tekkotsu behavior, with an optional implementation file.</string>
+	<key>MainTemplateFile</key>
+	<string>behavior.cc</string>
+	<key>FileToDisplay</key>
+	<string>%@.cc</string>
+	<key>CounterpartTemplateFile</key>
+	<string>behavior.h</string>
+</dict>
+</plist>
+EOF
+
+CUR="$INSTALL/MotionCommand.pbfiletemplate"
+mkdir "$CUR";
+echo "Made dir $CUR";
+sed '/Replace YOURNAMEHERE/,/^$/d' "$SOURCE/motioncommand.h" > "$CUR/motioncommand.h"
+cp "$SOURCE/implementation.cc" "$CUR";
+cat > "$CUR/$TIFILE" << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Description</key>
+	<string>A blank Tekkotsu MotionCommand, with an optional implementation file.</string>
+	<key>MainTemplateFile</key>
+	<string>implementation.cc</string>
+	<key>FileToDisplay</key>
+	<string>%@.h</string>
+	<key>ImplicitCounterpartTemplateFiles</key>
+	<dict>
+		<key>motioncommand.h</key>
+		<string>%@.h</string>
+	</dict>
+</dict>
+</plist>
+EOF
+
+CUR="$INSTALL/Control.pbfiletemplate"
+mkdir "$CUR";
+echo "Made dir $CUR";
+sed '/Replace YOURNAMEHERE/,/^$/d' "$SOURCE/control.h" > "$CUR/control.h"
+cp "$SOURCE/implementation.cc" "$CUR";
+cat > "$CUR/$TIFILE" << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Description</key>
+	<string>A blank Tekkotsu control, with an optional implementation file.</string>
+	<key>MainTemplateFile</key>
+	<string>implementation.cc</string>
+	<key>FileToDisplay</key>
+	<string>%@.h</string>
+	<key>ImplicitCounterpartTemplateFiles</key>
+	<dict>
+		<key>control.h</key>
+		<string>%@.h</string>
+	</dict>
+</dict>
+</plist>
+EOF
+
+CUR="$INSTALL/StateNode.pbfiletemplate"
+mkdir "$CUR";
+echo "Made dir $CUR";
+sed '/Replace YOURNAMEHERE/,/^$/d' "$SOURCE/statenode.h" > "$CUR/statenode.h"
+cp "$SOURCE/implementation.cc" "$CUR";
+cat > "$CUR/$TIFILE" << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Description</key>
+	<string>A blank Tekkotsu StateNode (element of a state machine), with an optional implementation file.</string>
+	<key>MainTemplateFile</key>
+	<string>implementation.cc</string>
+	<key>FileToDisplay</key>
+	<string>%@.h</string>
+	<key>ImplicitCounterpartTemplateFiles</key>
+	<dict>
+		<key>statenode.h</key>
+		<string>%@.h</string>
+	</dict>
+</dict>
+</plist>
+EOF
+
+CUR="$INSTALL/StateMachine.pbfiletemplate"
+mkdir "$CUR";
+echo "Made dir $CUR";
+sed '/Replace YOURNAMEHERE/,/^$/d' "$SOURCE/statemachine.h" > "$CUR/statemachine.h"
+sed $'/add member/i\\\nREGISTER_BEHAVIOR( CLASSNAME );\\\n\\\n' "$SOURCE/implementation.cc" > "$CUR/implementation.cc";
+cat > "$CUR/$TIFILE" << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Description</key>
+	<string>A blank Tekkotsu state machine (a StateNode with subnodes), with an optional implementation file.</string>
+	<key>MainTemplateFile</key>
+	<string>implementation.cc</string>
+	<key>FileToDisplay</key>
+	<string>%@.h</string>
+	<key>ImplicitCounterpartTemplateFiles</key>
+	<dict>
+		<key>statemachine.h</key>
+		<string>%@.h</string>
+	</dict>
+</dict>
+</plist>
+EOF
+
+CUR="$INSTALL/Transition.pbfiletemplate"
+mkdir "$CUR";
+echo "Made dir $CUR";
+sed '/Replace YOURNAMEHERE/,/^$/d' "$SOURCE/transition.h" > "$CUR/transition.h"
+cp "$SOURCE/implementation.cc" "$CUR";
+cat > "$CUR/$TIFILE" << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Description</key>
+	<string>A blank Tekkotsu state transition, with an optional implementation file.</string>
+	<key>MainTemplateFile</key>
+	<string>implementation.cc</string>
+	<key>FileToDisplay</key>
+	<string>%@.h</string>
+	<key>ImplicitCounterpartTemplateFiles</key>
+	<dict>
+		<key>transition.h</key>
+		<string>%@.h</string>
+	</dict>
+</dict>
+</plist>
+EOF
+
+echo "Translating keywords";
+${FWREP} -q "CLASSNAME" "«FILEBASENAME»" "$INSTALL";
+${FWREP} -q "YOURNAMEHERE" "«FULLUSERNAME»\ \(«USERNAME»\)" "$INSTALL";
+
+echo "Done!";

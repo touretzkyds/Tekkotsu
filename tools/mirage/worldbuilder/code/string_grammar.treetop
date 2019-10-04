@@ -1,0 +1,45 @@
+# Tekkotsu WorldBuilder
+# String parsing expression grammar
+#
+# Robert Lee (rslee / perihare)
+# 2-14-2011
+
+grammar StringGrammar
+
+    # Rule matching strings, either surrounded by double-quotes
+    # or a single word (no spaces) without double-quotes.
+    rule string
+    (string_quote / string_noquote)
+    end
+    
+    rule string_quote
+    '"' (!'"' . / '\"')* '"'
+    {
+        def eval(env={})
+            s = text_value
+            # Strip quotation marks from the raw string
+            s[1, s.length - 2]
+        end
+    }
+    end
+    
+    rule string_noquote
+    [a-zA-Z0-9_]+
+    {
+        def eval(env={})
+            text_value
+        end
+    }
+    end
+
+    # Matches whitespace (soft or hard spacing)
+    rule space
+    (' ' / '\t')*
+    {
+        def eval(env={})
+            return nil
+        end
+    }
+    end
+
+end

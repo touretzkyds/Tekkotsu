@@ -1,0 +1,18 @@
+@INCLUDE = doxygencfg
+
+PROJECT_NAME = ROBOOP
+PROJECT_NUMBER = 1.21a
+INPUT = ../Motion/roboop
+EXCLUDE = 
+EXCLUDE_PATTERNS = */extra/*
+OUTPUT_DIRECTORY = generated/html
+EXTRACT_ALL = YES
+ALWAYS_DETAILED_SEC = NO
+GENERATE_TREEVIEW = YES
+HTML_OUTPUT = roboop
+SEARCHENGINE = YES
+TAGFILES += generated/newmat.tag=../newmat
+GENERATE_TAGFILE = generated/roboop.tag
+HTML_HEADER = exthead.html
+HTML_FOOTER = roboopfoot.html
+INCLUDE_PATH = ../Shared/newmat

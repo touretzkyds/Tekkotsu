@@ -1,0 +1,93 @@
+#ifndef Included_MotionNodes_h_
+#define Included_MotionNodes_h_
+
+#include "Crew/PilotNode.h"
+#include "Behaviors/Nodes/HeadPointerNode.h"
+#include "Behaviors/Nodes/PIDNode.h"
+#include "Behaviors/Nodes/PostureNode.h"
+#include "Behaviors/Nodes/PostMachine.h"
+#include "Behaviors/Transitions/CompletionTrans.h"
+#include "Behaviors/Transitions/TimeOutTrans.h"
+
+$nodeclass WalkForward(float xdist=0) : PilotNode(PilotTypes::walk) : preStart {
+  PilotNode::preStart();
+  pilotreq.dx = xdist;
+}
+
+$nodeclass WalkSideways(float ydist=0) : PilotNode(PilotTypes::walk) : preStart {
+  PilotNode::preStart();
+  pilotreq.dy = ydist;
+}
+
+$nodeclass Turn(float angle=0) : PilotNode(PilotTypes::walk) : preStart {
+  PilotNode::preStart();
+  pilotreq.da = angle;
+}	
+
+#ifdef TGT_HAS_ARMS
+$nodeclass ArmPower(float level) : PIDNode(ArmOffset,ArmOffset+NumArmJoints,_level) {}
+
+$nodeclass ResetArm : StateNode {
+  $setupmachine{
+    ArmPower(0.0) =T(500)=> ArmPower(1.0) =N=> PostMachineCompletion
+  }
+}
+#else
+$nodeclass ArmPower(float level) : StateNode {}
+$nodeclass ResetArm : StateNode {}
+#endif
+
+
+// GripperPower
+#if defined(TGT_IS_CALLIOPE2) ||  defined(TGT_IS_CALLIOPE3)
+$nodeclass GripperPower(float level) : PIDNode(GripperOffset,GripperOffset+1,_level) {}
+#elif defined(TGT_IS_CALLIOPE5)
+$nodeclass GripperPower(float level) : PIDNode(LeftFingerOffset,RightFingerOffset+1,_level) {}
+#else
+$nodeclass GripperPower(float level) : PostStateCompletion {}
+#endif
+
+$nodeclass ResetGripper : StateNode {
+#if defined(TGT_IS_CALLIOPE2) || defined(TGT_IS_CALLIOPE3) || defined(TGT_IS_CALLIOPE5)
+  $setupmachine{
+    GripperPower(0.0) =T(500)=> GripperPower(1.0) =C=> PostMachineCompletion
+  }
+#endif
+}
+
+#ifdef TGT_HAS_GRIPPER
+$nodeclass OpenGripper(float percentage=0.5) : ArmNode : start {
+  ArmNode::start();
+#if defined(TGT_IS_CALLIOPE) || defined(TGT_IS_CALLIOPE3)
+  getMC()->setMaxSpeed(0.2);
+  getMC()->openGripper(percentage);
+#endif
+}
+#else
+$nodeclass OpenGripper(float percentage=0.5) : PostStateCompletion {}
+#endif
+
+#if defined(TGT_IS_CALLIOPE2) || defined(TGT_IS_CALLIOPE3) || defined(TGT_IS_CALLIOPE5)
+$nodeclass ParkArm : StateNode {
+  $setupmachine{
+    PostureNode("park1.pos") =C=> 
+      PostureNode("park2.pos") =C=>
+        ArmPower(0.0) =C=> PostMachineCompletion
+  }
+}
+#else
+$nodeclass ParkArm : PostStateCompletion {}
+#endif
+
+// LookAtGripper
+#if defined(TGT_HAS_HEAD) && defined(TGT_HAS_GRIPPER)
+$nodeclass LookAtGripper(float xoffset=0) : HeadPointerNode : preStart {
+  HeadPointerNode::preStart();
+	fmat::Column<3> gripperPos = kine->linkToBase(GripperFrameOffset).translation();
+  getMC()->lookAtPoint(gripperPos[0]+xoffset, gripperPos[1], gripperPos[2]);
+}
+#else
+$nodeclass LookAtGripper(float xoffset=0) : PostStateCompletion {}
+#endif
+
+#endif

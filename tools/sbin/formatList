@@ -1,0 +1,21 @@
+#!/bin/sh
+
+if [ $# -lt 2 -o "$1" = "-h" -o "$1" = "--help" ] ; then
+  echo "Usage: $0 class long_list.html";
+  echo "       class should be one of 'features', 'api_changes', 'bug_fixes', 'known_bugs'";
+  echo ""
+  echo "       This tool will convert a "long format" bug list saved from"
+  echo "       Tekkotsu's bugzilla installation into a format for use on the"
+  echo "       version history page."
+  exit 2;
+fi;
+
+prefix="^ *<font =\"+3\">Bug ";
+postfix="<\/font>";
+
+echo "<html><head></head><body><ul class=\"$1\">"
+grep "$prefix" "$2" | sed "s/${prefix}\([0-9]*\) - \(.*\)${postfix}/\1 \2/" | \
+while read idnum desc ; do
+echo "<li>$desc <a href=\"http://bugs.tekkotsu.org/show_bug.cgi?id=$idnum\">&raquo;</a></li>"
+done;
+echo "</ul></body></html>"

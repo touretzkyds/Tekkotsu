@@ -1,0 +1,220 @@
+#!/bin/sh
+
+usage="\
+$0 <libxml-dir>
+    will cause libxml to be built and installed into the
+    directory which contains this script.
+    
+    You will need to have OPENRSDK installed, either at
+    /usr/local/OPEN_R_SDK, or else set the OPENRSDK_ROOT
+    environment variable.
+    
+    The patch contained within this script was relative to
+    the libxml2-2.6.19 release, and may need to be tweaked
+    or replaced to support newer versions...
+";
+
+
+if [ $# -lt 1 -o "$1" == "-h" -o "$1" == "--help" ] ; then
+	printf "$usage";
+	exit 2;
+fi;
+
+pushd "`dirname \"$0\"`"
+TGT="`pwd`";
+popd;
+
+pushd "$1";
+
+echo "Patching..."
+patch -p1 <<'EOF'
+diff -ru libxml2-2.6.19/Makefile.in libxml2-2.6.19-aperios/Makefile.in
+--- libxml2-2.6.19/Makefile.in	Sat Apr  2 05:53:16 2005
++++ libxml2-2.6.19-aperios/Makefile.in	Thu Apr 28 15:39:31 2005
+@@ -41,12 +41,8 @@
+ POST_UNINSTALL = :
+ build_triplet = @build@
+ host_triplet = @host@
+-noinst_PROGRAMS = testSchemas$(EXEEXT) testRelax$(EXEEXT) \
+-	testSAX$(EXEEXT) testHTML$(EXEEXT) testXPath$(EXEEXT) \
+-	testURI$(EXEEXT) testThreads$(EXEEXT) testC14N$(EXEEXT) \
+-	testAutomata$(EXEEXT) testRegexp$(EXEEXT) testReader$(EXEEXT) \
+-	testapi$(EXEEXT) testModule$(EXEEXT)
+-bin_PROGRAMS = xmllint$(EXEEXT) xmlcatalog$(EXEEXT)
++noinst_PROGRAMS =
++bin_PROGRAMS =
+ DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
+ 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
+ 	$(srcdir)/libxml-2.0-uninstalled.pc.in \
+diff -ru libxml2-2.6.19/configure libxml2-2.6.19-aperios/configure
+--- libxml2-2.6.19/configure	Sat Apr  2 04:05:32 2005
++++ libxml2-2.6.19-aperios/configure	Thu Apr 28 16:12:54 2005
+@@ -2454,11 +2454,11 @@
+   echo "$as_me: failed program was:" >&5
+ sed 's/^/| /' conftest.$ac_ext >&5
+ 
+-{ { echo "$as_me:$LINENO: error: C compiler cannot create executables
+-See \`config.log' for more details." >&5
+-echo "$as_me: error: C compiler cannot create executables
+-See \`config.log' for more details." >&2;}
+-   { (exit 77); exit 77; }; }
++#{ { echo "$as_me:$LINENO: error: C compiler cannot create executables
++#See \`config.log' for more details." >&5
++#echo "$as_me: error: C compiler cannot create executables
++#See \`config.log' for more details." >&2;}
++#   { (exit 77); exit 77; }; }
+ fi
+ 
+ ac_exeext=$ac_cv_exeext
+@@ -2526,12 +2526,12 @@
+     * ) break;;
+   esac
+ done
+-else
+-  { { echo "$as_me:$LINENO: error: cannot compute suffix of executables: cannot compile and link
+-See \`config.log' for more details." >&5
+-echo "$as_me: error: cannot compute suffix of executables: cannot compile and link
+-See \`config.log' for more details." >&2;}
+-   { (exit 1); exit 1; }; }
++#else
++#  { { echo "$as_me:$LINENO: error: cannot compute suffix of executables: cannot compile and link
++#See \`config.log' for more details." >&5
++#echo "$as_me: error: cannot compute suffix of executables: cannot compile and link
++#See \`config.log' for more details." >&2;}
++#   { (exit 1); exit 1; }; }
+ fi
+ 
+ rm -f conftest$ac_cv_exeext
+@@ -20466,6 +20466,7 @@
+ _ACEOF
+  echo "$as_me:$LINENO: checking for gzread in -lz" >&5
+ echo $ECHO_N "checking for gzread in -lz... $ECHO_C" >&6
++if false ; then
+ if test "${ac_cv_lib_z_gzread+set}" = set; then
+   echo $ECHO_N "(cached) $ECHO_C" >&6
+ else
+@@ -20526,8 +20527,11 @@
+       conftest$ac_exeext conftest.$ac_ext
+ LIBS=$ac_check_lib_save_LIBS
+ fi
++fi;
++  ac_cv_lib_z_gzread=yes;
+ echo "$as_me:$LINENO: result: $ac_cv_lib_z_gzread" >&5
+ echo "${ECHO_T}$ac_cv_lib_z_gzread" >&6
++echo "*************** LIBZ TEST ********" $ac_cv_lib_z_gzread
+ if test $ac_cv_lib_z_gzread = yes; then
+ 
+ 
+diff -ru libxml2-2.6.19/globals.c libxml2-2.6.19-aperios/globals.c
+--- libxml2-2.6.19/globals.c	Fri Apr  1 08:15:02 2005
++++ libxml2-2.6.19-aperios/globals.c	Thu Apr 28 15:37:43 2005
+@@ -496,11 +496,16 @@
+ 
+     xmlMutexLock(xmlThrDefMutex);
+ 
++		//they check this in SAX.c where the functions are defined
++		//but forgot to here, which causes an undefined function
++		//linker error if legacy is disabled
++#ifdef LIBXML_LEGACY_ENABLED
+ #ifdef LIBXML_DOCB_ENABLED
+     initdocbDefaultSAXHandler(&gs->docbDefaultSAXHandler);
+ #endif
+ #ifdef LIBXML_HTML_ENABLED
+     inithtmlDefaultSAXHandler(&gs->htmlDefaultSAXHandler);
++#endif
+ #endif
+ 
+     gs->oldXMLWDcompatibility = 0;
+diff -ru libxml2-2.6.19/xmlIO.c libxml2-2.6.19-aperios/xmlIO.c
+--- libxml2-2.6.19/xmlIO.c	Fri Apr  1 08:15:10 2005
++++ libxml2-2.6.19-aperios/xmlIO.c	Thu Apr 28 15:37:43 2005
+@@ -893,10 +893,11 @@
+     const char *path = NULL;
+     gzFile fd;
+ 
+-    if (!strcmp(filename, "-")) {
+-        fd = gzdopen(dup(0), "rb");
+-	return((void *) fd);
+-    }
++		//don't do stdout output on aperios
++    //if (!strcmp(filename, "-")) {
++		//fd = gzdopen(dup(0), "rb");
++		//return((void *) fd);
++		//}
+ 
+     if (!xmlStrncasecmp(BAD_CAST filename, BAD_CAST "file://localhost/", 17))
+ #if defined (_WIN32) || defined (__DJGPP__) && !defined(__CYGWIN__)
+@@ -963,10 +964,11 @@
+     gzFile fd;
+ 
+     snprintf(mode, sizeof(mode), "wb%d", compression);
+-    if (!strcmp(filename, "-")) {
+-        fd = gzdopen(dup(1), mode);
+-	return((void *) fd);
+-    }
++		//don't do stdout output on aperios
++    //if (!strcmp(filename, "-")) {
++		//fd = gzdopen(dup(1), mode);
++		//return((void *) fd);
++		//}
+ 
+     if (!xmlStrncasecmp(BAD_CAST filename, BAD_CAST "file://localhost/", 17))
+ #if defined (_WIN32) || defined (__DJGPP__) && !defined(__CYGWIN__)
+@@ -3276,10 +3278,12 @@
+ 	else *cur = 0;
+ 	ret = xmlMemStrdup(dir);
+     } else {
+-        if (getcwd(dir, 1024) != NULL) {
+-	    dir[1023] = 0;
+-	    ret = xmlMemStrdup(dir);
+-	}
++			//apparently no getcwd in aperios... just assume it's always '/'
++			return strncpy(dir,"/",1023);
++			//if (getcwd(dir, 1024) != NULL) {
++	    //dir[1023] = 0;
++	    //ret = xmlMemStrdup(dir);
++			//}
+     }
+     return(ret);
+ }
+EOF
+if [ "$?" -gt 0 ] ; then
+    echo "Patching failed.";
+    exit 1;
+fi;
+
+if [ -z "$OPENRSDK_ROOT" ] ; then
+    OPENRSDK_ROOT=/usr/local/OPEN_R_SDK;
+fi;
+export PATH="$OPENRSDK_ROOT/bin:$PATH"
+
+echo "Configuring..."
+
+./configure --prefix="$TGT" --host=mipsel-linux --enable-static=yes --enable-shared=no \
+  --without-http --without-ftp --without-threads --without-python --with-zlib="$TGT" \
+  --without-c14n --without-catalog --without-debug --without-docbook --without-pattern \
+	--with-html --without-legacy \
+  --with-push --with-reader --without-regexps --without-sax1 --without-schemas \
+  --with-valid --with-writer --with-xinclude --with-xpath --with-xptr --without-modules  ;
+if [ "$?" -gt 0 ] ; then
+    echo "Configure failed.";
+    exit 1;
+fi;
+
+printf "all:;\ninstall:;\nclean:;\n" > doc/Makefile
+printf "all:;\ninstall:;\nclean:;\n" > example/Makefile
+
+echo "Making..."
+make;
+if [ "$?" -gt 0 ] ; then
+    echo "Make failed.";
+    exit 1;
+fi;
+
+echo "Installing..."
+make install;
+if [ "$?" -gt 0 ] ; then
+    echo "Make install failed.";
+    exit 1;
+fi;
+

@@ -1,0 +1,460 @@
+<?xml version="1.0"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><array>
+<dict>
+	<key>Model</key>     <string>ERS-7/Body</string>
+	<key>Name</key>      <string>BaseFrame</string>
+</dict>
+
+<!-- HEAD / { CAMERA, LEar, REar } -->
+<array>
+	<dict>
+		<key>JointType</key> <string>revolute</string>
+		<key>θ</key>         <string>0°</string>
+		<key>d</key>         <real>19.5</real>
+		<key>α</key>         <string>90°</string>
+		<key>r</key>         <real>67.5</real>
+		<key>Min</key>       <string>-75°</string>
+		<key>Max</key>       <string>0</string>
+		<key>Model</key>     <string>ERS-7/NeckTilt</string>
+		<key>Name</key>      <string>NECK:tilt</string>
+		<key>IKSolver</key>  <string>IKThreeLink</string>
+	</dict>
+	<dict>
+		<key>JointType</key> <string>revolute</string>
+		<key>θ</key>         <string>0°</string>
+		<key>d</key>         <real>0</real>
+		<key>α</key>         <string>-90°</string>
+		<key>r</key>         <real>0</real>
+		<key>Min</key>       <string>-90°</string>
+		<key>Max</key>       <string>90°</string>
+		<key>Model</key>     <string>ERS-7/NeckPan</string>
+		<key>Name</key>      <string>NECK:pan</string>
+		<key>IKSolver</key>  <string>IKThreeLink</string>
+	</dict>
+	<dict>
+		<key>JointType</key> <string>revolute</string>
+		<key>θ</key>         <string>0°</string>
+		<key>d</key>         <real>80</real>
+		<key>α</key>         <string>90°</string>
+		<key>r</key>         <real>0</real>
+		<key>Min</key>       <string>-15°</string>
+		<key>Max</key>       <string>45°</string>
+		<key>Model</key>     <string>ERS-7/Head</string>
+		<key>Name</key>      <string>NECK:nod</string>
+		<key>IKSolver</key>  <string>IKThreeLink</string>
+	</dict>
+	
+	<!-- Camera branch -->
+	<array>
+		<dict>
+			<key>JointType</key> <string>revolute</string>
+			<key>θ</key>         <string>-90°</string>
+			<key>d</key>         <real>0</real>
+			<key>α</key>         <string>-90°</string>
+			<key>r</key>         <real>14.6</real>
+			<key>IKSolver</key>  <string>IKThreeLink</string>
+		</dict>
+		<dict>
+			<key>JointType</key> <string>prismatic</string>
+			<key>θ</key>         <string>-90°</string>
+			<key>d</key>         <real>81.06</real>
+			<key>α</key>         <string>0°</string>
+			<key>r</key>         <real>0</real>
+			<key>Min</key>       <real>0</real>
+			<key>Max</key>       <real>inf</real>
+			<key>Model</key>     <string>CameraFOV</string>
+			<key>Name</key>      <string>CameraFrame</string>
+			<key>IKSolver</key>  <string>IKThreeLink</string>
+			<key>Visible</key>   <false/>
+		</dict>
+	</array>
+	
+	<!-- Mouth branch -->
+	<array>
+		<dict>
+			<key>JointType</key> <string>revolute</string>
+			<key>θ</key>         <string>-23.629°</string>
+			<key>d</key>         <real>0</real>
+			<key>α</key>         <string>0°</string>
+			<key>r</key>         <real>43.6606</real>
+			<key>Min</key>       <string>-55°</string>
+			<key>Max</key>       <string>0°</string>
+			<key>Model</key>     <string>ERS-7/Mouth</string>
+			<key>Name</key>      <string>MOUTH</string>
+		</dict>
+		<!-- <dict>
+			<key>JointType</key> <string>revolute</string>
+			<key>θ</key>         <string>15.279°</string>
+			<key>d</key>         <real>0</real>
+			<key>α</key>         <string>0°</string>
+			<key>r</key>         <real>41.662</real>
+			<key>Model</key>     <string>ReferenceFrame</string>
+			<key>ModelScale</key><real>0.2</real>
+			<key>Name</key>      <string>MouthFrame</string>
+			<key>Visible</key>   <false/>
+		</dict> -->
+	</array>
+	
+	<!-- Right ear -->
+	<array>
+		<dict>
+			<key>JointType</key> <string>revolute</string>
+			<key>θ</key>         <string>90°</string>
+			<key>d</key>         <real>42</real>
+			<key>α</key>         <string>-90°</string>
+			<key>r</key>         <real>14.5</real>
+			<key>Min</key>       <string>0°</string>
+			<key>Max</key>       <string>10°</string>
+			<key>Name</key>      <string>EAR:right</string>
+		</dict>
+		<dict>
+			<key>JointType</key> <string>revolute</string>
+			<key>θ</key>         <string>0°</string>
+			<key>d</key>         <real>11.1</real>
+			<key>α</key>         <string>90°</string>
+			<key>r</key>         <real>0</real>
+			<key>Min</key>       <string>-90°</string>
+			<key>Max</key>       <string>90°</string>
+			<key>Model</key>     <string>ERS-7/REar</string>
+		</dict>
+	</array>
+
+	<!-- Left ear -->
+	<array>
+		<dict>
+			<key>JointType</key> <string>revolute</string>
+			<key>θ</key>         <string>90°</string>
+			<key>d</key>         <real>-42</real>
+			<key>α</key>         <string>90°</string>
+			<key>r</key>         <real>14.5</real>
+			<key>Min</key>       <string>0°</string>
+			<key>Max</key>       <string>10°</string>
+			<key>Name</key>      <string>EAR:left</string>
+		</dict>
+		<dict>
+			<key>JointType</key> <string>revolute</string>
+			<key>θ</key>         <string>0°</string>
+			<key>d</key>         <real>-11.1</real>
+			<key>α</key>         <string>-90°</string>
+			<key>r</key>         <real>0</real>
+			<key>Min</key>       <string>-90°</string>
+			<key>Max</key>       <string>90°</string>
+			<key>Model</key>     <string>ERS-7/LEar</string>
+		</dict>
+	</array>
+	
+	<!-- Near IR -->
+	<array>
+		<dict>
+			<key>JointType</key> <string>revolute</string>
+			<key>θ</key>         <real>0.0249189</real>
+			<key>d</key>         <real>2.79525</real>
+			<key>α</key>         <real>0</real>
+			<key>r</key>         <real>76.9239</real>
+		</dict>
+		<dict>
+			<key>JointType</key> <string>prismatic</string>
+			<key>θ</key>         <real>1.50041</real>
+			<key>d</key>         <real>0</real>
+			<key>α</key>         <real>1.55997</real>
+			<key>r</key>         <real>0</real>
+			<key>qOffset</key>   <real>0</real>
+			<key>Name</key>      <string>NearIRFrame</string>
+			<key>SensorInfo</key><array><dict>
+				<key>SensorType</key> <string>RangeFinder</string>
+				<key>SensorName</key> <string>NearIRDist</string>
+				<key>MinRange</key> <real>50</real>
+				<key>MaxRange</key> <real>500</real>
+			</dict></array>
+		</dict>
+	</array>
+	
+	<!-- Far IR -->
+	<array>
+		<dict>
+			<key>JointType</key> <string>revolute</string>
+			<key>θ</key>         <real>0.0136814</real>
+			<key>d</key>         <real>-8.04682</real>
+			<key>α</key>         <real>0</real>
+			<key>r</key>         <real>76.9072</real>
+		</dict>
+		<dict>
+			<key>JointType</key> <string>prismatic</string>
+			<key>θ</key>         <real>1.52305</real>
+			<key>d</key>         <real>0</real>
+			<key>α</key>         <real>1.56055</real>
+			<key>r</key>         <real>0</real>
+			<key>qOffset</key>   <real>0</real>
+			<key>Name</key>      <string>FarIRFrame</string>
+			<key>SensorInfo</key><array><dict>
+				<key>SensorType</key> <string>RangeFinder</string>
+				<key>SensorName</key> <string>FarIRDist</string>
+				<key>MinRange</key> <real>200</real>
+				<key>MaxRange</key> <real>1500</real>
+			</dict></array>
+		</dict>
+	</array>
+</array>
+
+<!-- Chest IR -->
+<array>
+	<dict>
+		<key>JointType</key> <string>revolute</string>
+		<key>θ</key>         <real>0</real>
+		<key>d</key>         <real>-3.38397459622</real>
+		<key>α</key>         <real>90°</real>
+		<key>r</key>         <real>109.13620668</real>
+	</dict>
+	<dict>
+		<key>JointType</key> <string>prismatic</string>
+		<key>θ</key>         <real>60°</real>
+		<key>d</key>         <real>0</real>
+		<key>α</key>         <real>90°</real>
+		<key>r</key>         <real>0</real>
+		<key>qOffset</key>   <real>0</real>
+		<key>Name</key>      <string>ChestIRFrame</string>
+		<key>SensorInfo</key><array><dict>
+			<key>SensorType</key> <string>RangeFinder</string>
+			<key>SensorName</key> <string>ChestIRDist</string>
+			<key>MinRange</key> <real>100</real>
+			<key>MaxRange</key> <real>900</real>
+		</dict></array>
+	</dict>
+</array>
+
+<!-- LFr Leg -->
+<array>
+	<dict>
+		<key>JointType</key> <string>revolute</string>
+		<key>θ</key>         <string>0°</string>
+		<key>d</key>         <real>0</real>
+		<key>α</key>         <string>90°</string>
+		<key>r</key>         <real>65</real>
+		<key>Min</key>       <string>-130°</string>
+		<key>Max</key>       <string>115°</string>
+		<key>Model</key>     <string>ERS-7/LFrRotor</string>
+		<key>Name</key>      <string>LFr:rotor</string>
+		<key>IKSolver</key>  <string>IKThreeLink</string>
+	</dict>
+	<dict>
+		<key>JointType</key> <string>revolute</string>
+		<key>θ</key>         <string>-90°</string>
+		<key>d</key>         <real>-62.5</real>
+		<key>α</key>         <string>-90°</string>
+		<key>r</key>         <real>0</real>
+		<key>Min</key>       <string>-10°</string>
+		<key>Max</key>       <string>88°</string>
+		<key>Model</key>     <string>ERS-7/LFrElvtr</string>
+		<key>Name</key>      <string>LFr:elvtr</string>
+		<key>IKSolver</key>  <string>IKThreeLink</string>
+	</dict>
+	<dict>
+		<key>JointType</key> <string>revolute</string>
+		<key>θ</key>         <string>0°</string>
+		<key>d</key>         <real>9</real>
+		<key>α</key>         <string>90°</string>
+		<key>r</key>         <real>69.5</real>
+		<key>Min</key>       <string>-25°</string>
+		<key>Max</key>       <string>122°</string>
+		<key>Model</key>     <string>ERS-7/LFrKnee</string>
+		<key>Name</key>      <string>LFr:knee</string>
+		<key>IKSolver</key>  <string>IKThreeLink</string>
+	</dict>
+	<dict>
+		<key>JointType</key> <string>revolute</string>
+		<key>θ</key>         <string>-4.4088°</string>
+		<key>d</key>         <real>-4.7</real>
+		<key>α</key>         <string>0°</string>
+		<key>r</key>         <real>65.434</real>
+		<key>Model</key>     <string>ReferenceFrame</string>
+		<key>Visible</key>   <false/>
+		<key>Name</key>      <string>LFrFootFrame</string>
+		<key>IKSolver</key>  <string>IKThreeLink</string>
+	</dict>
+	<!-- Diameter of ball of foot = 26mm -->
+</array>
+
+<!-- RFr Leg -->
+<array>
+	<dict>
+		<key>JointType</key> <string>revolute</string>
+		<key>θ</key>         <string>0°</string>
+		<key>d</key>         <real>0</real>
+		<key>α</key>         <string>90°</string>
+		<key>r</key>         <real>65</real>
+		<key>Min</key>       <string>-130°</string>
+		<key>Max</key>       <string>115°</string>
+		<key>Model</key>     <string>ERS-7/RFrRotor</string>
+		<key>Name</key>      <string>RFr:rotor</string>
+		<key>IKSolver</key>  <string>IKThreeLink</string>
+	</dict>
+	<dict>
+		<key>JointType</key> <string>revolute</string>
+		<key>θ</key>         <string>-90°</string>
+		<key>d</key>         <real>62.5</real>
+		<key>α</key>         <string>90°</string>
+		<key>r</key>         <real>0</real>
+		<key>Min</key>       <string>-10°</string>
+		<key>Max</key>       <string>88°</string>
+		<key>Model</key>     <string>ERS-7/RFrElvtr</string>
+		<key>Name</key>      <string>RFr:elvtr</string>
+		<key>IKSolver</key>  <string>IKThreeLink</string>
+	</dict>
+	<dict>
+		<key>JointType</key> <string>revolute</string>
+		<key>θ</key>         <string>0°</string>
+		<key>d</key>         <real>-9</real>
+		<key>α</key>         <string>-90°</string>
+		<key>r</key>         <real>69.5</real>
+		<key>Min</key>       <string>-25°</string>
+		<key>Max</key>       <string>122°</string>
+		<key>Model</key>     <string>ERS-7/RFrKnee</string>
+		<key>Name</key>      <string>RFr:knee</string>
+		<key>IKSolver</key>  <string>IKThreeLink</string>
+	</dict>
+	<dict>
+		<key>JointType</key> <string>revolute</string>
+		<key>θ</key>         <string>-4.4088°</string>
+		<key>d</key>         <real>4.7</real>
+		<key>α</key>         <string>0°</string>
+		<key>r</key>         <real>65.434</real>
+		<key>Model</key>     <string>ReferenceFrame</string>
+		<key>Visible</key>   <false/>
+		<key>Name</key>      <string>RFrFootFrame</string>
+		<key>IKSolver</key>  <string>IKThreeLink</string>
+	</dict>
+	<!-- Diameter of ball of foot = 26mm -->
+</array>
+
+<!-- LBk Leg -->
+<array>
+	<dict>
+		<key>JointType</key> <string>revolute</string>
+		<key>θ</key>         <string>0°</string>
+		<key>d</key>         <real>0</real>
+		<key>α</key>         <string>-90°</string>
+		<key>r</key>         <real>-65</real>
+		<key>Min</key>       <string>-130°</string>
+		<key>Max</key>       <string>115°</string>
+		<key>Model</key>     <string>ERS-7/LBkRotor</string>
+		<key>Name</key>      <string>LBk:rotor</string>
+		<key>IKSolver</key>  <string>IKThreeLink</string>
+	</dict>
+	<dict>
+		<key>JointType</key> <string>revolute</string>
+		<key>θ</key>         <string>90°</string>
+		<key>d</key>         <real>62.5</real>
+		<key>α</key>         <string>90°</string>
+		<key>r</key>         <real>0</real>
+		<key>Min</key>       <string>-10°</string>
+		<key>Max</key>       <string>88°</string>
+		<key>Model</key>     <string>ERS-7/LBkElvtr</string>
+		<key>Name</key>      <string>LBk:elvtr</string>
+		<key>IKSolver</key>  <string>IKThreeLink</string>
+	</dict>
+	<dict>
+		<key>JointType</key> <string>revolute</string>
+		<key>θ</key>         <string>0°</string>
+		<key>d</key>         <real>-9</real>
+		<key>α</key>         <string>-90°</string>
+		<key>r</key>         <real>69.5</real>
+		<key>Min</key>       <string>-25°</string>
+		<key>Max</key>       <string>122°</string>
+		<key>Model</key>     <string>ERS-7/LBkKnee</string>
+		<key>Name</key>      <string>LBk:knee</string>
+		<key>IKSolver</key>  <string>IKThreeLink</string>
+	</dict>
+	<dict>
+		<key>JointType</key> <string>revolute</string>
+		<key>θ</key>         <string>-11.537°</string>
+		<key>d</key>         <real>4.7</real>
+		<key>α</key>         <string>180°</string>
+		<key>r</key>         <real>67.647</real>
+		<key>Model</key>     <string>ReferenceFrame</string>
+		<key>Visible</key>   <false/>
+		<key>Name</key>      <string>LBkFootFrame</string>
+		<key>IKSolver</key>  <string>IKThreeLink</string>
+	</dict>
+	<!-- Diameter of ball of foot = 26mm -->
+</array>
+
+<!-- RBk Leg -->
+<array>
+	<dict>
+		<key>JointType</key> <string>revolute</string>
+		<key>θ</key>         <string>0°</string>
+		<key>d</key>         <real>0</real>
+		<key>α</key>         <string>-90°</string>
+		<key>r</key>         <real>-65</real>
+		<key>Min</key>       <string>-130°</string>
+		<key>Max</key>       <string>115°</string>
+		<key>Model</key>     <string>ERS-7/RBkRotor</string>
+		<key>Name</key>      <string>RBk:rotor</string>
+		<key>IKSolver</key>  <string>IKThreeLink</string>
+	</dict>
+	<dict>
+		<key>JointType</key> <string>revolute</string>
+		<key>θ</key>         <string>90°</string>
+		<key>d</key>         <real>-62.5</real>
+		<key>α</key>         <string>-90°</string>
+		<key>r</key>         <real>0</real>
+		<key>Min</key>       <string>-10°</string>
+		<key>Max</key>       <string>88°</string>
+		<key>Model</key>     <string>ERS-7/RBkElvtr</string>
+		<key>Name</key>      <string>RBk:elvtr</string>
+		<key>IKSolver</key>  <string>IKThreeLink</string>
+	</dict>
+	<dict>
+		<key>JointType</key> <string>revolute</string>
+		<key>θ</key>         <string>0°</string>
+		<key>d</key>         <real>9</real>
+		<key>α</key>         <string>90°</string>
+		<key>r</key>         <real>69.5</real>
+		<key>Min</key>       <string>-25°</string>
+		<key>Max</key>       <string>122°</string>
+		<key>Model</key>     <string>ERS-7/RBkKnee</string>
+		<key>Name</key>      <string>RBk:knee</string>
+		<key>IKSolver</key>  <string>IKThreeLink</string>
+	</dict>
+	<dict>
+		<key>JointType</key> <string>revolute</string>
+		<key>θ</key>         <string>-11.537°</string>
+		<key>d</key>         <real>-4.7</real>
+		<key>α</key>         <string>180°</string>
+		<key>r</key>         <real>67.647</real>
+		<key>Model</key>     <string>ReferenceFrame</string>
+		<key>Visible</key>   <false/>
+		<key>Name</key>      <string>RBkFootFrame</string>
+		<key>IKSolver</key>  <string>IKThreeLink</string>
+	</dict>
+	<!-- Diameter of ball of foot = 26mm -->
+</array>
+
+<!-- Tail -->
+<array>
+	<dict>
+		<key>JointType</key> <string>revolute</string>
+		<key>θ</key>         <string>0°</string>
+		<key>d</key>         <real>33</real>
+		<key>α</key>         <string>-90°</string>
+		<key>r</key>         <real>-102</real>
+		<key>Min</key>       <string>0°</string>
+		<key>Max</key>       <string>65°</string>
+		<key>Name</key>      <string>TAIL:tilt</string>
+		<key>IKSolver</key>  <string>IKThreeLink</string>
+	</dict>
+	<dict>
+		<key>JointType</key> <string>revolute</string>
+		<key>θ</key>         <string>-90°</string>
+		<key>d</key>         <real>0</real>
+		<key>α</key>         <string>-90°</string>
+		<key>r</key>         <real>0</real>
+		<key>Min</key>       <string>-60°</string>
+		<key>Max</key>       <string>60°</string>
+		<key>Model</key>     <string>ERS-7/Tail</string>
+		<key>Name</key>      <string>TAIL:pan</string>
+		<key>IKSolver</key>  <string>IKThreeLink</string>
+	</dict>
+</array>
+</array></plist>

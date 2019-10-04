@@ -1,0 +1,120 @@
+Running visual tests, verify image files after execution.
+Test 0:
+Rendering tests/CircEllipse-bb.png
+Rendering tests/CircEllipse-repos.png
+Test 0    CircEllipse:  1155000 points,  403075 hits,  
+Rendering tests/CircEllipse-points.png
+Test 0    CircEllipse:  1155000 points, 0.0540943 error, total gradient 615425, 
+Rendering tests/CircEllipse-grad.png
+Rendering tests/CircEllipse-s0m.png
+Rendering tests/CircEllipse-s0h.png
+Rendering tests/CircEllipse-s1m.png
+Rendering tests/CircEllipse-s1h.png
+Rendering tests/CircEllipse-s2m.png
+Rendering tests/CircEllipse-s2h.png
+Rendering tests/CircEllipse-s3m.png
+Rendering tests/CircEllipse-s3h.png
+
+Rendering tests/Circle-bb.png
+Rendering tests/Circle-repos.png
+Test 0         Circle:  1155000 points,  403075 hits,  
+Rendering tests/Circle-points.png
+Test 0         Circle:  1155000 points, 0.0609025 error, total gradient 615425, 
+Rendering tests/Circle-grad.png
+Rendering tests/Circle-s0m.png
+Rendering tests/Circle-s0h.png
+Rendering tests/Circle-s1m.png
+Rendering tests/Circle-s1h.png
+Rendering tests/Circle-s2m.png
+Rendering tests/Circle-s2h.png
+Rendering tests/Circle-s3m.png
+Rendering tests/Circle-s3h.png
+
+Rendering tests/Ellipse-bb.png
+Rendering tests/Ellipse-repos.png
+Test 0        Ellipse:  1155000 points,  213609 hits,  
+Rendering tests/Ellipse-points.png
+Test 0        Ellipse:  1155000 points, 0.0639758 error, total gradient 886256, 
+Rendering tests/Ellipse-grad.png
+Rendering tests/Ellipse-s0m.png
+Rendering tests/Ellipse-s0h.png
+Rendering tests/Ellipse-s1m.png
+Rendering tests/Ellipse-s1h.png
+Rendering tests/Ellipse-s2m.png
+Rendering tests/Ellipse-s2h.png
+Rendering tests/Ellipse-s3m.png
+Rendering tests/Ellipse-s3h.png
+
+Rendering tests/Hierarchical-bb.png
+Rendering tests/Hierarchical-repos.png
+Test 0   Hierarchical:  1153845 points,  252284 hits,  
+Rendering tests/Hierarchical-points.png
+Test 0   Hierarchical:  1153845 points, 0.0712178 error, total gradient 898897, 
+Rendering tests/Hierarchical-grad.png
+Rendering tests/Hierarchical-s0m.png
+Rendering tests/Hierarchical-s0h.png
+Rendering tests/Hierarchical-s1m.png
+Rendering tests/Hierarchical-s1h.png
+Rendering tests/Hierarchical-s2m.png
+Rendering tests/Hierarchical-s2h.png
+Rendering tests/Hierarchical-s3m.png
+Rendering tests/Hierarchical-s3h.png
+
+Rendering tests/PolyRand-bb.png
+Rendering tests/PolyRand-repos.png
+Test 0       PolyRand:  1155000 points,  269536 hits,  
+Rendering tests/PolyRand-points.png
+Test 0       PolyRand:  1155000 points, 0.0456047 error, total gradient 703038, 
+Rendering tests/PolyRand-grad.png
+Rendering tests/PolyRand-s0m.png
+Rendering tests/PolyRand-s0h.png
+Rendering tests/PolyRand-s1m.png
+Rendering tests/PolyRand-s1h.png
+Rendering tests/PolyRand-s2m.png
+Rendering tests/PolyRand-s2h.png
+Rendering tests/PolyRand-s3m.png
+Rendering tests/PolyRand-s3h.png
+
+Rendering tests/PolyRect-bb.png
+Rendering tests/PolyRect-repos.png
+Test 0       PolyRect:  1155000 points,  196909 hits,  
+Rendering tests/PolyRect-points.png
+Test 0       PolyRect:  1155000 points, 0.066882 error, total gradient 951197, 
+Rendering tests/PolyRect-grad.png
+Rendering tests/PolyRect-s0m.png
+Rendering tests/PolyRect-s0h.png
+Rendering tests/PolyRect-s1m.png
+Rendering tests/PolyRect-s1h.png
+Rendering tests/PolyRect-s2m.png
+Rendering tests/PolyRect-s2h.png
+Rendering tests/PolyRect-s3m.png
+Rendering tests/PolyRect-s3h.png
+
+Rendering tests/Rectangle-bb.png
+Rendering tests/Rectangle-repos.png
+Test 0      Rectangle:  1155000 points,  196909 hits,  
+Rendering tests/Rectangle-points.png
+Test 0      Rectangle:  1155000 points, 0.0927035 error, total gradient 951197, 
+Rendering tests/Rectangle-grad.png
+Rendering tests/Rectangle-s0m.png
+Rendering tests/Rectangle-s0h.png
+Rendering tests/Rectangle-s1m.png
+Rendering tests/Rectangle-s1h.png
+Rendering tests/Rectangle-s2m.png
+Rendering tests/Rectangle-s2h.png
+Rendering tests/Rectangle-s3m.png
+Rendering tests/Rectangle-s3h.png
+
+
+Testing Rectangle initialization:
+Center: [10 15]ᵀ
+Dimensions: 10 14
+Orientation: 0.261799
+Extents min 3.35864 6.94442 max 16.6414 23.0556
+Center: [11 16]ᵀ
+Dimensions: 10 14
+Orientation: 0.261799
+Extents min 4.35864 7.94442 max 17.6414 24.0556
+
+Testing convex hull generation
+

@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><array>
+<dict>
+	<key>Name</key>      <string>BaseFrame</string>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key>         <real>0</real>
+	<key>d</key>         <real>0</real>
+	<key>α</key>         <real>0</real>
+	<key>r</key>         <real>0</real>
+	<key>qOffset</key>   <real>0</real>
+	<key>Min</key>       <real>0</real>
+	<key>Max</key>       <real>0</real>
+	<key>CollisionModel</key>         <string>Cube</string>
+	<key>CollisionModelOffset</key>   <array> <real>0</real> <real>0</real> <real>0</real> </array>
+	<key>CollisionModelRotation</key> <array> <real>0</real> <real>0</real> <real>0</real> </array>
+	<key>CollisionModelScale</key>    <array> <real>75</real> <real>50</real> <real>25</real> </array>
+</dict>
+</array></plist>

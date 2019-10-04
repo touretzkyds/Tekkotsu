@@ -1,0 +1,282 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<!--#include virtual="../setup.shtml" -->
+	<script language="JavaScript">
+	<!--
+		// name - name of the desired cookie
+		// * return string containing value of specified cookie or null if cookie does not exist
+		function getCookie(name) {
+		  var dc = document.cookie;
+		  var prefix = name + "=";
+		  var begin = dc.indexOf("; " + prefix);
+		  if (begin == -1) {
+		    begin = dc.indexOf(prefix);
+		    if (begin != 0) return null;
+		  } else
+		    begin += 2;
+		  var end = document.cookie.indexOf(";", begin);
+		  if (end == -1)
+		    end = dc.length;
+		  return unescape(dc.substring(begin + prefix.length, end));
+		}
+		
+		// name - name of the cookie
+		// [path] - path of the cookie (must be same as path used to create cookie)
+		// [domain] - domain of the cookie (must be same as domain used to create cookie)
+		// * path and domain default if assigned null or omitted if no explicit argument proceeds
+		function deleteCookie(name, path, domain) {
+		  if (getCookie(name)) {
+		    document.cookie = name + "=" + 
+		    ((path) ? "; path=" + path : "") +
+		    ((domain) ? "; domain=" + domain : "") +
+		    "; expires=Thu, 01-Jan-70 00:00:01 GMT";
+		  }
+		}
+		var newURL = getCookie('newURL');
+		if (newURL != null) {
+			deleteCookie('newURL', '/', null);
+			document.location=newURL;
+		}
+	//-->
+	</script>
+	<meta content="text/html;charset=iso-8859-1" http-equiv="Content-Type">
+	<title>Tekkotsu: Reference Documenation</title>
+	<link type="text/css" rel="stylesheet" href="doxygen.css">
+	<link type="text/css" rel="stylesheet" href="tabs.css" >
+	<link type="text/css" rel="stylesheet" href="../tutorialcode.css">
+	<link type="text/css" rel="stylesheet" href="../tekkotsu.css">
+	<link type="text/css" rel="stylesheet" href="doxygen-override.css">
+  <link href="favicon.ico" rel="SHORTCUT ICON">
+</head>
+<body>
+<table style="text-align: left; margin-left: auto; margin-right: auto;"
+ border="0" cellpadding="1" cellspacing="6">
+  <tbody>
+    <tr>
+<!-- #Homepage# --> <td style="vertical-align: top;"><a
+ href="../index.html" target="_top">Tekkotsu Homepage</a></td>
+<!-- #Bar# --> <td
+ style="vertical-align: top; background-color: rgb(0, 0, 0);"><br>
+      </td>
+<!-- #Demos# --> <td style="vertical-align: top;"><a
+ href="../Samples.html" target="_top">Demos</a></td>
+<!-- #Bar# --> <td
+ style="vertical-align: top; background-color: rgb(0, 0, 0);"><br>
+      </td>
+<!-- #Overview# --> <td style="vertical-align: top;"><a
+ href="../ArchitecturalOverview.html" target="_top">Overview</a></td>
+<!-- #Bar# --> <td
+ style="vertical-align: top; background-color: rgb(0, 0, 0);"><br>
+      </td>
+<!-- #Downloads# --> <td style="vertical-align: top;"><a
+ href="../downloads.html" target="_top">Downloads</a></td>
+<!-- #Bar# --> <td
+ style="vertical-align: top; background-color: rgb(0, 0, 0);"><br>
+      </td>
+<!-- #Tutorials# --> <td style="vertical-align: top;"><a
+ href="../development.html" target="_top">Dev. Resources</a></td>
+<!-- #Bar# --> <td
+ style="vertical-align: top; background-color: rgb(0, 0, 0);"><br>
+      </td>
+<!-- #Current# -->
+<!-- #Reference# --> <td style="vertical-align: top;"><i>Reference</i></td>
+<!-- #Bar# --> <td
+ style="vertical-align: top; background-color: rgb(0, 0, 0);"><br>
+      </td>
+<!-- #Credits# --> <td style="vertical-align: top;"><a
+ href="../acknowledgments.html" target="_top">Credits</a> </td>
+    </tr>
+  </tbody>
+</table>
+<table
+ style="text-align: left;" align="center" width=725 border="0" cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top;">
+		<div class="navigation" id="top">
+		  <div class="tabs">
+		    <ul class="tablist">
+		      <li><a href="main.html"><span>Main&nbsp;Page</span></a></li>
+		      <li><a href="pages.html"><span>Related&nbsp;Pages</span></a></li>
+		      <li><a href="namespaces.html"><span>Namespaces</span></a></li>
+		      <li><a href="annotated.html"><span>Classes</span></a></li>
+		      <li class="current"><a href="files.html"><span>Files</span></a></li>
+		      <li><a href="dirs.html"><span>Directories</span></a></li>
+		    </ul>
+		  </div>
+		</div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table
+ style="text-align: left;" align="center" width=620 border="0" cellpadding="2" cellspacing="2" width=620>
+  <tbody>
+    <tr>
+      <td style="vertical-align: top;">
+<center>
+<h1>Tekkotsu Reference Documentation</h1>
+</center>
+      <div style="text-align: center;"> </div>
+      <p style="text-align: center;"><a target="_top" href="index.html">Frames</a>
+| <a target="_top" href="main.html">No Frames</a><br>
+      </p>
+      <h3>Documentation Contents:</h3>
+      <p>If you want a more general overview
+of what this software does and how the pieces fit together, you may
+want
+to visit the <a target="_top" href="../Overview.html">overview</a>.  Don't forget there are also <a href="development.html">tutorials</a> available.</p>
+<div style="margin-left:20px;"><b>Library Sub-Documentation:</b></div>
+      <ul>
+        <li><a href="dualcoding/index.html" target="_top">DualCoding</a> - vision parsing</li>
+        <li><a href="hal/index.html" target="_top">Hardware Abstraction Layer</a> - low level device interfacing</li>
+        <li><a href="newmat/index.html" target="_top">newmat</a> - variable-sized matrix library</li>
+        <li><a href="namespacefmat.html">fmat</a> - fixed-sized (but faster) matrix library</li>
+      </ul>
+<br>
+<div style="margin-left:20px;"><b>Tekkotsu Documentation:</b></div>
+      <ul>
+        <li><a href="classes.html">Alphabetical Index</a> - Lists all
+classes and structs<br>
+        </li>
+        <li><a href="annotated.html">Compound List</a> - Gives a short
+description of each class and struct<br>
+        </li>
+        <li><a href="namespacemembers.html">Namespace Members</a> -
+Lists the global constants, organized by namespaces</li>
+        <li><a href="globals.html">File Members</a> - Lists all of the
+global
+variables and macros which aren't in namespaces<br>
+        </li>
+        <li><a href="pages.html">Related Pages</a> - Links to the <a
+ href="todo.html">todo</a> and <a href="bug.html">bug</a> lists.</li>
+      </ul>
+      </p>
+      <h3>Popular Destinations:</h3>
+      <center>
+      <table border="0" cellpadding="0" cellspacing="0" style="line-height:1.5em; text-align:center;"><tr>
+      	<td width="20%"><a href="classBehaviorBase.html">BehaviorBase</a></td>
+      	<td width="20%"><a href="classEventBase.html">EventBase</a></td>
+      	<td width="20%"><a href="classEventRouter.html">EventRouter</a></td>
+      	<td width="20%"><a href="classLoadSave.html">LoadSave</a></td>
+      </tr><tr>
+      	<td><a href="classMotionManager.html">MotionManager</a></td>
+      	<td><a href="classMotionCommand.html">MotionCommand</a></td>
+      	<td><a href="classWorldState.html">WorldState</a></td>
+      	<td><a href="classSoundManager.html">SoundManager</a></td>
+      </tr><tr>
+      	<td><a href="classLedEngine.html">LedEngine</a></td>
+      	<td><a href="classPostureEngine.html">PostureEngine</a></td>
+      	<td><a href="classMotionSequenceEngine.html">MotionSequenceEngine</a></td>
+      	<td><a href="classWalkMC.html">WalkMC</a></td>
+      </tr><tr>
+      	<td><a href="namespaceERS7Info.html">ERS7Info</a></td>
+      	<td><a href="namespaceProjectInterface.html">ProjectInterface</a></td>
+      	<td><a href="classSocket.html">Socket</a></td>
+      	<td><a href="classWireless.html">Wireless</a></td>
+      </tr></table>
+      </center>
+      <h3>Documentation Download:</h3>
+      <p>If you would like to obtain a local
+copy of the reference materials, you may download a tarball of this site:<br>
+      <ul>
+        <li><a href="../media/Tekkotsu_doc_<!--#echo var="current_version" -->.tar.gz">HTML</a>
+(v<!--#echo var="current_version" -->, <!--#fsize virtual="../media/Tekkotsu_doc_${current_version}.tar.gz" -->B)</li>
+<li>Quick Reference Sheets (PDF):
+<ul>
+<li><a href="../media/TekkotsuQuickReference_ERS7_<!--#echo var="current_version" -->.pdf">ERS-7</a></li>
+<li><a href="../media/TekkotsuQuickReference_ERS210_<!--#echo var="current_version" -->.pdf">ERS-210</a></li>
+<li><a href="../media/TekkotsuQuickReference_ERS220_<!--#echo var="current_version" -->.pdf">ERS-220</a></li>
+</ul></li>
+      </ul>
+      </p>
+      <p>If you're using the most recent
+version from the <a href="http://cvs.tekkotsu.org/">CVS repository</a>,
+you can build the corresponding documentation locally by typing <span
+ style="font-family: monospace;">make docs</span> in the root Tekkotsu
+directory.<br>
+      </p>
+      <h3>External Documentation:<br>
+      </h3>
+      <p>We have integrated two independent
+libraries: the <a href="http://www.robertnz.net/nm_intro.htm"
+ target="_top">newmat</a> matrix library
+and the <a href="http://www.cours.polymtl.ca/roboop/" target="_top">ROBOOP</a>
+kinematics library. We mirror their own doxygen documentation on our
+site so that our documentation can link to it.  You can directly access these
+libraries' documentation with the Library Sub-Documentation links given above.
+      </p>
+      <p>In addition, we provide precompiled copies of several other libraries for the AIBO platform.
+You may wish to make use of their references as well:
+<ul>
+<li><a href="http://www.ijg.org/files/">libjpeg</a> - lossy image compression</li>
+<li><a href="http://www.libpng.org/pub/png/libpng-1.2.5-manual.html">libpng</a> - lossless image compression</li>
+<li><a href="http://xmlsoft.org/html/index.html">libxml2</a> - XML generation and parsing</li>
+<li><a href="http://www.zlib.net/manual.html">zlib</a> - compression utilities</li>
+</ul>
+</p>
+      <p> This code is originally based on
+an early version of CMU's
+2002 Legged RoboSoccer entry, <a
+ href="http://www-2.cs.cmu.edu/%7Erobosoccer/legged/legged-team.html">CMPack</a>.
+&nbsp;<a href="classWalkMC.html">WalkMC</a>
+and the <a href="http://www.cs.cmu.edu/%7Ejbruce/cmvision">CMVision</a>
+library
+still fall under their <a href="CMPack_license.txt">license</a>.
+&nbsp;This license is also included in the files themselves.<br>
+      </p>
+      <p> Note that although we include the
+CMVision classes within our reference section, CMVision does not have
+any inline doxygen documentation.&nbsp; However, there is some external
+documentation as <a
+ href="http://www-2.cs.cmu.edu/%7Ejbruce/cmvision/papers/JBThesis00.ps.gz">compressed
+postscript</a> and <a
+ href="http://www-2.cs.cmu.edu/%7Ejbruce/cmvision/papers/JBThesis00.pdf">PDF</a>.</p>
+      <p><br>
+      </p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div style="text-align: right;"><small><span style="font-style: italic;"><br>
+<br>
+<br>
+<br>
+<br>
+</span></small>
+<div style="text-align: center;"><small>This file is
+found at <span style="font-family: monospace;">docs/html/index.html</span>,
+which overwrites the doxygen generated page.</small><br>
+</div>
+
+<script language="javascript" type="text/javascript">
+<!--
+s="na";c="na";j="na";f=""+escape(document.referrer)
+s=screen.width;v=navigator.appName
+if (v != "Netscape") {c=screen.colorDepth}
+else {c=screen.pixelDepth}
+j=navigator.javaEnabled()
+function pr(n) {document.write(n);}
+NS2Ch=0
+if (navigator.appName == "Netscape" &&
+navigator.appVersion.charAt(0) == "2") {NS2Ch=1}
+if (NS2Ch == 0) {
+r="size="+s+"&colors="+c+"&referer="+f+"&java="+j+"&stamp="+(new Date()).getTime()+""
+pr("<a href='http://validator.w3.org/check?uri=referer'><IMG BORDER='0' style='vertical-align:bottom;margin:0 2px 2px 0' width='12' height='12' SRC='http://aibo2.boltz.cs.cmu.edu/tekkotsu-icon.png?"+r+"'><\/a>");}
+//-->
+</script><noscript><a href="http://validator.w3.org/check?uri=referer"><img style="vertical-align:bottom" src="http://aibo2.boltz.cs.cmu.edu/tekkotsu-icon.png" border="0" style='vertical-align:bottom;margin:0 2px 2px 0' width="12" height="12" alt=""></a></noscript>
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-697544-1");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,5 @@
+#POS
+ARM:base	 1.2258
+ARM:shoulder	 0.8215
+ARM:gripper	 0.1356
+#END

@@ -1,0 +1,9 @@
+This directory can be used to hold logged data (.png and .pos files)
+that you do not want Tekkotsu to load right now when running in
+simulator mode.
+
+You will typically have several sets of image and posture files from
+projects you are working on.  The data can be kept safely out of the
+way in this project/logged/reserve directory (or any directory other
+than project/logged).  When you want to use specific .png and .pos
+files, copy them to project/logged.

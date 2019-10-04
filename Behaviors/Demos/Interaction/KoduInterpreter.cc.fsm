@@ -1,0 +1,9 @@
+#if defined(TGT_HAS_WHEELS) && defined(TGT_HAS_HEAD) && defined(TGT_HAS_ARMS)
+
+#include <cctype>
+#include "Kodu/KoduInterpreter.h"
+
+REGISTER_BEHAVIOR_MENU(KoduInterpreter, DEFAULT_TK_MENU"/Interaction Demos");
+
+#endif
+

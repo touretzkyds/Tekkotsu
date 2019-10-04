@@ -1,0 +1,3 @@
+object MMCombo 16384 16384 128 cache notlb kernel
+#as opposed to: object mmcombo 3072 16384 128 cache tlb user
+#if we were using protected memory

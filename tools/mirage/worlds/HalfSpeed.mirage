@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Defaults provide 25 fps graphics, 100 fps physics at realtime -->
+	
+	<!-- Changing total physics fps can alter simulation outcome, so
+	you may wish to maintain StepsPerFrame = 100 * TimeScale / RenderFPS
+	This is not absolutely critical however. -->
+	
+	<!-- Can be used for slow-mo physics... should match Speed setting of Tekkotsu; default=1 -->
+	<key>TimeScale</key> <real>0.5</real>
+	
+	<!-- This is the number of graphics frames to render per second
+	Also controls framerate of camera images in Tekkotsu; default=25 -->
+	<key>RenderFPS</key> <real>10</real>
+	
+	<!-- This is the number of physics update to do between each graphics frame; default=4 -->
+	<key>StepsPerFrame</key> <integer>5</integer> 
+</dict>
+</plist>

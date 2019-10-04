@@ -1,0 +1,28 @@
+#!/bin/bash
+
+FF=~/Metric-FF/ff
+
+DOMAINFILE=$1
+PROBLEMFILE=$2
+PLANFILE=$3
+
+OUTFILE=/tmp/ff-$$.out
+TEMPFILE=/tmp/ff-$$.tmp
+
+\rm -f $OUTFILE $TEMPFILE
+
+$FF -o $DOMAINFILE -f $PROBLEMFILE >$OUTFILE
+
+FAILED=`grep "simplified to FALSE" $OUTFILE`
+if [ ! -z "$FAILED" ]; then
+ echo false >$TEMPFILE
+ echo the test succeeded
+else
+ echo true >$TEMPFILE
+ grep [0-9]: $OUTFILE | sed 's/step/    /' >>$TEMPFILE
+fi
+
+mv $TEMPFILE $PLANFILE
+\rm -f $OUTFILE
+echo Done
+cat $PLANFILE

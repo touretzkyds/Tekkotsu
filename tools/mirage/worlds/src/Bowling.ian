@@ -1,0 +1,153 @@
+# Bowling lane simulated in Mirage.
+# By Anggie Ramirez, University of Maryland Eastern Shore.
+# Version of April 2, 2012.
+
+background material=CloudySky model=None
+
+#floor
+plane material=Black scale=[11000,18000,0] location=[0,9000,0]
+
+#walls
+cube material=Red scale=[200,14000,1000] location=[1900,10000,500]
+cube material=Red scale=[200,14000,1000] location=[-1900,10000,500]
+cube material=Red scale=[4000,200,1000] location=[0,16900,500]
+
+#top of lane
+cube material=Wood scale=[2000,2000,500] location=[0,6000,250]
+
+
+#foul line
+cube material=Yellow scale=[2000,250,500] location=[0,7125,250]
+
+
+#plane for pins
+cube material=Wood scale=[2000,2750,250] location=[0,14625,125]
+
+
+#balls
+sphere material=Green scale=[600,600,600] location=[0,6000,800] mass=1
+
+
+#pin 1 
+cylinder material=White scale=[200,200,500] location=[0,15000,500] mass=0.0001
+cylinder material=Pink scale=[200,200,50] location=[0,15000,775] mass=0.0001
+cylinder material=White scale=[200,200,200] location=[0,15000,900] mass=0.0001
+#pin 2 
+cylinder material=White scale=[200,200,500] location=[-150,15250,500] mass=0.0001
+cylinder material=Pink scale=[200,200,50] location=[-150,15250,775] mass=0.0001
+cylinder material=White scale=[200,200,200] location=[-150,15250,900] mass=0.0001
+#pin 3 
+cylinder material=White scale=[200,200,500] location=[150,15250,500] mass=0.0001
+cylinder material=Pink scale=[200,200,50] location=[150,15250,775] mass=0.0001
+cylinder material=White scale=[200,200,200] location=[150,15250,900] mass=0.0001
+#pin 4 
+cylinder material=White scale=[200,200,500] location=[-300,15500,500] mass=0.0001
+cylinder material=Pink scale=[200,200,50] location=[-300,15500,775] mass=0.0001
+cylinder material=White scale=[200,200,200] location=[-300,15500,900] mass=0.0001
+#pin 5 
+cylinder material=White scale=[200,200,500] location=[0,15500,500] mass=0.0001
+cylinder material=Pink scale=[200,200,50] location=[0,15500,775] mass=0.0001
+cylinder material=White scale=[200,200,200] location=[0,15500,900] mass=0.0001
+#pin 6 
+cylinder material=White scale=[200,200,500] location=[300,15500,500] mass=0.0001
+cylinder material=Pink scale=[200,200,50] location=[300,15500,775] mass=0.0001
+cylinder material=White scale=[200,200,200] location=[300,15500,900] mass=0.0001
+#pin 7 
+cylinder material=White scale=[200,200,500] location=[-450,15750,500] mass=0.0001
+cylinder material=Pink scale=[200,200,50] location=[-450,15750,775] mass=0.0001
+cylinder material=White scale=[200,200,200] location=[-450,15750,900] mass=0.0001
+#pin 8 
+cylinder material=White scale=[200,200,500] location=[-150,15750,500] mass=0.0001
+cylinder material=Pink scale=[200,200,50] location=[-150,15750,775] mass=0.0001
+cylinder material=White scale=[200,200,200] location=[-150,15750,900] mass=0.0001
+#pin 9 
+cylinder material=White scale=[200,200,500] location=[150,15750,500] mass=0.0001
+cylinder material=Pink scale=[200,200,50] location=[150,15750,775] mass=0.0001
+cylinder material=White scale=[200,200,200] location=[150,15750,900] mass=0.0001
+#pin 10 
+cylinder material=White scale=[200,200,500] location=[450,15750,500] mass=0.0001
+cylinder material=Pink scale=[200,200,50] location=[450,15750,775] mass=0.0001
+cylinder material=White scale=[200,200,200] location=[450,15750,900] mass=0.0001
+
+
+#U
+plane material=White scale=[1250,250,0] location=[-4375,5375,1]
+plane material=White scale=[1250,250,0] location=[-4375,6625,1]
+plane material=White scale=[250,500,0] location=[-3625,5500,1]
+plane material=White scale=[250,500,0] location=[-3625,6500,1]
+plane material=White scale=[250,1000,0] location=[-3375,6000,1]
+
+#M
+plane material=White scale=[1750,250,0] location=[-4125,7375,1]
+plane material=White scale=[500,250,0] location=[-4500,7625,1]
+plane material=White scale=[500,500,0] location=[-4250,8000,1]
+plane material=White scale=[500,250,0] location=[-4500,8375,1]
+plane material=White scale=[1750,250,0] location=[-4125,8625,1]
+
+#A
+plane material=White scale=[1000,250,0] location=[-3750,9375,1]
+plane material=White scale=[1000,250,0] location=[-4250,9625,1]
+plane material=White scale=[500,500,0] location=[-4750,10000,1]
+plane material=White scale=[250,500,0] location=[-3875,10000,1]
+plane material=White scale=[1000,250,0] location=[-4250,10375,1]
+plane material=White scale=[1000,250,0] location=[-3750,10625,1]
+
+#T
+plane material=White scale=[1500,500,0] location=[-4000,12000,1]
+plane material=White scale=[250,1500,0] location=[-4875,12000,1]
+
+#R
+plane material=White scale=[1750,250,0] location=[-4250,13375,1]
+plane material=White scale=[250,1000,0] location=[-4875,14000,1]
+plane material=White scale=[750,250,0] location=[-4625,14625,1]
+plane material=White scale=[250,500,0] location=[-4325,14250,1]
+plane material=White scale=[500,500,0] location=[-4250,13750,1]
+plane material=White scale=[250,500,0] location=[-3875,14000,1]
+plane material=White scale=[250,500,0] location=[-3375,14500,1]
+plane material=White scale=[250,500,0] location=[-3625,14250,1]
+
+#T
+plane material=White scale=[1500,500,0] location=[-4000,12000,1]
+plane material=White scale=[250,1500,0] location=[-4875,12000,1]
+
+#2
+plane material=White scale=[250,1000,0] location=[3375,12750,1]
+plane material=White scale=[500,500,0] location=[3500,13500,1]
+plane material=White scale=[250,500,0] location=[3873,13250,1]
+plane material=White scale=[250,500,0] location=[4125,13000,1]
+plane material=White scale=[250,500,0] location=[4375,12750,1]
+plane material=White scale=[500,500,0] location=[4750,12500,1]
+plane material=White scale=[250,750,0] location=[4875,13125,1]
+plane material=White scale=[500,250,0] location=[4750,13625,1]
+
+#0
+plane material=White scale=[250,1000,0] location=[3375,11000,1]
+plane material=White scale=[1250,500,0] location=[4125,11500,1]
+plane material=White scale=[250,1000,0] location=[4875,11000,1]
+plane material=White scale=[1250,500,0] location=[4125,10500,1]
+
+#1
+plane material=White scale=[250,1500,0] location=[3375,9000,1]
+plane material=White scale=[1500,500,0] location=[4250,9000,1]
+plane material=White scale=[500,250,0] location=[4750,9375,1]
+plane material=White scale=[500,250,0] location=[4500,9625,1]
+
+#2
+plane material=White scale=[250,1000,0] location=[3375,6750,1]
+plane material=White scale=[500,500,0] location=[3500,7500,1]
+plane material=White scale=[250,500,0] location=[3875,7250,1]
+plane material=White scale=[250,500,0] location=[4125,7000,1]
+plane material=White scale=[250,500,0] location=[4375,6750,1]
+plane material=White scale=[500,500,0] location=[4750,6500,1]
+plane material=White scale=[250,750,0] location=[4875,7125,1]
+plane material=White scale=[500,250,0] location=[4750,7625,1]
+
+#long ramp
+cube material=Wood scale=[2000,6005.2,500] location=[0,10247.4,125] orientation=rotx(-0.042)
+
+#ramp bumpers
+cube material=Wood scale=[20,5500,520] location=[150,10247.4,125] orientation=rotx(-0.042)
+cube material=Wood scale=[20,5500,520] location=[-150,10247.4,125] orientation=rotx(-0.042)
+
+#R short ramp
+cube material=Wood scale=[2000,4031.128874,500] location=[0,3015.564437,-10] orientation=rotx(0.124354704)

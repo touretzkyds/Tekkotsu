@@ -1,0 +1,109 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1">
+		<title>$title</title>
+		<link type="text/css" rel="stylesheet" href="doxygen.css">
+		<link type="text/css" rel="stylesheet" href="tabs.css" >
+		<link type="text/css" rel="stylesheet" href="../tutorialcode.css">
+		<link type="text/css" rel="stylesheet" href="../tekkotsu.css">
+		<link type="text/css" rel="stylesheet" href="doxygen-override.css">
+		<link rel="home" href="../index.html">
+		<link rel="up" href="../index.html">
+		<link rel="SHORTCUT ICON" href="favicon.ico">
+		<script language="JavaScript">
+		<!--
+		// name - name of the desired cookie
+		// * return string containing value of specified cookie or null if cookie does not exist
+		function getCookie(name) {
+		  var dc = document.cookie;
+		  var prefix = name + "=";
+		  var begin = dc.indexOf("; " + prefix);
+		  if (begin == -1) {
+		    begin = dc.indexOf(prefix);
+		    if (begin != 0) return null;
+		  } else
+		    begin += 2;
+		  var end = document.cookie.indexOf(";", begin);
+		  if (end == -1)
+		    end = dc.length;
+		  return unescape(dc.substring(begin + prefix.length, end));
+		}
+		
+		// name - name of the cookie
+		// [path] - path of the cookie (must be same as path used to create cookie)
+		// [domain] - domain of the cookie (must be same as domain used to create cookie)
+		// * path and domain default if assigned null or omitted if no explicit argument proceeds
+		function deleteCookie(name, path, domain) {
+		  if (getCookie(name)) {
+		    document.cookie = name + "=" + 
+		    ((path) ? "; path=" + path : "") +
+		    ((domain) ? "; domain=" + domain : "") +
+		    "; expires=Thu, 01-Jan-70 00:00:01 GMT";
+		  }
+		}
+		var newURL = getCookie('newURL');
+		if (newURL != null) {
+			deleteCookie('newURL', '/', null);
+			document.location=newURL;
+		}
+		
+		function addFrames() {
+			document.cookie = "newURL=" + escape(document.URL) + "; path=/;";
+			location="index.html";
+		}
+		
+		window.onload=function() {
+			toggle=document.getElementById('toggleframes');
+			if(!toggle) {
+				alert("no toggle found!");
+				return;
+			}
+			toggle.style.display="block";
+			toggle.href=document.location;
+		  if (top.frames.length == 0) {
+				toggle.onclick=function() { addFrames(); return false; };
+				toggle.innerHTML="show<br>frames";
+		  } else {
+				toggle.target="_top";
+				toggle.innerHTML="hide<br>frames";
+		  }
+		}
+		//-->
+		</script>
+		<style type="text/css">
+			#toggleframes { display:none; background-color:#EEE; border:1px solid #888; padding:.25em; opacity:.5; filter:alpha(opacity=50); font-size:85%;}
+			#toggleframes:hover { background-color:#E4E4F8; opacity:1; filter:alpha(opacity=100); }
+		</style>
+		</head>
+		<body>
+		<table style="position:absolute; top:.25em; left:.25em;" cellpadding="0" cellspacing="0" id="toggleframesbox">
+			<tr><td align="center">
+			<a id="toggleframes"></a>
+			</td></tr>
+		</table>
+		<!-- <img src="aibosmall.jpg" width=92 height=75 align=right> -->
+		<table cellpadding="1" cellspacing="6" border="0"
+					 style="text-align: left; margin-left: auto; margin-right: auto;">
+			<tbody>
+				<tr>
+					<!-- #Homepage# --> <td style="vertical-align: top;"><a target="_top" href="../index.html">Tekkotsu Homepage</a></td>
+					<!-- #Bar# --> <td style="vertical-align: top; background-color: rgb(0, 0, 0);"><br></td>
+					<!-- #Demos# --> <td style="vertical-align: top;"><a target="_top" href="../Samples.html">Demos</a></td>
+					<!-- #Bar# --> <td style="vertical-align: top; background-color: rgb(0, 0, 0);"><br></td>
+					<!-- #Overview# --> <td style="vertical-align: top;"><a target="_top" href="../ArchitecturalOverview.html">Overview</a></td>
+					<!-- #Bar# --> <td style="vertical-align: top; background-color: rgb(0, 0, 0);"><br></td>
+					<!-- #Downloads# --> <td style="vertical-align: top;"><a target="_top" href="../downloads.html">Downloads</a></td>
+					<!-- #Bar# --> <td style="vertical-align: top; background-color: rgb(0, 0, 0);"><br></td>
+					<!-- #Tutorials# --> <td style="vertical-align: top;"><a target="_top" href="../development.html">Dev. Resources</a></td>
+					<!-- #Bar# --> <td style="vertical-align: top; background-color: rgb(0, 0, 0);"><br></td>
+					<!-- #Current# --><!-- #Reference# --> <td style="vertical-align: top;"><i>Reference</i></td>
+					<!-- #Bar# --> <td style="vertical-align: top; background-color: rgb(0, 0, 0);"><br></td>
+					<!-- #Credits# --> <td style="vertical-align: top;"><a target="_top" href="../acknowledgments.html">Credits</a> </td>
+				</tr>
+			</tbody>
+		</table>
+<table id="doxygen" border="0" cellspacing="2" cellpadding="2">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top;">

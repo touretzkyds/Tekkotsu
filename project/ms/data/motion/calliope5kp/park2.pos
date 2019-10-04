@@ -1,0 +1,9 @@
+#POS
+ARM:base	 1.3058
+ARM:shoulder	 2.4727
+ARM:elbow	-2.1738
+ARM:wrist	 2.0343
+ARM:wristrot	-0.0000
+ARM:gripperLeft	-0.0001
+ARM:gripperRight	 0.0001
+#END

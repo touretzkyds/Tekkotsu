@@ -1,0 +1,85 @@
+# environment settings
+background material=CloudySky model=Dome
+
+# create the template shape
+define orange sphere scale=[30,30,30] material=Blue group=orangestack
+
+# first layer
+orange location=[-60,-60,0]
+orange location=[-30,-60,0]
+orange location=[0,-60,0]
+orange location=[30,-60,0]
+orange location=[60,-60,0]
+
+orange location=[-60,-30,0]
+orange location=[-30,-30,0]
+orange location=[0,-30,0]
+orange location=[30,-30,0]
+orange location=[60,-30,0]
+
+orange location=[-60,0,0]
+orange location=[-30,0,0]
+orange location=[0,0,0]
+orange location=[30,0,0]
+orange location=[60,0,0]
+
+orange location=[-60,30,0]
+orange location=[-30,30,0]
+orange location=[0,30,0]
+orange location=[30,30,0]
+orange location=[60,30,0]
+
+orange location=[-60,60,0]
+orange location=[-30,60,0]
+orange location=[0,60,0]
+orange location=[30,60,0]
+orange location=[60,60,0]
+
+# second layer
+orange location=[-45,-45,30]
+orange location=[-15,-45,30]
+orange location=[15,-45,30]
+orange location=[45,-45,30]
+
+orange location=[-45,-15,30]
+orange location=[-15,-15,30]
+orange location=[15,-15,30]
+orange location=[45,-15,30]
+
+orange location=[-45,15,30]
+orange location=[-15,15,30]
+orange location=[15,15,30]
+orange location=[45,15,30]
+
+orange location=[-45,45,30]
+orange location=[-15,45,30]
+orange location=[15,45,30]
+orange location=[45,45,30]
+
+# third layer
+orange location=[-30,-30,60]
+orange location=[0,-30,60]
+orange location=[30,-30,60]
+
+orange location=[-30,0,60]
+orange location=[0,0,60]
+orange location=[30,0,60]
+
+orange location=[-30,30,60]
+orange location=[0,30,60]
+orange location=[30,30,60]
+
+# fourth layer
+orange location=[-15,-15,90]
+orange location=[15,-15,90]
+
+orange location=[-15,15,90]
+orange location=[15,15,90]
+
+# fifth layer
+orange location=[0,0,120]
+
+# copy?
+
+copy orangestack [-300,0,0]
+copy orangestack [300,0,0]

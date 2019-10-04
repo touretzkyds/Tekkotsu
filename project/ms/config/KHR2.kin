@@ -1,0 +1,681 @@
+<?xml version="1.0"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><array>
+<!--
+##################################################################
+##################   Kinematics Configuration   ##################
+##################################################################
+
+This is an XML-based format using the Property List (plist) layout.
+
+Each joint is defined by a <dict> element with the keys listed below.
+A branch in the chain is denoted by an <array> containing the
+joints of the sub-chain.
+
+  JointType: Indicates the type of motion produced by the joint
+    One of: revolute | prismatic
+
+  Denavit-Hartenberg parameters: (here in order of application)
+    d: Displacement along the previous joint's z axis
+    θ: Rotation about the previous joint's z axis (theta, U+03B8)
+    r: Displacement from prev. z along the current joint's x axis
+    α: Rotation about the current joint's x axis (alpha, U+03B1)
+  In other words, θ and d align the previous joint's x axis with
+  this joint's x axis, and then a displacement of r (radius of
+  rotation) along this x defines the current joint's origin.
+  α then defines the current joint's z axis (the axis of actuation).
+
+  qOffset: An additional parameter which shifts the final reference
+    frame to the physical joint's 0 position.  This is a rotation
+    about the joint's z axis for revolute joints, or translation
+    along z for prismatic.
+  Min: The minimum acceptable joint value for inverse kinematics
+  Max: The maximum acceptable joint value for inverse kinematics
+    Inverse kinematics ignores this joint if Min==Max (immobile).
+
+  Model: for 3D graphics, the name of the OGRE mesh file to render
+    for the link following the joint. (drop the ".mesh" suffix)
+  Material: for 3D graphics, the name of the material to apply to
+    the model, or blank to use the model's defaults
+
+All distances are in millimeters.  Angles are radians, unless a
+'unit' attribute is specified, or a '°' is suffixed.  You can
+also specify radians as multiples of Pi, e.g. 'π/2'.
+-->
+
+<dict>
+	<key>Name</key>        <string>BaseFrame</string>
+	<key>d</key>           <real>0</real>
+	
+	<!--======== Components ========-->
+	<key>Components</key>  <array>
+		<dict>
+			<key>CollisionModel</key>        <string>Cube</string>
+			<key>CollisionModelOffset</key>  <array> <real>-14</real> <real>0</real> <real>53.6</real> </array>
+			<key>CollisionModelScale</key>   <array> <real>107.8</real> <real>113.8</real> <real>52.2</real> </array>
+			<key>Model</key>                 <string></string>
+		</dict>
+		<dict>
+			<key>CollisionModel</key>        <string>Cube</string>
+			<key>CollisionModelOffset</key>  <array> <real>-0.8</real> <real>0</real> <real>32.85</real> </array>
+			<key>CollisionModelScale</key>   <array> <real>48.2</real> <real>67</real> <real>93.7</real> </array>
+			<key>Model</key>                 <string></string>
+		</dict>
+	</array>
+	
+	<!--Mass of the component, in kilograms.  If 0, indicates static object, does not move but can still collide. (default 0)-->
+	<key>Mass</key>        <real>0.1</real>
+	
+	<!--Model: An Ogre .mesh file, or "CollisionModel" to render the collision primitive. (default CollisionModel)-->
+	<key>Model</key>       <string>KHR2/Torso</string>
+</dict>
+<array>
+	<dict>
+		<key>Name</key>                  <string>NECK:Pan</string>
+		<key>d</key>                     <real>0</real>
+		<key>θ</key>                     <string>0°</string>
+		<key>r</key>                     <real>2.002</real>
+		<key>α</key>                     <string>180°</string>
+		<key>Min</key>                   <string>-90°</string>
+		<key>Max</key>                   <string>90°</string>
+		
+		<!--CollisionModel: A Bullet primitive collision shape: { Cube | Cylinder | Sphere | Plane }-->
+		<key>CollisionModel</key>        <string>Cube</string>
+		
+		<!--CollisionModelOffset: Positions the CollisionModel, relative to parent frame.-->
+		<key>CollisionModelOffset</key>  <array> <real>10</real> <real>0</real> <real>-103.8</real> </array>
+		
+		<!--CollisionModelScale: Scales the CollisionModel, which by default is 1x1x1, so this sets the object dimensions.-->
+		<key>CollisionModelScale</key>   <array> <real>41</real> <real>21</real> <real>39.4</real> </array>
+		
+		<!--Mass of the component, in kilograms.  If 0, indicates static object, does not move but can still collide. (default 0)-->
+		<key>Mass</key>                  <real>0.1</real>
+		
+		<!--Model: An Ogre .mesh file, or "CollisionModel" to render the collision primitive. (default CollisionModel)-->
+		<key>Model</key>                 <string>KHR2/Head</string>
+	</dict>
+	
+	<dict>
+			<key>JointType</key> <string>revolute</string>
+			<key>θ</key>         <real>0°</real>
+			<key>d</key>         <real>-110.8</real>
+			<key>α</key>         <real>0°</real>
+			<key>r</key>         <real>50</real>
+			<key>qOffset</key>   <real>0</real>
+			<key>Min</key>       <real>0</real>
+			<key>Max</key>       <real>0</real>
+    </dict>
+    <dict>
+			<key>JointType</key> <string>revolute</string>
+			<key>θ</key>         <real>90°</real>
+			<key>d</key>         <real>0</real>
+			<key>α</key>         <real>85°</real>
+			<key>r</key>         <real>0</real>
+			<key>qOffset</key>   <real>0</real>
+			<key>Min</key>       <real>0</real>
+			<key>Max</key>       <real>0</real>
+			
+			
+			<key>Model</key>     <string>ReferenceFrame</string>
+			<key>Name</key>      <string>CAMERA:Eye</string>
+    </dict>
+
+</array>
+<array>
+	<dict>
+		<key>Name</key>                  <string>LArm:Rotate</string>
+		<key>d</key>                     <real>66.183</real>
+		<key>θ</key>                     <string>-180°</string>
+		<key>r</key>                     <real>6.4</real>
+		<key>α</key>                     <string>-90°</string>
+		<key>Min</key>                   <string>-90°</string>
+		<key>Max</key>                   <string>90°</string>
+		
+		<!--CollisionModel: A Bullet primitive collision shape: { Cube | Cylinder | Sphere | Plane }-->
+		<key>CollisionModel</key>        <string>Cube</string>
+		
+		<!--CollisionModelOffset: Positions the CollisionModel, relative to parent frame.-->
+		<key>CollisionModelOffset</key>  <array> <real>6.1</real> <real>0.516</real> <real>-71.05</real> </array>
+		
+		<!--CollisionModelScale: Scales the CollisionModel, which by default is 1x1x1, so this sets the object dimensions.-->
+		<key>CollisionModelScale</key>   <array> <real>54</real> <real>17</real> <real>27.5</real> </array>
+		
+		<!--Mass of the component, in kilograms.  If 0, indicates static object, does not move but can still collide. (default 0)-->
+		<key>Mass</key>                  <real>0.1</real>
+		
+		<!--Model: An Ogre .mesh file, or "CollisionModel" to render the collision primitive. (default CollisionModel)-->
+		<key>Model</key>                 <string>KHR2/LeftShoulder</string>
+	</dict>
+	<dict>
+		<key>Name</key>                  <string>LArm:Elevator</string>
+		<key>d</key>                     <real>-82.3</real>
+		<key>θ</key>                     <string>90°</string>
+		<key>r</key>                     <real>0</real>
+		<key>α</key>                     <string>-90°</string>
+		<key>Min</key>                   <string>-90°</string>
+		<key>Max</key>                   <string>90°</string>
+		
+		<!--CollisionModel: A Bullet primitive collision shape: { Cube | Cylinder | Sphere | Plane }-->
+		<key>CollisionModel</key>        <string>Cube</string>
+		
+		<!--CollisionModelOffset: Positions the CollisionModel, relative to parent frame.-->
+		<key>CollisionModelOffset</key>  <array> <real>25.734</real> <real>0</real> <real>-6.1</real> </array>
+		
+		<!--CollisionModelScale: Scales the CollisionModel, which by default is 1x1x1, so this sets the object dimensions.-->
+		<key>CollisionModelScale</key>   <array> <real>72.5</real> <real>24</real> <real>54</real> </array>
+		
+		<!--Mass of the component, in kilograms.  If 0, indicates static object, does not move but can still collide. (default 0)-->
+		<key>Mass</key>                  <real>0.1</real>
+		
+		<!--Model: An Ogre .mesh file, or "CollisionModel" to render the collision primitive. (default CollisionModel)-->
+		<key>Model</key>                 <string>KHR2/LeftHumerus</string>
+	</dict>
+	<dict>
+		<key>Name</key>                  <string>LArm:Elbow</string>
+		<key>d</key>                     <real>0</real>
+		<key>θ</key>                     <string>0°</string>
+		<key>r</key>                     <real>59.483</real>
+		<key>α</key>                     <string>0°</string>
+		<key>Min</key>                   <string>-90°</string>
+		<key>Max</key>                   <string>90°</string>
+		
+		<!--CollisionModel: A Bullet primitive collision shape: { Cube | Cylinder | Sphere | Plane }-->
+		<key>CollisionModel</key>        <string>Cube</string>
+		
+		<!--CollisionModelOffset: Positions the CollisionModel, relative to parent frame.-->
+		<key>CollisionModelOffset</key>  <array> <real>15</real> <real>0</real> <real>-6.45</real> </array>
+		
+		<!--CollisionModelScale: Scales the CollisionModel, which by default is 1x1x1, so this sets the object dimensions.-->
+		<key>CollisionModelScale</key>   <array> <real>51</real> <real>24</real> <real>36.9</real> </array>
+		
+		<!--======== Components ========-->
+		<key>Components</key>            <array>
+			<dict>
+				<key>CollisionModel</key>        <string>Cube</string>
+				<key>CollisionModelOffset</key>  <array> <real>45.2</real> <real>-2.5</real> <real>11.5</real> </array>
+				<key>CollisionModelScale</key>   <array> <real>20</real> <real>13</real> <real>4</real> </array>
+				<key>Model</key>                 <string></string>
+			</dict>
+			<dict>
+				<key>CollisionModel</key>        <string>Cube</string>
+				<key>CollisionModelOffset</key>  <array> <real>49.451</real> <real>11.5</real> <real>-4.4</real> </array>
+				<key>CollisionModelScale</key>   <array> <real>29.421</real> <real>4</real> <real>25</real> </array>
+				<key>Model</key>                 <string></string>
+			</dict>
+			<dict>
+				<key>CollisionModel</key>          <string>Cube</string>
+				<key>CollisionModelOffset</key>    <array> <real>67.872</real> <real>7.62</real> <real>-4.4</real> </array>
+				<key>CollisionModelRotation</key>  <array> <real>0</real> <real>0</real> <real>-0.382683</real> </array>
+				<key>CollisionModelScale</key>     <array> <real>11.441</real> <real>4</real> <real>25</real> </array>
+				<key>Model</key>                   <string></string>
+			</dict>
+		</array>
+		
+		<!--Mass of the component, in kilograms.  If 0, indicates static object, does not move but can still collide. (default 0)-->
+		<key>Mass</key>                  <real>0.1</real>
+		
+		<!--Model: An Ogre .mesh file, or "CollisionModel" to render the collision primitive. (default CollisionModel)-->
+		<key>Model</key>                 <string>KHR2/LeftForearm</string>
+	</dict>
+	<dict>
+		<key>Name</key>      <string>LArm:Wrist</string>
+		<key>JointType</key> <string>prismatic</string>
+		<key>d</key>         <real>0</real>
+		<key>θ</key>         <string>-90°</string>
+		<key>r</key>         <real>0</real>
+		<key>α</key>         <string>-90°</string>
+		<key>qOffset</key>   <real>40.499</real>
+		
+		<!--Model: An Ogre .mesh file, or "CollisionModel" to render the collision primitive. (default CollisionModel)-->
+		<key>Model</key>     <string>ReferenceFrame</string>
+		
+		<!--Visible: If true, indicates component should be rendered for simulated cameras, otherwise only appears in the Mirage user window. (default true)-->
+		<key>Visible</key>   <false/>
+	</dict>
+</array>
+<array>
+	<dict>
+		<key>Name</key>                  <string>RArm:Rotate</string>
+		<key>d</key>                     <real>66.183</real>
+		<key>θ</key>                     <string>180°</string>
+		<key>r</key>                     <real>6.4</real>
+		<key>α</key>                     <string>90°</string>
+		<key>Min</key>                   <string>-90°</string>
+		<key>Max</key>                   <string>90°</string>
+		
+		<!--CollisionModel: A Bullet primitive collision shape: { Cube | Cylinder | Sphere | Plane }-->
+		<key>CollisionModel</key>        <string>Cube</string>
+		
+		<!--CollisionModelOffset: Positions the CollisionModel, relative to parent frame.-->
+		<key>CollisionModelOffset</key>  <array> <real>6.1</real> <real>0.516</real> <real>-71.05</real> </array>
+		
+		<!--CollisionModelScale: Scales the CollisionModel, which by default is 1x1x1, so this sets the object dimensions.-->
+		<key>CollisionModelScale</key>   <array> <real>54</real> <real>17</real> <real>27.5</real> </array>
+		
+		<!--Mass of the component, in kilograms.  If 0, indicates static object, does not move but can still collide. (default 0)-->
+		<key>Mass</key>                  <real>0.1</real>
+		
+		<!--Model: An Ogre .mesh file, or "CollisionModel" to render the collision primitive. (default CollisionModel)-->
+		<key>Model</key>                 <string>KHR2/RightShoulder</string>
+	</dict>
+	<dict>
+		<key>Name</key>                  <string>RArm:Elevator</string>
+		<key>d</key>                     <real>-82.3</real>
+		<key>θ</key>                     <string>-90°</string>
+		<key>r</key>                     <real>0</real>
+		<key>α</key>                     <string>90°</string>
+		<key>Min</key>                   <string>-90°</string>
+		<key>Max</key>                   <string>90°</string>
+		
+		<!--CollisionModel: A Bullet primitive collision shape: { Cube | Cylinder | Sphere | Plane }-->
+		<key>CollisionModel</key>        <string>Cube</string>
+		
+		<!--CollisionModelOffset: Positions the CollisionModel, relative to parent frame.-->
+		<key>CollisionModelOffset</key>  <array> <real>25.734</real> <real>0</real> <real>-6.1</real> </array>
+		
+		<!--CollisionModelScale: Scales the CollisionModel, which by default is 1x1x1, so this sets the object dimensions.-->
+		<key>CollisionModelScale</key>   <array> <real>72.5</real> <real>24</real> <real>54</real> </array>
+		
+		<!--Mass of the component, in kilograms.  If 0, indicates static object, does not move but can still collide. (default 0)-->
+		<key>Mass</key>                  <real>0.1</real>
+		
+		<!--Model: An Ogre .mesh file, or "CollisionModel" to render the collision primitive. (default CollisionModel)-->
+		<key>Model</key>                 <string>KHR2/RightHumerus</string>
+	</dict>
+	<dict>
+		<key>Name</key>                  <string>RArm:Elbow</string>
+		<key>d</key>                     <real>0</real>
+		<key>θ</key>                     <string>0°</string>
+		<key>r</key>                     <real>59.483</real>
+		<key>α</key>                     <string>0°</string>
+		<key>Min</key>                   <string>-90°</string>
+		<key>Max</key>                   <string>90°</string>
+		
+		<!--CollisionModel: A Bullet primitive collision shape: { Cube | Cylinder | Sphere | Plane }-->
+		<key>CollisionModel</key>        <string>Cube</string>
+		
+		<!--CollisionModelOffset: Positions the CollisionModel, relative to parent frame.-->
+		<key>CollisionModelOffset</key>  <array> <real>15</real> <real>0</real> <real>-6.45</real> </array>
+		
+		<!--CollisionModelScale: Scales the CollisionModel, which by default is 1x1x1, so this sets the object dimensions.-->
+		<key>CollisionModelScale</key>   <array> <real>51</real> <real>24</real> <real>36.9</real> </array>
+		
+		<!--======== Components ========-->
+		<key>Components</key>            <array>
+			<dict>
+				<key>CollisionModel</key>        <string>Cube</string>
+				<key>CollisionModelOffset</key>  <array> <real>45.2</real> <real>2.5</real> <real>11.5</real> </array>
+				<key>CollisionModelScale</key>   <array> <real>20</real> <real>13</real> <real>4</real> </array>
+				<key>Model</key>                 <string></string>
+			</dict>
+			<dict>
+				<key>CollisionModel</key>        <string>Cube</string>
+				<key>CollisionModelOffset</key>  <array> <real>49.451</real> <real>-11.5</real> <real>-4.4</real> </array>
+				<key>CollisionModelScale</key>   <array> <real>29.421</real> <real>4</real> <real>25</real> </array>
+				<key>Model</key>                 <string></string>
+			</dict>
+			<dict>
+				<key>CollisionModel</key>          <string>Cube</string>
+				<key>CollisionModelOffset</key>    <array> <real>67.872</real> <real>-7.62</real> <real>-4.4</real> </array>
+				<key>CollisionModelRotation</key>  <array> <real>0</real> <real>0</real> <real>0.382683</real> </array>
+				<key>CollisionModelScale</key>     <array> <real>11.441</real> <real>4</real> <real>25</real> </array>
+				<key>Model</key>                   <string></string>
+			</dict>
+		</array>
+		
+		<!--Mass of the component, in kilograms.  If 0, indicates static object, does not move but can still collide. (default 0)-->
+		<key>Mass</key>                  <real>0.1</real>
+		
+		<!--Model: An Ogre .mesh file, or "CollisionModel" to render the collision primitive. (default CollisionModel)-->
+		<key>Model</key>                 <string>KHR2/RightForearm</string>
+	</dict>
+	<dict>
+		<key>Name</key>      <string>RArm:Wrist</string>
+		<key>JointType</key> <string>prismatic</string>
+		<key>d</key>         <real>0</real>
+		<key>θ</key>         <string>90°</string>
+		<key>r</key>         <real>0</real>
+		<key>α</key>         <string>90°</string>
+		<key>qOffset</key>   <real>40.499</real>
+		
+		<!--Model: An Ogre .mesh file, or "CollisionModel" to render the collision primitive. (default CollisionModel)-->
+		<key>Model</key>     <string>ReferenceFrame</string>
+		
+		<!--Visible: If true, indicates component should be rendered for simulated cameras, otherwise only appears in the Mirage user window. (default true)-->
+		<key>Visible</key>   <false/>
+	</dict>
+</array>
+<array>
+	<dict>
+		<key>Name</key>        <string>LLeg:Abduce</string>
+		<key>d</key>           <real>0</real>
+		<key>θ</key>           <string>90°</string>
+		<key>r</key>           <real>23</real>
+		<key>α</key>           <string>-90°</string>
+		<key>Min</key>         <string>-90°</string>
+		<key>Max</key>         <string>90°</string>
+		
+		<!--======== Components ========-->
+		<key>Components</key>  <array>
+			<dict>
+				<key>CollisionModel</key>        <string>Cube</string>
+				<key>CollisionModelOffset</key>  <array> <real>0</real> <real>11.5</real> <real>4.6</real> </array>
+				<key>CollisionModelScale</key>   <array> <real>16</real> <real>27</real> <real>51</real> </array>
+				<key>Model</key>                 <string></string>
+			</dict>
+			<dict>
+				<key>CollisionModel</key>        <string>Cube</string>
+				<key>CollisionModelOffset</key>  <array> <real>6.1</real> <real>32.75</real> <real>-0.5</real> </array>
+				<key>CollisionModelScale</key>   <array> <real>54</real> <real>27.5</real> <real>17</real> </array>
+				<key>Model</key>                 <string></string>
+			</dict>
+		</array>
+		
+		<!--Mass of the component, in kilograms.  If 0, indicates static object, does not move but can still collide. (default 0)-->
+		<key>Mass</key>        <real>0.1</real>
+		
+		<!--Model: An Ogre .mesh file, or "CollisionModel" to render the collision primitive. (default CollisionModel)-->
+		<key>Model</key>       <string>KHR2/LeftAbduce</string>
+	</dict>
+	<dict>
+		<key>Name</key>                  <string>LLeg:Flex</string>
+		<key>d</key>                     <real>0</real>
+		<key>θ</key>                     <string>90°</string>
+		<key>r</key>                     <real>44</real>
+		<key>α</key>                     <string>-90°</string>
+		<key>Min</key>                   <string>-90°</string>
+		<key>Max</key>                   <string>90°</string>
+		
+		<!--CollisionModel: A Bullet primitive collision shape: { Cube | Cylinder | Sphere | Plane }-->
+		<key>CollisionModel</key>        <string>Cube</string>
+		
+		<!--CollisionModelOffset: Positions the CollisionModel, relative to parent frame.-->
+		<key>CollisionModelOffset</key>  <array> <real>25.75</real> <real>0</real> <real>-6.1</real> </array>
+		
+		<!--CollisionModelScale: Scales the CollisionModel, which by default is 1x1x1, so this sets the object dimensions.-->
+		<key>CollisionModelScale</key>   <array> <real>72.5</real> <real>24</real> <real>54</real> </array>
+		
+		<!--Mass of the component, in kilograms.  If 0, indicates static object, does not move but can still collide. (default 0)-->
+		<key>Mass</key>                  <real>0.1</real>
+		
+		<!--Model: An Ogre .mesh file, or "CollisionModel" to render the collision primitive. (default CollisionModel)-->
+		<key>Model</key>                 <string>KHR2/LeftThigh</string>
+	</dict>
+	<dict>
+		<key>Name</key>        <string>LLeg:Knee</string>
+		<key>d</key>           <real>0</real>
+		<key>θ</key>           <string>0°</string>
+		<key>r</key>           <real>59.5</real>
+		<key>α</key>           <string>0°</string>
+		<key>Min</key>         <string>-120°</string>
+		<key>Max</key>         <string>0°</string>
+		
+		<!--======== Components ========-->
+		<key>Components</key>  <array>
+			<dict>
+				<key>CollisionModel</key>          <string>Cube</string>
+				<key>CollisionModelOffset</key>    <array> <real>3.509</real> <real>9.737</real> <real>-6.4</real> </array>
+				<key>CollisionModelRotation</key>  <array> <real>0</real> <real>0</real> <real>-0.172075</real> </array>
+				<key>CollisionModelScale</key>     <array> <real>21</real> <real>41.7</real> <real>37</real> </array>
+				<key>Model</key>                   <string></string>
+			</dict>
+			<dict>
+				<key>CollisionModel</key>          <string>Cube</string>
+				<key>CollisionModelOffset</key>    <array> <real>32.901</real> <real>9.448</real> <real>-6.4</real> </array>
+				<key>CollisionModelRotation</key>  <array> <real>0</real> <real>0</real> <real>-0.172075</real> </array>
+				<key>CollisionModelScale</key>     <array> <real>76.5</real> <real>22.315</real> <real>37</real> </array>
+				<key>Model</key>                   <string></string>
+			</dict>
+		</array>
+		
+		<!--Mass of the component, in kilograms.  If 0, indicates static object, does not move but can still collide. (default 0)-->
+		<key>Mass</key>        <real>0.1</real>
+		
+		<!--Model: An Ogre .mesh file, or "CollisionModel" to render the collision primitive. (default CollisionModel)-->
+		<key>Model</key>       <string>KHR2/LeftTibia</string>
+		<key>IKSolver</key>  <string>IKThreeLink</string>
+	</dict>
+	<dict>
+		<key>Name</key>        <string>LLeg:AnkleFlex</string>
+		<key>d</key>           <real>0</real>
+		<key>θ</key>           <string>0°</string>
+		<key>r</key>           <real>58.994</real>
+		<key>α</key>           <string>180°</string>
+		<key>Min</key>         <string>-90°</string>
+		<key>Max</key>         <string>90°</string>
+		
+		<!--======== Components ========-->
+		<key>Components</key>  <array>
+			<dict>
+				<key>CollisionModel</key>        <string>Cube</string>
+				<key>CollisionModelOffset</key>  <array> <real>11.25</real> <real>0.5</real> <real>6.1</real> </array>
+				<key>CollisionModelScale</key>   <array> <real>27.5</real> <real>17</real> <real>54</real> </array>
+				<key>Model</key>                 <string></string>
+			</dict>
+			<dict>
+				<key>CollisionModel</key>        <string>Cube</string>
+				<key>CollisionModelOffset</key>  <array> <real>32.5</real> <real>-4.6</real> <real>0</real> </array>
+				<key>CollisionModelScale</key>   <array> <real>27</real> <real>51</real> <real>16</real> </array>
+				<key>Model</key>                 <string></string>
+			</dict>
+		</array>
+		
+		<!--Mass of the component, in kilograms.  If 0, indicates static object, does not move but can still collide. (default 0)-->
+		<key>Mass</key>        <real>0.1</real>
+		
+		<!--Model: An Ogre .mesh file, or "CollisionModel" to render the collision primitive. (default CollisionModel)-->
+		<key>Model</key>       <string>KHR2/LeftAnkle</string>
+	</dict>
+	<dict>
+		<key>Name</key>        <string>LLeg:AnkleLateral</string>
+		<key>d</key>           <real>0</real>
+		<key>θ</key>           <string>0°</string>
+		<key>r</key>           <real>44</real>
+		<key>α</key>           <string>-90°</string>
+		<key>Min</key>         <string>-90°</string>
+		<key>Max</key>         <string>90°</string>
+		
+		<!--======== Components ========-->
+		<key>Components</key>  <array>
+			<dict>
+				<key>CollisionModel</key>        <string>Cube</string>
+				<key>CollisionModelOffset</key>  <array> <real>2.25</real> <real>-10</real> <real>-6.4</real> </array>
+				<key>CollisionModelScale</key>   <array> <real>29.5</real> <real>56</real> <real>37</real> </array>
+				<key>Model</key>                 <string></string>
+			</dict>
+			<dict>
+				<key>CollisionModel</key>        <string>Cube</string>
+				<key>CollisionModelOffset</key>  <array> <real>13.75</real> <real>-10</real> <real>-6.4</real> </array>
+				<key>CollisionModelScale</key>   <array> <real>6.5</real> <real>61</real> <real>100</real> </array>
+				<key>Model</key>                 <string></string>
+			</dict>
+		</array>
+		
+		<!--Mass of the component, in kilograms.  If 0, indicates static object, does not move but can still collide. (default 0)-->
+		<key>Mass</key>        <real>0.1</real>
+		
+		<!--Model: An Ogre .mesh file, or "CollisionModel" to render the collision primitive. (default CollisionModel)-->
+		<key>Model</key>       <string>KHR2/LeftFoot</string>
+	</dict>
+	<dict>
+		<key>Name</key>    <string>LLeg:Sole</string>
+		<key>d</key>       <real>0</real>
+		<key>θ</key>       <string>0°</string>
+		<key>r</key>       <real>17</real>
+		<key>α</key>       <string>180°</string>
+		
+		<!--Model: An Ogre .mesh file, or "CollisionModel" to render the collision primitive. (default CollisionModel)-->
+		<key>Model</key>   <string>ReferenceFrame</string>
+		
+		<!--Visible: If true, indicates component should be rendered for simulated cameras, otherwise only appears in the Mirage user window. (default true)-->
+		<key>Visible</key> <false/>
+	</dict>
+</array>
+<array>
+	<dict>
+		<key>Name</key>        <string>RLeg:Abduce</string>
+		<key>d</key>           <real>0</real>
+		<key>θ</key>           <string>-90°</string>
+		<key>r</key>           <real>23</real>
+		<key>α</key>           <string>90°</string>
+		<key>Min</key>         <string>-90°</string>
+		<key>Max</key>         <string>90°</string>
+		
+		<!--======== Components ========-->
+		<key>Components</key>  <array>
+			<dict>
+				<key>CollisionModel</key>        <string>Cube</string>
+				<key>CollisionModelOffset</key>  <array> <real>0</real> <real>-11.5</real> <real>4.6</real> </array>
+				<key>CollisionModelScale</key>   <array> <real>16</real> <real>27</real> <real>51</real> </array>
+				<key>Model</key>                 <string></string>
+			</dict>
+			<dict>
+				<key>CollisionModel</key>        <string>Cube</string>
+				<key>CollisionModelOffset</key>  <array> <real>6.1</real> <real>-32.75</real> <real>-0.5</real> </array>
+				<key>CollisionModelScale</key>   <array> <real>54</real> <real>27.5</real> <real>17</real> </array>
+				<key>Model</key>                 <string></string>
+			</dict>
+		</array>
+		
+		<!--Mass of the component, in kilograms.  If 0, indicates static object, does not move but can still collide. (default 0)-->
+		<key>Mass</key>        <real>0.1</real>
+		
+		<!--Model: An Ogre .mesh file, or "CollisionModel" to render the collision primitive. (default CollisionModel)-->
+		<key>Model</key>       <string>KHR2/RightAbduce</string>
+	</dict>
+	<dict>
+		<key>Name</key>                  <string>RLeg:Flex</string>
+		<key>d</key>                     <real>0</real>
+		<key>θ</key>                     <string>-90°</string>
+		<key>r</key>                     <real>44</real>
+		<key>α</key>                     <string>90°</string>
+		<key>Min</key>                   <string>-90°</string>
+		<key>Max</key>                   <string>90°</string>
+		
+		<!--CollisionModel: A Bullet primitive collision shape: { Cube | Cylinder | Sphere | Plane }-->
+		<key>CollisionModel</key>        <string>Cube</string>
+		
+		<!--CollisionModelOffset: Positions the CollisionModel, relative to parent frame.-->
+		<key>CollisionModelOffset</key>  <array> <real>25.75</real> <real>0</real> <real>-6.1</real> </array>
+		
+		<!--CollisionModelScale: Scales the CollisionModel, which by default is 1x1x1, so this sets the object dimensions.-->
+		<key>CollisionModelScale</key>   <array> <real>72.5</real> <real>24</real> <real>54</real> </array>
+		
+		<!--Mass of the component, in kilograms.  If 0, indicates static object, does not move but can still collide. (default 0)-->
+		<key>Mass</key>                  <real>0.1</real>
+		
+		<!--Model: An Ogre .mesh file, or "CollisionModel" to render the collision primitive. (default CollisionModel)-->
+		<key>Model</key>                 <string>KHR2/RightThigh</string>
+	</dict>
+	<dict>
+		<key>Name</key>        <string>RLeg:Knee</string>
+		<key>d</key>           <real>0</real>
+		<key>θ</key>           <string>0°</string>
+		<key>r</key>           <real>59.5</real>
+		<key>α</key>           <string>0°</string>
+		<key>Min</key>         <string>0°</string>
+		<key>Max</key>         <string>120°</string>
+		
+		<!--======== Components ========-->
+		<key>Components</key>  <array>
+			<dict>
+				<key>CollisionModel</key>          <string>Cube</string>
+				<key>CollisionModelOffset</key>    <array> <real>3.509</real> <real>-9.737</real> <real>-6.4</real> </array>
+				<key>CollisionModelRotation</key>  <array> <real>0</real> <real>0</real> <real>0.172075</real> </array>
+				<key>CollisionModelScale</key>     <array> <real>21</real> <real>41.7</real> <real>37</real> </array>
+				<key>Model</key>                   <string></string>
+			</dict>
+			<dict>
+				<key>CollisionModel</key>          <string>Cube</string>
+				<key>CollisionModelOffset</key>    <array> <real>32.901</real> <real>-9.448</real> <real>-6.4</real> </array>
+				<key>CollisionModelRotation</key>  <array> <real>0</real> <real>0</real> <real>0.172075</real> </array>
+				<key>CollisionModelScale</key>     <array> <real>76.5</real> <real>22.315</real> <real>37</real> </array>
+				<key>Model</key>                   <string></string>
+			</dict>
+		</array>
+		
+		<!--Mass of the component, in kilograms.  If 0, indicates static object, does not move but can still collide. (default 0)-->
+		<key>Mass</key>        <real>0.1</real>
+		
+		<!--Model: An Ogre .mesh file, or "CollisionModel" to render the collision primitive. (default CollisionModel)-->
+		<key>Model</key>       <string>KHR2/RightTibia</string>
+		<key>IKSolver</key>  <string>IKThreeLink</string>
+	</dict>
+	<dict>
+		<key>Name</key>        <string>RLeg:AnkleFlex</string>
+		<key>d</key>           <real>0</real>
+		<key>θ</key>           <string>0°</string>
+		<key>r</key>           <real>58.994</real>
+		<key>α</key>           <string>180°</string>
+		<key>Min</key>         <string>-90°</string>
+		<key>Max</key>         <string>90°</string>
+		
+		<!--======== Components ========-->
+		<key>Components</key>  <array>
+			<dict>
+				<key>CollisionModel</key>        <string>Cube</string>
+				<key>CollisionModelOffset</key>  <array> <real>11.25</real> <real>-0.5</real> <real>6.1</real> </array>
+				<key>CollisionModelScale</key>   <array> <real>27.5</real> <real>17</real> <real>54</real> </array>
+				<key>Model</key>                 <string></string>
+			</dict>
+			<dict>
+				<key>CollisionModel</key>        <string>Cube</string>
+				<key>CollisionModelOffset</key>  <array> <real>32.5</real> <real>4.6</real> <real>0</real> </array>
+				<key>CollisionModelScale</key>   <array> <real>27</real> <real>51</real> <real>16</real> </array>
+				<key>Model</key>                 <string></string>
+			</dict>
+		</array>
+		
+		<!--Mass of the component, in kilograms.  If 0, indicates static object, does not move but can still collide. (default 0)-->
+		<key>Mass</key>        <real>0.1</real>
+		
+		<!--Model: An Ogre .mesh file, or "CollisionModel" to render the collision primitive. (default CollisionModel)-->
+		<key>Model</key>       <string>KHR2/RightAnkle</string>
+	</dict>
+	<dict>
+		<key>Name</key>        <string>RLeg:AnkleLateral</string>
+		<key>d</key>           <real>0</real>
+		<key>θ</key>           <string>0°</string>
+		<key>r</key>           <real>44</real>
+		<key>α</key>           <string>90°</string>
+		<key>Min</key>         <string>-90°</string>
+		<key>Max</key>         <string>90°</string>
+		
+		<!--======== Components ========-->
+		<key>Components</key>  <array>
+			<dict>
+				<key>CollisionModel</key>        <string>Cube</string>
+				<key>CollisionModelOffset</key>  <array> <real>2.25</real> <real>10</real> <real>-6.4</real> </array>
+				<key>CollisionModelScale</key>   <array> <real>29.5</real> <real>56</real> <real>37</real> </array>
+				<key>Model</key>                 <string></string>
+			</dict>
+			<dict>
+				<key>CollisionModel</key>        <string>Cube</string>
+				<key>CollisionModelOffset</key>  <array> <real>13.75</real> <real>10</real> <real>-6.4</real> </array>
+				<key>CollisionModelScale</key>   <array> <real>6.5</real> <real>61</real> <real>100</real> </array>
+				<key>Model</key>                 <string></string>
+			</dict>
+		</array>
+		
+		<!--Mass of the component, in kilograms.  If 0, indicates static object, does not move but can still collide. (default 0)-->
+		<key>Mass</key>        <real>0.1</real>
+		
+		<!--Model: An Ogre .mesh file, or "CollisionModel" to render the collision primitive. (default CollisionModel)-->
+		<key>Model</key>       <string>KHR2/RightFoot</string>
+	</dict>
+	<dict>
+		<key>Name</key>    <string>RLeg:Sole</string>
+		<key>d</key>       <real>0</real>
+		<key>θ</key>       <string>0°</string>
+		<key>r</key>       <real>17</real>
+		<key>α</key>       <string>180°</string>
+		
+		<!--Model: An Ogre .mesh file, or "CollisionModel" to render the collision primitive. (default CollisionModel)-->
+		<key>Model</key>   <string>ReferenceFrame</string>
+		
+		<!--Visible: If true, indicates component should be rendered for simulated cameras, otherwise only appears in the Mirage user window. (default true)-->
+		<key>Visible</key> <false/>
+	</dict>
+</array>
+</array></plist>
+

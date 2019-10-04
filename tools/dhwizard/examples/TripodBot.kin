@@ -1,0 +1,259 @@
+<?xml version="1.0"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>150.0</real>
+	<key>α</key> <real>0.0°</real>
+	<key>r</key> <real>0.0</real>
+	<key>Min</key> <real>0.0°</real>
+	<key>Max</key> <real>0.0°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>Create/Body</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>BaseFrame</string>
+</dict>
+<array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>50.0</real>
+	<key>α</key> <real>91.67324722093171°</real>
+	<key>r</key> <real>0.0</real>
+	<key>Min</key> <real>-180.48170546620932°</real>
+	<key>Max</key> <real>180.48170546620932°</real>
+	<key>qOffset</key> <real>1.6</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>HandEye/Link1</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>Shoulder</string>
+</dict>
+<array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>0.0°</real>
+	<key>r</key> <real>210.0</real>
+	<key>Min</key> <real>-180.48170546620932°</real>
+	<key>Max</key> <real>180.48170546620932°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>HandEye/Link1</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>Elbow1</string>
+</dict>
+<array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>0.0°</real>
+	<key>r</key> <real>210.0</real>
+	<key>Min</key> <real>-180.48170546620932°</real>
+	<key>Max</key> <real>180.48170546620932°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>HandEye/Link1</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>Elbow2</string>
+</dict>
+<array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>0.0°</real>
+	<key>r</key> <real>210.0</real>
+	<key>Min</key> <real>-180.48170546620932°</real>
+	<key>Max</key> <real>180.48170546620932°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>HandEye/Link1</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>Elbow3</string>
+</dict>
+<array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>-93.3921206063242°</real>
+	<key>r</key> <real>220.0</real>
+	<key>Min</key> <real>-180.48170546620932°</real>
+	<key>Max</key> <real>180.48170546620932°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>Chiara/Pan</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>Pan</string>
+</dict>
+<array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>-45.0</real>
+	<key>α</key> <real>93.3921206063242°</real>
+	<key>r</key> <real>30.0</real>
+	<key>Min</key> <real>-180.48170546620932°</real>
+	<key>Max</key> <real>180.48170546620932°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>Chiara/Tilt</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>Tilt</string>
+</dict>
+</array>
+</array>
+</array>
+</array>
+</array>
+</array>
+<array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>45.83662361046586°</real>
+	<key>d</key> <real>50.0</real>
+	<key>α</key> <real>91.67324722093171°</real>
+	<key>r</key> <real>160.0</real>
+	<key>Min</key> <real>-180.48170546620932°</real>
+	<key>Max</key> <real>180.48170546620932°</real>
+	<key>qOffset</key> <real>1.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>HandEye/Link1</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>Leg1:S</string>
+</dict>
+<array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>0.0°</real>
+	<key>r</key> <real>210.0</real>
+	<key>Min</key> <real>-180.48170546620932°</real>
+	<key>Max</key> <real>180.48170546620932°</real>
+	<key>qOffset</key> <real>-2.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>HandEye/Link1</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>Leg1:E1</string>
+</dict>
+<array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>0.0°</real>
+	<key>r</key> <real>210.0</real>
+	<key>Min</key> <real>-180.48170546620932°</real>
+	<key>Max</key> <real>180.48170546620932°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>HandEye/Link1</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>Leg1:E2</string>
+</dict>
+</array>
+</array>
+</array>
+<array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>-45.83662361046586°</real>
+	<key>d</key> <real>50.0</real>
+	<key>α</key> <real>91.67324722093171°</real>
+	<key>r</key> <real>160.0</real>
+	<key>Min</key> <real>-180.48170546620932°</real>
+	<key>Max</key> <real>180.48170546620932°</real>
+	<key>qOffset</key> <real>1.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>HandEye/Link1</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>Leg2:S</string>
+</dict>
+<array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>0.0°</real>
+	<key>r</key> <real>210.0</real>
+	<key>Min</key> <real>-180.48170546620932°</real>
+	<key>Max</key> <real>180.48170546620932°</real>
+	<key>qOffset</key> <real>-2.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>HandEye/Link1</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>Leg2:E1</string>
+</dict>
+<array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>0.0°</real>
+	<key>r</key> <real>210.0</real>
+	<key>Min</key> <real>-180.48170546620932°</real>
+	<key>Max</key> <real>180.48170546620932°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>HandEye/Link1</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>Leg2:E2</string>
+</dict>
+</array>
+</array>
+</array>
+<array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>179.90874767107852°</real>
+	<key>d</key> <real>50.0</real>
+	<key>α</key> <real>91.67324722093171°</real>
+	<key>r</key> <real>160.0</real>
+	<key>Min</key> <real>-180.48170546620932°</real>
+	<key>Max</key> <real>180.48170546620932°</real>
+	<key>qOffset</key> <real>1.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>HandEye/Link1</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>Leg3:S</string>
+</dict>
+<array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>0.0°</real>
+	<key>r</key> <real>210.0</real>
+	<key>Min</key> <real>-180.48170546620932°</real>
+	<key>Max</key> <real>180.48170546620932°</real>
+	<key>qOffset</key> <real>-2.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>HandEye/Link1</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>Leg3:E1</string>
+</dict>
+<array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>0.0°</real>
+	<key>r</key> <real>210.0</real>
+	<key>Min</key> <real>-180.48170546620932°</real>
+	<key>Max</key> <real>180.48170546620932°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>HandEye/Link1</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>Leg3:E2</string>
+</dict>
+</array>
+</array>
+</array>
+</array>
+</plist>

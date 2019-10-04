@@ -1,0 +1,26 @@
+/ArmNode.h/1.3/Thu Aug 26 18:36:32 2010//
+/DynamicMotionSequenceNode.h/1.13/Mon Jun 13 10:54:39 2011//
+/GroupNode.h/1.14/Mon Jun 13 10:54:39 2011//
+/HeadPointerNode.h/1.10/Thu Aug 26 18:36:32 2010//
+/LGNode.h/1.1/Wed Mar 24 07:44:07 2010//
+/LedNode.h/1.12/Thu Mar 10 16:45:41 2011//
+/LogNode.cc/1.10/Mon Jun 13 10:54:39 2011//
+/LogNode.h/1.9/Mon Jun 13 10:54:39 2011//
+/MCNode.cc/1.29/Fri Dec 20 10:59:30 2013//
+/MCNode.h/1.23/Thu May  2 03:53:39 2013//
+/MotionSequenceNode.h/1.24/Mon Jun 13 10:54:39 2011//
+/OutputNode.h/1.17/Mon Dec 26 10:59:07 2011//
+/PIDNode.h/1.3/Tue Apr 10 08:20:26 2012//
+/PostMachine.h/1.2/Tue May  1 04:11:20 2012//
+/PostureNode.cc/1.2/Thu May  2 03:53:39 2013//
+/PostureNode.h/1.17/Thu May  2 04:00:35 2013//
+/RecordMotionNode.h/1.12/Mon Jun 13 10:54:39 2011//
+/SoundNode.h/1.24/Mon Jun 13 10:54:40 2011//
+/SpeechNode.h/1.24/Wed Jan 27 11:12:07 2016//
+/TailWagNode.h/1.6/Thu Aug 26 18:36:33 2010//
+/WalkNode.cc/1.15/Fri Dec 20 11:30:06 2013//
+/WalkNode.h/1.35/Mon Jun 13 10:54:40 2011//
+/WalkToTargetNode.cc/1.15/Wed Feb  6 07:31:06 2013//
+/WalkToTargetNode.h/1.11/Thu Aug 26 18:36:33 2010//
+/WaypointWalkNode.h/1.20/Wed Feb  6 07:31:06 2013//
+D

@@ -1,0 +1,14 @@
+#POS
+LFr:rotor	-0.3897
+LFr:elvtr	 0.0570
+LFr:knee	 0.4219
+RFr:rotor	-0.5757
+RFr:elvtr	-0.1138
+RFr:knee	 0.2518
+LBk:rotor	-1.3800
+LBk:elvtr	 0.4215
+LBk:knee	 1.9800
+RBk:rotor	-1.3321
+RBk:elvtr	 0.2506
+RBk:knee	 2.2166
+#END

@@ -1,0 +1,10 @@
+^build$
+.*\.rej$
+.*\.orig$
+^Make.xcodeproj/.*\.mode1v3$
+^Make.xcodeproj/.*\.pbxuser$
+^Make.xcodeproj/project.xcworkspace$
+^Make.xcodeproj/xcuserdata$
+^tekkotsu-[a-zA-Z0-9]*$
+^ms/open-r/mw/objs/.*\.bin$
+.DS_Store$

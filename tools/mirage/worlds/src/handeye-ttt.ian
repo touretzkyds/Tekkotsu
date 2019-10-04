@@ -1,0 +1,11 @@
+define vline cube material=Yellow scale=[275,15,0.1]
+define hline cube material=Yellow scale=[15,275,0.1]
+define bluePiece cylinder material=Blue scale=[30,30,20]
+
+vline location=[375,80,0]
+vline location=[375,0,0]
+
+hline location=[325,40,0]
+hline location=[425,40,0]
+
+bluePiece location=[285,40,11] mass=5 centerofmass=[0,0,-9]

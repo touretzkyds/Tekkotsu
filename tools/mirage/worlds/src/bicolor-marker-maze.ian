@@ -1,0 +1,124 @@
+define shortVerticalWall cube material=Wood scale=[770,1,1000]
+define shortHorizontalWall cube material=Wood scale=[1,770,1000]
+define longVerticalWall cube material=Wood scale=[1540,1,1000]
+
+define pinkMarkerHalf cube material=Pink scale=[2,101.6,50.8]
+define blueMarkerHalf cube material=Blue scale=[2,101.6,50.8]
+define greenMarkerHalf cube material=Green scale=[2,101.6,50.8]
+define yellowMarkerHalf cube material=Yellow scale=[2,101.6,50.8]
+define orangeMarkerHalf cube material=Orange scale=[2,101.6,50.8]
+
+define blueHorizontalMarkerHalf cube material=Blue scale=[101.6,2,50.8]
+define greenHorizontalMarkerHalf cube material=Green scale=[101.6,2,50.8]
+define yellowHorizontalMarkerHalf cube material=Yellow scale=[101.6,2,50.8]
+define pinkHorizontalMarkerHalf cube material=Pink scale=[101.6,2,50.8]
+define orangeHorizontalMarkerHalf cube material=Orange scale=[101.6,2,50.8]
+
+
+#light location=[5,3000,7000]
+#light location=[195,-2685,7000]
+light location=[-100,3000,2000]
+
+longVerticalWall location=[370,400,0]
+longVerticalWall location=[370,-3450,0]
+
+shortVerticalWall location=[-15,-370,0]
+shortVerticalWall location=[-15,-1140,0]
+shortVerticalWall location=[-15,-1910,0]
+shortVerticalWall location=[-15,-2680,0]
+shortVerticalWall location=[1525,-370,0]
+shortVerticalWall location=[1525,-1140,0]
+shortVerticalWall location=[1525,-1910,0]
+shortVerticalWall location=[1525,-2680,0]
+
+shortHorizontalWall  location=[-400,15,0]
+shortHorizontalWall  location=[370,-755,0]
+shortHorizontalWall  location=[-400,-1525,0]
+shortHorizontalWall  location=[370,-2295,0]
+shortHorizontalWall  location=[-400,-3065,0]
+shortHorizontalWall  location=[1140,15,0]
+shortHorizontalWall  location=[1910,-755,0]
+shortHorizontalWall  location=[1140,-1525,0]
+shortHorizontalWall  location=[1910,-2295,0]
+shortHorizontalWall  location=[1140,-3065,0]
+
+
+# marker1
+greenHorizontalMarkerHalf  location=[755,390,203.2]
+yellowHorizontalMarkerHalf  location=[755,390,152.4]
+
+# marker2
+greenMarkerHalf  location=[1138,85,203.2]
+pinkMarkerHalf  location=[1138,85,152.4]
+
+# marker3
+greenHorizontalMarkerHalf  location=[1523,-380,203.2]
+orangeHorizontalMarkerHalf  location=[1523,-380,152.4]
+
+# marker4
+yellowMarkerHalf  location=[1908,-755,203.2]
+orangeMarkerHalf location=[1908,-755,152.4]
+
+# marker5
+yellowHorizontalMarkerHalf  location=[1523,-1128,203.2]
+pinkHorizontalMarkerHalf  location=[1523,-1128,152.4]
+
+# marker6
+orangeMarkerHalf  location=[1138,-1525,203.2]
+blueMarkerHalf  location=[1138,-1525,152.4]
+
+# marker7
+yellowHorizontalMarkerHalf  location=[1523,-1915,203.2]
+greenHorizontalMarkerHalf  location=[1523,-1915,152.4]
+
+# marker8
+orangeMarkerHalf  location=[1908,-2295,203.2]
+greenMarkerHalf  location=[1908,-2295,152.4]
+
+# marker9
+yellowHorizontalMarkerHalf  location=[1523,-2675,203.2]
+blueHorizontalMarkerHalf  location=[1523,-2675,152.4]
+
+# marker10
+greenMarkerHalf  location=[1138,-3065,203.2]
+blueMarkerHalf  location=[1138,-3065,152.4]
+
+# marker11
+blueHorizontalMarkerHalf  location=[755,-3440,203.2]
+yellowHorizontalMarkerHalf  location=[755,-3440,152.4]
+
+# marker12
+pinkMarkerHalf  location=[-398,-3065,203.2]
+orangeMarkerHalf  location=[-398,-3065,152.4]
+
+# marker13
+orangeHorizontalMarkerHalf  location=[-13,-2690,203.2]
+yellowHorizontalMarkerHalf  location=[-13,-2690,152.4]
+
+# marker14
+blueMarkerHalf  location=[372,-2295,203.2]
+pinkMarkerHalf  location=[372,-2295,152.4]
+
+# marker15
+blueHorizontalMarkerHalf  location=[-13,-1905,203.2]
+orangeHorizontalMarkerHalf  location=[-13,-1905,152.4]
+
+# marker16
+pinkMarkerHalf  location=[-398,-1515,203.2]
+yellowMarkerHalf  location=[-398,-1515,152.4]
+
+# marker17
+blueHorizontalMarkerHalf  location=[-13,-1145,203.2]
+greenHorizontalMarkerHalf  location=[-13,-1145,152.4]
+
+# marker18
+pinkMarkerHalf  location=[372,-755,203.2]
+blueMarkerHalf  location=[372,-755,152.4]
+
+# marker19
+orangeHorizontalMarkerHalf  location=[-13,-366,203.2]
+pinkHorizontalMarkerHalf  location=[-13,-366,152.4]
+
+# marker20
+pinkMarkerHalf  location=[-398,85,203.2]
+greenMarkerHalf  location=[-398,85,152.4]

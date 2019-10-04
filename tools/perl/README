@@ -1,0 +1,10 @@
+The Tekkotsu/tools/perl directory is a place where you can place
+Perl modules if you are unable to install them in the normal
+location for your computer because of file permissions.
+
+Currently Tekkotsu requires Parse::RecDescent (used in the
+stateparser), which can be downloaded from www.cpan.org.
+Simply extract the "Parse" subdirectory and place it in
+Tekkotsu/tools/perl.
+
+

@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<!--======== Drivers ========-->
+<!--Settings for device drivers-->
+<key>Drivers</key> <dict>
+
+	<!--======== Logged ========-->
+	<key>Logged</key> <dict>
+		<!--.type: Stores the typename of the class so it can be re-instantiated on load.
+		** Do not edit ** -->
+		<key>.type</key> <string>LoggedData</string>
+	</dict>
+
+	<!--======== Camera ========-->
+	<key>Camera</key> <dict>
+		<!--.type: Stores the typename of the class so it can be re-instantiated on load.
+		** Do not edit ** -->
+		<key>.type</key> <string>Camera</string>
+		<key>Path</key>       <string>/dev/video1</string>
+                <key>Resolution</key> <string>1280x720</string>
+	</dict>
+
+</dict>
+
+<!--======== Vision ========-->
+<!--Settings for the loading of camera frames-->
+<key>Vision</key> <dict>
+	<key>Sources</key> <array>
+		<string>Camera</string>
+	</array>
+</dict>
+
+<!--======== CommPorts ========-->
+<!--Communication portals for use by device drivers-->
+<key>CommPorts</key> <dict>
+</dict>
+
+<!--======== Sensors ========-->
+<!--Settings for the loading of sensor values-->
+<key>Sensors</key> <dict>
+</dict>
+
+<!--WaitForSensors: If true, wait for initial sensor readings before triggering the startup behavior
+ or starting the motion polling thread.  On some platforms, sensed output values can be used to init
+ialize output positions.  On others, you may be unable to get any feedback, or can only expect feedb
+ack if the robot was left running and the executable is reconnecting.-->
+<key>WaitForSensors</key> <false/>
+
+</dict></plist>

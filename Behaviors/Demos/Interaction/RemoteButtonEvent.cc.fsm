@@ -1,0 +1,52 @@
+#include <iostream>
+
+#include "Behaviors/StateMachine.h"
+#include "Shared/string_util.h"
+
+$nodeclass RemoteButtonEvent : StateNode {
+
+  $nodeclass DisplayInstructions : StateNode : doStart {
+    sndman->speak("Message the I-P address of the remote robot");
+    std::cout << "Type 'msg <ip-address>'" << std::endl;
+  }
+
+  $nodeclass SetupListener : StateNode {
+    virtual void doStart() {
+      const TextMsgEvent &textev = dynamic_cast<const TextMsgEvent&>(*event);
+      unsigned int x;
+      int const result = sscanf(textev.getText().c_str(), "%u.%u.%u.%u", &x, &x, &x, &x);
+      if ( result != 4 ) {
+	std::cout << "Invalid IP address" << std::endl;
+	postStateFailure();
+	return;
+      }
+      int ip = string_util::stringToIntIP(textev.getText());
+      erouter->addRemoteListener(this, ip, EventBase::buttonEGID);
+      sndman->speak("Listening for remote events");
+    }
+
+    // Whenever we receive a remote button press event, generate a local userEGID event.
+    virtual void doEvent() {
+      std::cout << "Remote event: " << event->getDescription() << std::endl;
+      erouter->postEvent(EventBase(EventBase::userEGID, event->getSourceID(), EventBase::activateETID));
+    }
+  }
+
+  virtual void setup() {
+    $statemachine{
+
+      startnode: StateNode =N=> {getIpForListener, listenLoop}
+
+      // Display instructions, wait for IP address, and set up remote event listener.
+      // Repeat the instructions if the IP address was invalid.
+      getIpForListener: DisplayInstructions =TM=> SetupListener =F=> getIpForListener;
+
+      // Remote button press events are being reposted as userEGID events.
+      // When we get one, play a ping sound and go back to waiting for the next one.
+      listenLoop: StateNode =E(userEGID)=> SoundNode($,"ping.wav") =N=> listenLoop
+    }
+  }
+
+}
+
+REGISTER_BEHAVIOR_MENU(RemoteButtonEvent,DEFAULT_TK_MENU"/Interaction Demos");

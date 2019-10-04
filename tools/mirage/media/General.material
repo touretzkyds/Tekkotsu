@@ -1,0 +1,585 @@
+material Black
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			texture_unit
+			{
+				colour_op_ex source1 src_manual src_current 0 0 0
+			}
+		}
+	}
+}
+material Red
+{
+	receive_shadows on
+	technique
+	{
+		pass
+        {
+            ambient 1 0 0 1
+            diffuse 1 0 0 1
+        }
+	}
+}
+material Green
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient .25 .25 .25 1
+			diffuse 0 1 0 1
+			//texture_unit
+			//{
+			//	colour_op_ex source1 src_manual src_current 0 1 0
+			//}
+		}
+	}
+}
+material Yellow
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient .75 .5 .25 1
+			diffuse 1 1 0 1
+			//texture_unit
+			//{
+			//	colour_op_ex source1 src_manual src_current 1 1 0
+			//}
+		}
+	}
+}
+material Orange
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient .5 .25 .25 1
+			diffuse 1 0 0 1
+			//texture_unit
+			//{
+			//	colour_op_ex source1 src_manual src_current 1 .5 0
+			//}
+		}
+	}
+}
+material Pink
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.4 0.1 0.2 1.0
+			diffuse 1 0.25 0.5 1
+			emissive 0 0 0 1
+		}
+	}
+}
+material Blue
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient .25 .25 .25 1
+			diffuse 0 0 1 1
+			//{
+			//	colour_op_ex source1 src_manual src_current 0 0 1
+			//}
+		}
+	}
+}
+material White
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 1 1 1 1
+			diffuse 1 1 1 1
+			//texture_unit
+			//{
+			//	colour_op_ex source1 src_manual src_current 0 1 0
+			//}
+		}
+	}
+}
+material Grid
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			texture_unit
+			{
+				texture grid.png
+				tex_address_mode wrap
+				filtering anisotropic point none
+				max_anisotropy 6
+				scale 0.05 0.05
+				scroll -.001 -.001
+			}
+			depth_bias -10
+		}
+	}
+}
+material RedYellowGrid
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			texture_unit
+			{
+				texture grid-RedYellow.png
+				tex_address_mode wrap
+				filtering anisotropic point none
+				max_anisotropy 6
+				scale 0.05 0.05
+				scroll -.001 -.001
+			}
+			depth_bias -10
+		}
+	}
+}
+
+material Wood
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.250000 0.250000 0.250000 1.000000
+			diffuse 0.604454 0.401815 0.143782 1.000000
+			emissive 0.000000 0.000000 0.000000 1.000000
+		}
+	}
+}
+material Steel
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.250000 0.250000 0.250000 1.000000
+			diffuse 0.720000 0.720000 0.800000 1.000000
+			emissive 0.000000 0.000000 0.000000 1.000000
+		}
+	}
+}
+material Xaxis
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.250000 0.250000 0.250000 1.000000
+			diffuse 0.850000 0.000000 0.000000 1.000000
+			emissive 0.000000 0.000000 0.000000 1.000000
+		}
+	}
+}
+material Yaxis
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.250000 0.250000 0.250000 1.000000
+			diffuse 0.000000 0.850000 0.000000 1.000000
+			emissive 0.000000 0.000000 0.000000 1.000000
+		}
+	}
+}
+material Zaxis
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.250000 0.250000 0.250000 1.000000
+			diffuse 0.000000 0.000000 0.850000 1.000000
+			emissive 0.000000 0.000000 0.000000 1.000000
+		}
+	}
+}
+material CameraFOV
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.250000 0.250000 0.250000 .4000000
+			diffuse 0.000000 0.000000 1.000000 .4000000
+			emissive 0.000000 0.000000 0.000000 1.000000
+			scene_blend alpha_blend
+			depth_write off
+		}
+	}
+}
+material BoundingBox
+{
+	receive_shadows off
+	technique
+	{
+		pass
+		{
+			ambient 0.350000 0.350000 0.000000 .2500000
+			diffuse 0.850000 0.850000 0.000000 .2500000
+			emissive 0.000000 0.000000 0.000000 1.000000
+			scene_blend alpha_blend
+			depth_write off
+			depth_bias 10
+		}
+	}
+}
+material CollisionShape
+{
+	receive_shadows off
+	technique
+	{
+		pass
+		{
+			ambient 0 0.35 0.35 .6500000
+			diffuse 0 0.85 0.85 .6500000
+			emissive 0 0 0 1
+			scene_blend alpha_blend
+			depth_write off
+			depth_bias 10
+		}
+	}
+}
+material "Black Plastic"
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.250000 0.250000 0.250000 1.000000
+			diffuse 0.20000 0.20000 0.20000 1.000000
+			emissive 0.000000 0.000000 0.000000 1.000000
+		}
+	}
+}
+material Black_Plastic
+{
+        receive_shadows on
+        technique
+        {
+                pass
+                {
+                        ambient 0.250000 0.250000 0.250000 1.000000
+                        diffuse 0.20000 0.20000 0.20000 1.000000
+                        emissive 0.000000 0.000000 0.000000 1.000000
+                }
+        }
+}
+material "Red Plastic"
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.250000 0.250000 0.250000 1.000000
+			diffuse 1.000000 0.2 0.2 1.000000
+			emissive 0.000000 0.000000 0.000000 1.000000
+		}
+	}
+}
+material "Blue Plastic"
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.250000 0.250000 0.250000 1.000000
+			diffuse 0.2 0.2 1.0 1.000000
+			emissive 0.000000 0.000000 0.000000 1.000000
+		}
+	}
+}
+material "White Plastic"
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.250000 0.250000 0.250000 1.000000
+			diffuse 0.92500 0.92500 0.92500 1.000000
+			emissive 0.000000 0.000000 0.000000 1.000000
+		}
+	}
+}
+material White_Plastic
+{
+        receive_shadows on
+        technique
+        {
+                pass
+                {
+                        ambient 0.250000 0.250000 0.250000 1.000000
+                        diffuse 0.92500 0.92500 0.92500 1.000000
+                        emissive 0.000000 0.000000 0.000000 1.000000
+                }
+        }
+}
+material BracketPlastic
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.250000 0.250000 0.250000 1.000000
+			diffuse 0.720000 0.720000 0.720000 1.000000
+			emissive 0.000000 0.000000 0.000000 1.000000
+		}
+	}
+}
+material BracketPlastic2
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.400000 0.400000 0.360000 1.000000
+			diffuse 0.650000 0.650000 0.630000 1.000000
+			emissive 0.000000 0.000000 0.000000 1.000000
+		}
+	}
+}
+material DarkGrey
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.250000 0.250000 0.250000 1.000000
+			diffuse 0.400000 0.400000 0.400000 1.000000
+			emissive 0.000000 0.000000 0.000000 1.000000
+		}
+	}
+}
+material DarkGrey2 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass 
+        {
+            ambient 0.5070579051971436 0.5070579051971436 0.5070579051971436 1.0
+            diffuse 0.4056463302023161 0.4056463302023161 0.4056463302023161 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.0 0.0 0.0 1.0
+
+        }
+    }
+}
+material Table
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.250000 0.250000 0.250000 1.000000
+			diffuse 1.0000 1.0000 1.0000 1.000000
+			emissive 0.000000 0.000000 0.000000 1.000000
+		}
+	}
+}
+
+material CloudySky
+{
+	technique
+	{
+		pass
+		{
+			lighting off
+			depth_write off
+
+			texture_unit
+			{
+				texture clouds.jpg
+				scroll_anim -0.04 0
+			}
+			texture_unit
+			{
+				texture clouds.jpg
+				scroll_anim -0.007 0.016
+				scale 2.3 2.3
+				colour_op modulate
+				colour_op_multipass_fallback dest_colour zero
+			}
+		}
+	}
+}
+material DarkCloudySky
+{
+	technique
+	{
+		pass
+		{
+			lighting off
+			depth_write off
+
+			texture_unit
+			{
+				colour_op_ex source1 src_manual src_current 1 .75 .5
+			}
+			texture_unit
+			{
+				texture clouds.jpg
+				scroll_anim -0.04 0
+			}
+			texture_unit
+			{
+				texture darkclouds.jpg
+				scroll_anim -0.007 0.016
+				scale 2.3 2.3
+				colour_op modulate
+				colour_op_multipass_fallback dest_colour zero
+			}
+		}
+	}
+}
+material CloudyBox
+{
+	technique
+	{
+		pass
+		{
+			lighting off
+			depth_write off
+
+			texture_unit
+			{
+				cubic_texture clouds.jpg clouds.jpg clouds.jpg clouds.jpg clouds.jpg clouds.jpg separateUV
+				tex_address_mode clamp
+			}
+		}
+	}
+}
+material RustySteel
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+
+			texture_unit
+			{
+				texture RustySteel.jpg
+			}
+		}
+	}
+}
+material TarnishedBronze
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+
+			texture_unit
+			{
+				texture TarnishedBronze.jpg
+			}
+		}
+	}
+}
+material Carpet
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			texture_unit
+			{
+				texture DarkCarpet.jpg
+				rotate 25
+				tex_address_mode wrap
+				scale .034 .034
+			}
+			texture_unit
+			{
+				texture DarkCarpet.jpg
+				rotate -25
+				tex_address_mode wrap
+				scale .0052 .0052
+				colour_op_ex blend_manual src_current src_texture .4
+				colour_op_multipass_fallback src_colour one_minus_src_colour
+			}
+		}
+	}
+}
+material Wheel
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			texture_unit
+			{
+				texture wheel-texture.png
+			}
+		}
+	}
+}
+material MantisGreen 
+{
+    receive_shadows off 
+    technique
+    {
+        pass 
+        {
+           
+            ambient 0.1817794293165207 0.3343154191970825 0.060889773070812225 1.0
+            diffuse 0.14542354562019622 0.2674523393430164 0.04871181918251244 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.0 0.0 0.0 1.0
+
+        }
+    }
+}
+material default
+{
+	technique
+	{
+		pass
+		{
+		}
+	}
+
+}

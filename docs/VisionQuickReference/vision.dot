@@ -1,0 +1,13 @@
+digraph vision {
+	graph [ ranksep=".3", rankdir=LR, ordering=out ] ;
+	raw [ label="Raw\nImage" ] ;
+	inter [ label="Interleaved" ] ;
+	color [ label="Color\nJPEG" ] ;
+	gray [ label="Gray\nJPEG" ] ;
+	seg [ label="Segmented" ] ;
+	ball [ label="\"Ball\"\nDetection" ] ;
+	
+	raw -> gray ;
+	raw -> inter -> color ;
+	raw -> seg -> RLE -> Regions -> ball ;
+}

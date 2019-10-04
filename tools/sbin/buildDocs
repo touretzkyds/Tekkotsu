@@ -1,0 +1,44 @@
+#!/bin/sh
+
+
+#initialization
+
+tmp="/tmp";
+if [ -z "$MEMSTICK_ROOT" ] ; then
+	MEMSTICK_ROOT=/mnt/memstick
+fi;
+
+if [ $# -lt 1 ] ; then
+	echo "Usage $0 <newversion>";
+	exit 2;
+fi;
+newtag=tekkotsu-`echo $1 | tr . _`;
+
+echo New tag: ${newtag}
+
+
+
+#cvs export source
+
+cd ${tmp};
+rm -rf Tekkotsu_$1
+
+cvs export -r ${newtag} -d Tekkotsu_$1 Tekkotsu
+
+if [ ! -d Tekkotsu_$1 ] ; then
+	echo "cvs export failed"
+	exit 1;
+fi;
+
+
+
+#build documentation
+
+cd ${tmp}/Tekkotsu_$1;
+docs/builddocs -a -c -r -s -t;
+cd docs/generated;
+mv html Tekkotsu_doc_$1;
+tar -cvzf Tekkotsu_doc_$1.tar.gz --exclude Tekkotsu_doc_$1/search.idx Tekkotsu_doc_$1;
+mv Tekkotsu_doc_$1.tar.gz ${tmp};
+
+

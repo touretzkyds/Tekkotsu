@@ -1,0 +1,14 @@
+This directory contains behavior-related files.
+Subdirectories:
+   Controls - Used by the controller for the menu system
+
+      Demos - sample code (note that these are not necessarily 'clean' coding - some are more
+              proof of concept at the time they were written and therefore are not always
+              the best way to do something.)
+
+      Nodes - For finite state machines, we'll put general purpose nodes here.
+
+   Services - These are behaviors which provide a useful service during execution, not just
+              sample code.  For instance, automatic get up, battery monitoring, etc.
+
+Transitions - For finite state machines, we'll put general purpose transitions here.

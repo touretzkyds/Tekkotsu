@@ -1,0 +1,44 @@
+#!/bin/sh
+
+usage="$0 [-h | --help] [ -f | --filelist] [directory]\n  Recursively searches for CVS directories and finds the newest entry"
+
+listfiles=false;
+while [ $# -gt 0 ] ; do
+	case "$1" in
+		-h | --help) printf "$usage"; exit 2;;
+		-f | --filelist) listfiles=true; shift;;
+		*) break;;
+	esac;
+done;
+
+dir="$1";
+if [ -z "$dir" ] ; then
+	dir=".";
+fi;
+
+tmpfile=`mktemp -t cvsCheckoutDate.XXXXXXXXXX` || { echo "Failed to create temp file"; exit 1; };
+find $dir -name "CVS" -type d -exec cut -f 4 -d / \{\}/Entries \; | grep '^... ... .. ..:..:..' > "$tmpfile";
+
+if [ "`uname`" = "Darwin" ] ; then
+	if $listfiles ; then
+		d1=`while read line ; do
+			date -j -f "%a %b %d %H:%M:%S %Y" "$line" "+%F %T"
+		done < "$tmpfile" | sort -r | head -n 1`
+		d2=`date -j -f "%F %T" "$d1" "+%b %e %T %Y"`;
+		find $dir -name "CVS" -type d -exec grep -H "$d2" \{\}/Entries \;
+	else
+		while read line ; do
+			date -j -f "%a %b %e %T %Y" "$line" "+%F %T"
+		done < "$tmpfile" | sort -r | head -n 1
+	fi;
+else
+	if $listfiles ; then
+		d1=`date -f "$tmpfile" "+%F %T" | sort -r | head -n 1`;
+		d2=`date -d "$d1" "+%b %e %T %Y"`;
+		find $dir -name "CVS" -type d -exec grep -H "$d2" \{\}/Entries \;
+	else
+		date -f "$tmpfile" "+%F %T" | sort -r | head -n 1;
+	fi;
+fi;
+
+rm -f "$tmpfile";

@@ -1,0 +1,50 @@
+#!/bin/sh
+
+toolsdir="`dirname \"$0\"`/.."
+worldbuilder_path="$toolsdir/mirage/worldbuilder/code"
+
+ruby=`which ruby`
+if [ -z "$ruby" ]; then
+  echo "You must install ruby, rubygems, plist, and treetop to use WorldBuilder."
+  echo "Try:   sudo apt-get install ruby rubygems"
+  echo "then:  sudo gem install plist treetop"
+ exit 1
+fi;
+
+rubygems=`which gem`
+if [ -z "$rubygems" ]; then
+  echo "You must install the rubygems package to use WorldBuilder."
+  echo "Try:   sudo apt-get install rubygems"
+  echo "then:  sudo gem install plist treetop"
+  exit 1
+fi;
+
+plist=`gem list plist`
+treetop=`gem list treetop`
+if [ -z "$plist" -o -z "$treetop" ]; then
+  echo "You must install the plist and treetop packages to use WorldBuilder."
+  echo "Try:   sudo gem install plist treetop"
+  exit 1
+fi;
+
+if [ -z "$1" ]; then
+  echo Usage: $0 infile [outfile]
+  exit 0
+fi;
+
+infile=$(cd "$(dirname "$1")"; pwd)/$(basename "$1")
+if [ ! -e $infile ]; then
+  echo No such file or directory: $1
+  exit 1
+fi;
+if [ ! -r $infile ]; then
+  echo "Can't get read access to $1"
+  exit 1
+fi;
+
+if [ ! -z "$2" ]; then
+  outfile=$(cd "$(dirname "$2")"; pwd)/$(basename "$2")
+fi;
+
+cd $worldbuilder_path
+./worldbuilder $infile $outfile

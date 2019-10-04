@@ -1,0 +1,75 @@
+//-*-c++-*-
+#ifndef INCLUDED_WalkToMarker_h_
+#define INCLUDED_WalkToMarker_h_
+
+#include "Behaviors/Demos/Tapia/TapiaMarkerData.h"
+#include "Behaviors/StateMachine.h"
+#include "DualCoding/DualCoding.h"
+#include "Sound/SoundManager.h"
+
+using namespace DualCoding;
+
+//! Selects a visible marker, calculates bearing and distance, and walks to it
+class WalkToMarker : public VisualRoutinesStateNode {
+public:
+
+  class LookForTapiaMarkers : public MapBuilderNode {
+  public:
+    LookForTapiaMarkers() : MapBuilderNode("LookForTapiaMarkers",MapBuilderRequest::localMap) {}
+
+    virtual void doStart() {
+      mapreq.maxDist = 100000;
+      mapreq.addObjectColor(markerDataType, "orange");
+      mapreq.addObjectColor(markerDataType, "pink");
+      mapreq.addObjectColor(markerDataType, "blue");
+      mapreq.markerTypes.insert(TapiaMarkerData::tapiaMarkerType);
+    }
+  };
+
+  class SelectMarker : public VisualRoutinesStateNode {
+  public:
+    SelectMarker() : VisualRoutinesStateNode("SelectMarker") {}
+
+    virtual void doStart() {
+      NEW_SHAPEVEC(tmarkers, TapiaMarkerData, select_type<TapiaMarkerData>(localShS));
+      cout << "tmarkers.size() = " << tmarkers.size() << endl;
+      if ( tmarkers.empty() ) {
+	postStateCompletion();
+	return;
+      }
+      postStateSignal<Shape<TapiaMarkerData> >(tmarkers[0]);
+    }
+  };
+
+  class ApproachMarker : public WalkNode {
+  public:
+    ApproachMarker() : WalkNode("ApproachMarker",0,0,0) {}
+
+    virtual void doStart() {
+      const DataEvent<Shape<TapiaMarkerData> > *datev = dynamic_cast<const DataEvent<Shape<TapiaMarkerData> >*>(event);
+      if ( datev ) {
+	const Shape<TapiaMarkerData> &marker = datev->getData();
+	const Point target = marker->getCentroid();
+	const float tx = target.coordX(), ty=target.coordY();
+	const float robotDiameter = 25.4 * 14;  // 14 inch robot diameter in mm
+	const float distance = sqrt(tx*tx + ty*ty);
+	const float bearing = atan2(ty,tx);
+	cout << "Centroid=" << target << "   Distance=" << distance
+	     << " mm,    Bearing=" << bearing*180/M_PI << " deg\n";
+	setDisplacement(distance-robotDiameter, 0, bearing);
+      }
+    }
+  };
+
+  WalkToMarker() :  VisualRoutinesStateNode("WalkToMarker") {}
+
+  virtual void setup() {
+#statemachine
+  startnode: LookForTapiaMarkers() =MAP=> 
+      SelectMarker() =S<Shape<TapiaMarkerData> >=> 
+        ApproachMarker()
+#endstatemachine
+      }
+};
+
+#endif

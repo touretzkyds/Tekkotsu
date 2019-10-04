@@ -1,0 +1,48 @@
+#!/bin/sh
+
+usage="Usage: $0 [-c separator_char] [-q] oldstr newstr file1 [file2...]";
+
+tmpname="/tmp/wordreplacetmp";
+sepchar="/";
+status="true";
+while [ $# -gt 0 ] ; do
+	case $1 in
+		-h | --help) echo "$usage"; exit 1;;
+		-c ) sepchar="$2"; recurseflags="$recurseflags $1 $2"; shift; shift;;
+		-q ) status=false; recurseflags="$recurseflags $1"; shift;;
+		*) break;;
+	esac;
+done;
+
+cmd="`cd \`dirname \"$0\"\`; pwd`/`basename $0`"
+
+if [ $# -lt 3 ] ; then
+	echo "$usage";
+	exit 1;
+else
+	old="$1";
+	new="$2";
+	shift; shift;
+	while [ $# -gt 0 ] ; do
+		if [ -f "$1" ] ; then
+			if grep -q "$old" "$1" ; then
+				if $status; then
+					echo "Processing $1";
+				fi;
+				sed "s${sepchar}${old}${sepchar}${new}${sepchar}g" "$1" > "$tmpname";
+				mv "$tmpname" "$1";
+			fi;
+		elif [ -d "$1" ] ; then
+			cd "$1";
+			for x in * ; do
+				#echo "evaling: " "$0" $recurseflags "\"$old\"" "\"$new\"" "\"$x\"";
+				eval "$cmd" $recurseflags "\"$old\"" "\"$new\"" "\"$x\"";
+			done;
+		else
+			echo "$1 not found";
+		fi;
+		shift;
+	done;
+fi;
+
+	

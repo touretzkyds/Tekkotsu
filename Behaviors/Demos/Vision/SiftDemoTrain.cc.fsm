@@ -1,0 +1,41 @@
+#include "Behaviors/StateMachine.h"
+
+//! SIFT training example from the YouTube video http://www.youtube.com/watch?v=2QVSTtjenCs
+/*! Run this SiftDemoTrain behavior, point the camera at the object,
+ *  and type "msg train" to the Tekkotsu command line to train on that
+ *  image.  Repeat for multiple training images.  When done training,
+ *  type "msg save" to save the SIFT database to a file.  Then run the
+ *  SiftDemoTest behavior to test object recognition.
+ */
+
+$nodeclass SiftDemoTrain : VisualRoutinesStateNode {
+
+  $nodeclass CreateDatabase : VisualRoutinesStateNode : doStart {
+    mapBuilder->newSiftMatcher("sift-demo.dat");
+  }
+
+  $nodeclass TrainObject : VisualRoutinesStateNode : doStart {
+    mapBuilder->trainSiftObject("sift-demo.dat", "juice-bottle");
+  }
+
+  $nodeclass SaveDatabase : VisualRoutinesStateNode : doStart {
+    mapBuilder->saveSiftDatabase("sift-demo.dat");
+  }
+
+  virtual void setup() {
+    $statemachine{
+      CreateDatabase =N=> ask
+
+      ask: SpeechNode("message.  train or save")
+      ask =TM("train")=> train
+      ask =TM("save")=> save
+
+      train: TrainObject =N=> ask
+
+      save: SaveDatabase =N=> SpeechNode("done")
+    }
+  }
+
+}
+
+REGISTER_BEHAVIOR_MENU(SiftDemoTrain,DEFAULT_TK_MENU"/Vision Demos");

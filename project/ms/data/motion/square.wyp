@@ -1,0 +1,19 @@
+#WyP
+
+# This demo traces a square 500 mm, turning in place at each corner
+
+#add_{point|arc} {ego|off|abs} x_val y_val {hold|follow} angle_val speed_val arc_val
+
+max_turn_speed 0.9
+track_path 1
+
+add_point ego 500 0 follow 0 100 0
+add_point ego 0 0 follow 1.571 100 0
+add_point ego 500 0 follow 0 100 0
+add_point ego 0 0 follow 1.571 100 0
+add_point ego 500 0 follow 0 100 0
+add_point ego 0 0 follow 1.571 100 0
+add_point ego 500 0 follow 0 100 0
+add_point ego 0 0 follow 1.571 100 0
+
+#END

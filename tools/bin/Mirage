@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# Prevent running Mirage as root because it messes up the
+# ownership of the ~/.mirage/ogre.cfg file.
+if [ `whoami` == root ]; then
+  echo Do not run Mirage as root!
+  exit 1
+fi
+
+# Run the Mirage simulation environment from the
+# proper directory.  Put this script on your search
+# path so you can run Mirage from anywhere.
+if [ ! -z "$2" ]; then
+  echo Usage: Mirage [filename]
+  exit 1
+fi
+
+TOOLSDIR="`dirname \"$0\"`/.."
+
+# OSX does not support the readlink -f command.  So
+# if we are using OSX, we should use our own version
+# of readlink named preadlink.  preadlink is a tool
+# that is built as part of the Tekkotsu framework, and
+# is located in tools/preadlink.
+if [ $(uname) = Darwin ]; then
+    READLINK=$TOOLSDIR/preadlink/preadlink
+else
+    READLINK="readlink -f"
+fi
+
+MIRAGE_PATH="$($READLINK ${TOOLSDIR}/mirage)"
+
+if [ ! -z "$1" ]; then
+  ABSFILEPATH=$($READLINK "$1")
+  if [ ! -e "${ABSFILEPATH}" ]; then
+    ABSFILEPATH="${MIRAGE_PATH}/worlds/$1"
+    if [ -e "${ABSFILEPATH}" ]; then
+      echo Using world file $($READLINK "${ABSFILEPATH}")
+    else
+      echo File "$1" not found.
+      exit 1
+    fi
+  fi
+fi
+
+cd $MIRAGE_PATH
+echo "$MIRAGE_PATH"
+
+if [ ! -e mirage ]; then
+    echo Mirage not found in ${MIRAGE_PATH}. You need to build it.
+    exit 1
+fi
+
+./mirage $ABSFILEPATH

@@ -1,0 +1,245 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		6916C4D708ECF2DD00B61601 /* ColorConverter.java in Sources */ = {isa = PBXBuildFile; fileRef = 6916C4CC08ECF2DD00B61601 /* ColorConverter.java */; };
+		6916C4D808ECF2DD00B61601 /* EasyTrain.java in Sources */ = {isa = PBXBuildFile; fileRef = 6916C4CD08ECF2DD00B61601 /* EasyTrain.java */; };
+		6916C4D908ECF2DD00B61601 /* HelpBox.java in Sources */ = {isa = PBXBuildFile; fileRef = 6916C4CE08ECF2DD00B61601 /* HelpBox.java */; };
+		6916C4DA08ECF2DD00B61601 /* ImageData.java in Sources */ = {isa = PBXBuildFile; fileRef = 6916C4CF08ECF2DD00B61601 /* ImageData.java */; };
+		6916C4DB08ECF2DD00B61601 /* ImagePanel.java in Sources */ = {isa = PBXBuildFile; fileRef = 6916C4D008ECF2DD00B61601 /* ImagePanel.java */; };
+		6916C4DD08ECF2DD00B61601 /* SegmentedImage.java in Sources */ = {isa = PBXBuildFile; fileRef = 6916C4D208ECF2DD00B61601 /* SegmentedImage.java */; };
+		6916C4DE08ECF2DD00B61601 /* Thumbnail.java in Sources */ = {isa = PBXBuildFile; fileRef = 6916C4D308ECF2DD00B61601 /* Thumbnail.java */; };
+		6916C4DF08ECF2DD00B61601 /* ThumbnailShow.java in Sources */ = {isa = PBXBuildFile; fileRef = 6916C4D408ECF2DD00B61601 /* ThumbnailShow.java */; };
+		6916C4E308ECF31E00B61601 /* help.txt in JavaArchive */ = {isa = PBXBuildFile; fileRef = 6916C4E208ECF31E00B61601 /* help.txt */; settings = {JAVA_ARCHIVE_SUBDIR = ""; }; };
+		692A932208EF05DE00736A17 /* ImageSelectionManager.java in Sources */ = {isa = PBXBuildFile; fileRef = 692A932108EF05DE00736A17 /* ImageSelectionManager.java */; };
+		692A93B408F0AB9D00736A17 /* ThresholdMap.java in Sources */ = {isa = PBXBuildFile; fileRef = 692A93B308F0AB9D00736A17 /* ThresholdMap.java */; };
+		69AFF9B408FEDCA20002640E /* SpectrumViewer.java in Sources */ = {isa = PBXBuildFile; fileRef = 69AFF9B308FEDCA20002640E /* SpectrumViewer.java */; };
+		69D8EBA708F1D241004624EF /* ImageViewer.java in Sources */ = {isa = PBXBuildFile; fileRef = 69D8EBA608F1D241004624EF /* ImageViewer.java */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXBuildStyle section */
+		130F8B95001BDF0A11CA292A /* Debug */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		130F8B96001BDF0A11CA292A /* Release */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+/* End PBXBuildStyle section */
+
+/* Begin PBXFileReference section */
+		6916C4CC08ECF2DD00B61601 /* ColorConverter.java */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.java; path = ColorConverter.java; sourceTree = "<group>"; };
+		6916C4CD08ECF2DD00B61601 /* EasyTrain.java */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.java; path = EasyTrain.java; sourceTree = "<group>"; };
+		6916C4CE08ECF2DD00B61601 /* HelpBox.java */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.java; path = HelpBox.java; sourceTree = "<group>"; };
+		6916C4CF08ECF2DD00B61601 /* ImageData.java */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.java; path = ImageData.java; sourceTree = "<group>"; };
+		6916C4D008ECF2DD00B61601 /* ImagePanel.java */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.java; path = ImagePanel.java; sourceTree = "<group>"; };
+		6916C4D208ECF2DD00B61601 /* SegmentedImage.java */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.java; path = SegmentedImage.java; sourceTree = "<group>"; };
+		6916C4D308ECF2DD00B61601 /* Thumbnail.java */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.java; path = Thumbnail.java; sourceTree = "<group>"; };
+		6916C4D408ECF2DD00B61601 /* ThumbnailShow.java */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.java; path = ThumbnailShow.java; sourceTree = "<group>"; };
+		6916C4E108ECF31700B61601 /* README */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
+		6916C4E208ECF31E00B61601 /* help.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = help.txt; sourceTree = "<group>"; };
+		692A932108EF05DE00736A17 /* ImageSelectionManager.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = ImageSelectionManager.java; sourceTree = "<group>"; };
+		692A93B308F0AB9D00736A17 /* ThresholdMap.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = ThresholdMap.java; sourceTree = "<group>"; };
+		69AFF9B308FEDCA20002640E /* SpectrumViewer.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = SpectrumViewer.java; sourceTree = "<group>"; };
+		69D8EBA608F1D241004624EF /* ImageViewer.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = ImageViewer.java; sourceTree = "<group>"; };
+		6A8008AE02C7B68F0CC91562 /* Manifest */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Manifest; sourceTree = "<group>"; };
+		6A9ED92C02B0286D0CC91562 /* EasyTrain.jar */ = {isa = PBXFileReference; explicitFileType = archive.jar; includeInIndex = 0; path = EasyTrain.jar; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		130F8B94001BDF0A11CA292A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		00E6828FFEC88D1A11DB9C8B = {
+			isa = PBXGroup;
+			children = (
+				6916C4CC08ECF2DD00B61601 /* ColorConverter.java */,
+				6916C4CD08ECF2DD00B61601 /* EasyTrain.java */,
+				6916C4CE08ECF2DD00B61601 /* HelpBox.java */,
+				6916C4CF08ECF2DD00B61601 /* ImageData.java */,
+				6916C4D008ECF2DD00B61601 /* ImagePanel.java */,
+				69D8EBA608F1D241004624EF /* ImageViewer.java */,
+				69AFF9B308FEDCA20002640E /* SpectrumViewer.java */,
+				6916C4D208ECF2DD00B61601 /* SegmentedImage.java */,
+				6916C4D308ECF2DD00B61601 /* Thumbnail.java */,
+				6916C4D408ECF2DD00B61601 /* ThumbnailShow.java */,
+				692A93B308F0AB9D00736A17 /* ThresholdMap.java */,
+				692A932108EF05DE00736A17 /* ImageSelectionManager.java */,
+				6A8008AE02C7B68F0CC91562 /* Manifest */,
+				6A0644A002C7BD230CC91562 /* Documentation */,
+				0120612AFEC8923411DB9C8B /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		0120612AFEC8923411DB9C8B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				6A9ED92C02B0286D0CC91562 /* EasyTrain.jar */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		6A0644A002C7BD230CC91562 /* Documentation */ = {
+			isa = PBXGroup;
+			children = (
+				6916C4E208ECF31E00B61601 /* help.txt */,
+				6916C4E108ECF31700B61601 /* README */,
+			);
+			name = Documentation;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXJavaArchiveBuildPhase section */
+		130F8B93001BDF0A11CA292A /* JavaArchive */ = {
+			isa = PBXJavaArchiveBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6916C4E308ECF31E00B61601 /* help.txt in JavaArchive */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXJavaArchiveBuildPhase section */
+
+/* Begin PBXProject section */
+		00E6828EFEC88D1A11DB9C8B /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 697D1BC908ECE39C0002B8B1 /* Build configuration list for PBXProject "EasyTrain" */;
+			buildSettings = {
+			};
+			buildStyles = (
+				130F8B95001BDF0A11CA292A /* Debug */,
+				130F8B96001BDF0A11CA292A /* Release */,
+			);
+			hasScannedForEncodings = 1;
+			mainGroup = 00E6828FFEC88D1A11DB9C8B;
+			productRefGroup = 0120612AFEC8923411DB9C8B /* Products */;
+			projectDirPath = "";
+			targets = (
+				130F8B90001BDF0A11CA292A /* EasyTrain */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		130F8B91001BDF0A11CA292A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6916C4D708ECF2DD00B61601 /* ColorConverter.java in Sources */,
+				6916C4D808ECF2DD00B61601 /* EasyTrain.java in Sources */,
+				6916C4D908ECF2DD00B61601 /* HelpBox.java in Sources */,
+				6916C4DA08ECF2DD00B61601 /* ImageData.java in Sources */,
+				6916C4DB08ECF2DD00B61601 /* ImagePanel.java in Sources */,
+				6916C4DD08ECF2DD00B61601 /* SegmentedImage.java in Sources */,
+				6916C4DE08ECF2DD00B61601 /* Thumbnail.java in Sources */,
+				6916C4DF08ECF2DD00B61601 /* ThumbnailShow.java in Sources */,
+				692A932208EF05DE00736A17 /* ImageSelectionManager.java in Sources */,
+				692A93B408F0AB9D00736A17 /* ThresholdMap.java in Sources */,
+				69D8EBA708F1D241004624EF /* ImageViewer.java in Sources */,
+				69AFF9B408FEDCA20002640E /* SpectrumViewer.java in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXToolTarget section */
+		130F8B90001BDF0A11CA292A /* EasyTrain */ = {
+			isa = PBXToolTarget;
+			buildConfigurationList = 697D1BC508ECE39C0002B8B1 /* Build configuration list for PBXToolTarget "EasyTrain" */;
+			buildPhases = (
+				130F8B91001BDF0A11CA292A /* Sources */,
+				130F8B93001BDF0A11CA292A /* JavaArchive */,
+				130F8B94001BDF0A11CA292A /* Frameworks */,
+			);
+			buildSettings = {
+				JAVA_ARCHIVE_CLASSES = YES;
+				JAVA_ARCHIVE_COMPRESSION = NO;
+				JAVA_ARCHIVE_TYPE = JAR;
+				JAVA_COMPILER = /usr/bin/javac;
+				JAVA_MANIFEST_FILE = Manifest;
+				JAVA_SOURCE_SUBDIR = .;
+				PRODUCT_NAME = EasyTrain;
+				PURE_JAVA = YES;
+				REZ_EXECUTABLE = YES;
+			};
+			dependencies = (
+			);
+			name = EasyTrain;
+			productInstallPath = /usr/local/bin;
+			productName = EasyTrain;
+			productReference = 6A9ED92C02B0286D0CC91562 /* EasyTrain.jar */;
+		};
+/* End PBXToolTarget section */
+
+/* Begin XCBuildConfiguration section */
+		697D1BC808ECE39C0002B8B1 /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				JAVA_ARCHIVE_CLASSES = YES;
+				JAVA_ARCHIVE_COMPRESSION = NO;
+				JAVA_ARCHIVE_TYPE = JAR;
+				JAVA_COMPILER = /usr/bin/javac;
+				JAVA_MANIFEST_FILE = Manifest;
+				JAVA_SOURCE_SUBDIR = .;
+				PRODUCT_NAME = EasyTrain;
+				PURE_JAVA = YES;
+				REZ_EXECUTABLE = YES;
+			};
+			name = Default;
+		};
+		697D1BCC08ECE39C0002B8B1 /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Default;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		697D1BC508ECE39C0002B8B1 /* Build configuration list for PBXToolTarget "EasyTrain" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				697D1BC808ECE39C0002B8B1 /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+		697D1BC908ECE39C0002B8B1 /* Build configuration list for PBXProject "EasyTrain" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				697D1BCC08ECE39C0002B8B1 /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 00E6828EFEC88D1A11DB9C8B /* Project object */;
+}

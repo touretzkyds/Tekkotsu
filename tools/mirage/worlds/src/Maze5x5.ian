@@ -1,0 +1,85 @@
+# Author: David Barnett, University of the District of Columbia
+# environment settings
+background material=CloudySky model=Dome
+light location=[0,0,2000]
+# draw the walls
+define Wall1 cube material=Wood scale=[2,5002,500]
+define Wall2 cube material=Wood scale=[4996,2,500]
+define Wall3 cube material=Wood scale=[2,5002,500]
+define Wall4 cube material=Wood scale=[4996,2,500]
+define Wall5 cube material=Wood scale=[2,996,500]
+define Wall6 cube material=Wood scale=[996,2,500]
+define Wall7 cube material=Wood scale=[2,3000,500]
+define Wall8 cube material=Wood scale=[2,3996,500]
+define Wall9 cube material=Wood scale=[996,2,500]
+define Wall10 cube material=Wood scale=[996,2,500]
+define Wall11 cube material=Wood scale=[2,3000,500]
+define Wall12 cube material=Wood scale=[996,2,500]
+define Wall13 cube material=Wood scale=[2,1000,500]
+Wall1 location=[4400,2100,250]
+Wall2 location=[1900,-400,250]
+Wall3 location=[-600,2100,250]
+Wall4 location=[1900,4600,250]
+Wall5 location=[1400,4100,250]
+Wall6 location=[3900,1600,250]
+Wall7 location=[3400,2100,250]
+Wall8 location=[2400,1600,250]
+Wall9 location=[1900,600,250]
+Wall10 location=[-100,600,250]
+Wall11 location=[400,2100,250]
+Wall12 location=[900,2600,250]
+Wall13 location=[1400,2100,250]
+# draw the tags
+define Tag cube scale=[1, 25.4 * 7, 25.4 * 7] 
+Tag location=[-595, 100, 25.4 * 7] material="AprilTag/tag16h5/00"
+Tag location=[-100, 595, 25.4 * 7] material="AprilTag/tag16h5/01" orientation=[0,0,0.707107]
+Tag location=[-100, -395, 25.4 * 7] material="AprilTag/tag16h5/02" orientation=[0,0,0.707107]
+Tag location=[900, -395, 25.4 * 7] material="AprilTag/tag16h5/03" orientation=[0,0,0.707107]
+Tag location=[1900, -395, 25.4 * 7] material="AprilTag/tag16h5/04" orientation=[0,0,0.707107]
+Tag location=[2395, 100, 25.4 * 7] material="AprilTag/tag16h5/05"
+Tag location=[1900, 595, 25.4 * 7] material="AprilTag/tag16h5/06" orientation=[0,0,0.707107]
+Tag location=[405, 1100, 25.4 * 7] material="AprilTag/tag16h5/07"
+Tag location=[405, 2100, 25.4 * 7] material="AprilTag/tag16h5/08"
+Tag location=[900, 2595, 25.4 * 7] material="AprilTag/tag16h5/09" orientation=[0,0,0.707107]
+Tag location=[1395, 2100, 25.4 * 7] material="AprilTag/tag16h5/10"
+Tag location=[1900, 605, 25.4 * 7] material="AprilTag/tag16h5/11" orientation=[0,0,0.707107]
+Tag location=[2395, 1100, 25.4 * 7] material="AprilTag/tag16h5/12"
+Tag location=[2395, 2100, 25.4 * 7] material="AprilTag/tag16h5/13"
+Tag location=[1405, 2100, 25.4 * 7] material="AprilTag/tag16h5/14"
+Tag location=[2395, 3100, 25.4 * 7] material="AprilTag/tag16h5/15"
+Tag location=[1900, 4595, 25.4 * 7] material="AprilTag/tag16h5/16" orientation=[0,0,0.707107]
+Tag location=[1405, 4100, 25.4 * 7] material="AprilTag/tag16h5/17"
+Tag location=[900, 2605, 25.4 * 7] material="AprilTag/tag16h5/18" orientation=[0,0,0.707107]
+Tag location=[405, 3100, 25.4 * 7] material="AprilTag/tag16h5/19"
+Tag location=[1395, 4100, 25.4 * 7] material="AprilTag/tag16h5/20"
+Tag location=[900, 4595, 25.4 * 7] material="AprilTag/tag16h5/21" orientation=[0,0,0.707107]
+Tag location=[-100, 4595, 25.4 * 7] material="AprilTag/tag16h5/22" orientation=[0,0,0.707107]
+Tag location=[-595, 4100, 25.4 * 7] material="AprilTag/tag16h5/23" 
+Tag location=[-595, 3100, 25.4 * 7] material="AprilTag/tag16h5/24" 
+Tag location=[-595, 2100, 25.4 * 7] material="AprilTag/tag16h5/25" 
+Tag location=[-595, 1100, 25.4 * 7] material="AprilTag/tag16h5/26" 
+Tag location=[-100, 605, 25.4 * 7] material="AprilTag/tag16h5/27" orientation=[0,0,0.707107]
+Tag location=[395, 1100, 25.4 * 7] material="AprilTag/tag16h5/28"
+Tag location=[395, 2100, 25.4 * 7] material="AprilTag/tag16h5/29"
+Tag location=[395, 3100, 25.4 * 7] material="AprilTag/tag16h5/06"
+Tag location=[2405, 3100, 25.4 * 7] material="AprilTag/tag16h5/16" 
+Tag location=[2405, 2100, 25.4 * 7] material="AprilTag/tag16h5/06" 
+Tag location=[2405, 1100, 25.4 * 7] material="AprilTag/tag16h5/10" 
+Tag location=[2405,  100, 25.4 * 7] material="AprilTag/tag16h5/17" 
+Tag location=[2900, -395, 25.4 * 7] material="AprilTag/tag16h5/24" orientation=[0,0,0.707107]
+Tag location=[3395, 1100, 25.4 * 7] material="AprilTag/tag16h5/03"
+Tag location=[3395, 2100, 25.4 * 7] material="AprilTag/tag16h5/23"
+Tag location=[3395, 3100, 25.4 * 7] material="AprilTag/tag16h5/09"
+Tag location=[2900, 4595, 25.4 * 7] material="AprilTag/tag16h5/02" orientation=[0,0,0.707107]
+Tag location=[3405, 3100, 25.4 * 7] material="AprilTag/tag16h5/28" 
+Tag location=[3405, 2100, 25.4 * 7] material="AprilTag/tag16h5/14" 
+Tag location=[3900, 1605, 25.4 * 7] material="AprilTag/tag16h5/00" orientation=[0,0,0.707107]
+Tag location=[4395, 2100, 25.4 * 7] material="AprilTag/tag16h5/07"
+Tag location=[4395, 3100, 25.4 * 7] material="AprilTag/tag16h5/21"
+Tag location=[4395, 4100, 25.4 * 7] material="AprilTag/tag16h5/01"
+Tag location=[3900, 4595, 25.4 * 7] material="AprilTag/tag16h5/08" orientation=[0,0,0.707107]
+Tag location=[3900, -395, 25.4 * 7] material="AprilTag/tag16h5/04" orientation=[0,0,0.707107]
+Tag location=[4395,  100, 25.4 * 7] material="AprilTag/tag16h5/11"
+Tag location=[4395, 1100, 25.4 * 7] material="AprilTag/tag16h5/18"
+Tag location=[3900, 1595, 25.4 * 7] material="AprilTag/tag16h5/25" orientation=[0,0,0.707107]
+Tag location=[3405, 1100, 25.4 * 7] material="AprilTag/tag16h5/21" 

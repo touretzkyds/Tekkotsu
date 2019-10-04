@@ -1,0 +1,34 @@
+#!/bin/sh
+
+if [ $# -gt 0 ] ; then
+	pt="$1";
+elif [ "$MEMSTICK_ROOT" ] ; then
+	pt="$MEMSTICK_ROOT";
+else
+	case "`uname`" in
+		CYGWIN*) pt="/cygdrive/e";;
+		Darwin) d="`dirname $0`"; pt="`$d/osx_find_memstick`";;
+		*) pt="/mnt/memstick";;
+	esac	
+fi
+
+case "`uname`" in
+	CYGWIN*)
+		echo "Don't forget to stop your memory stick before removing it. (Unless you have XP)";
+		exit 0;
+		;;
+	Darwin)
+		echo "Waiting for unmount... this may take a few seconds for buffered writes to complete";
+		if diskutil eject "$pt" > /dev/null; then
+			echo "$pt unmounted, you may remove the memstick";
+		fi;
+		;;
+	*)
+		printf "Waiting for unmount...";
+		if umount $pt ; then
+			printf "successful.\n";
+		else
+			printf "an error occured.\n";
+		fi;
+		;;
+esac

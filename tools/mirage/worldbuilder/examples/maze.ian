@@ -1,0 +1,70 @@
+background material=CloudySky model=Dome
+cube material=CustomGrass location=[0,0,0] scale=[7000,7000,0.01]
+cube material=CustomGrass location=[-4700,-3000,0] scale=[2400,1000,0.01]
+
+cylinder material=Wood location=[-4000,-3400,154] scale=[64,64,300] group=tree group=treerow
+sphere material=Green location=[-4000,-3400,379] scale=[250,250,250] group=tree group=treerow
+copy tree [0,800,0]
+copy treerow [-500,0,0] keepgroup
+copy treerow [-1000,0,0] keepgroup
+
+penheight 1000
+pencolor RustySteel
+pendown
+moveto [-3500,-3500,0]
+const l=90
+const r=270
+forward 7000
+turn l
+forward 7000
+turn l
+forward 7000
+turn l
+forward 6000
+turn l
+forward 1000
+turn l
+forward 4000
+turn r
+forward 1000
+turn r
+forward 1000
+turn l 
+forward 1000
+turn l
+forward 2000
+turn l
+forward 2000
+turn 180
+penup
+forward 3000
+pendown
+forward 2000
+turn r
+forward 5000
+turn r 
+forward 2000
+turn r
+forward 4000
+turn r
+forward 1000
+turn r
+forward 3000
+turn r
+penup
+forward 2000
+turn l
+pendown
+forward 2000
+penup
+turn r
+forward 2000
+turn r
+forward 1000
+turn r
+pendown
+forward 1000
+turn l
+forward 2000
+turn r
+forward 2000

@@ -1,0 +1,113 @@
+# Tekkotsu WorldBuilder
+# Shape parsing expression grammar
+#
+# Robert Lee (rslee / perihare)
+# 2-14-2011
+
+require "shape"
+
+require "grammar_support"
+
+require "expression_grammar"
+require "string_grammar"
+require "vector_grammar"
+require "color_grammar"
+
+grammar EnvironmentGrammar
+    include ExpressionGrammar
+    include StringGrammar
+    include VectorGrammar
+    include ColorGrammar
+
+    rule environment
+    (background / shadows / physics /
+    observer / ambient / env_number_parameter)
+    end
+
+    # Background commands and parameters
+    rule background
+    keyword:'background'
+    space
+    parameters:(background_color_parameter /
+    background_number_parameter /
+    background_string_parameter)* <EnvironmentCommand>
+    end
+
+    rule background_color_parameter
+    keyword:'color'
+    space '=' value:vector space <EnvironmentParameter>
+    end
+
+    rule background_number_parameter
+    keyword:('curvature' / 'distance' / 'tiling')
+    space '=' value:expression space <EnvironmentParameter>
+    end
+
+    rule background_string_parameter
+    keyword:('model' / 'material')
+    space '=' value:string space <EnvironmentParameter>
+    end
+
+    # Shadows commands and parameters
+    rule shadows
+    keyword:'shadows'
+    space
+    parameters:(shadows_string_parameter /
+    shadows_color_parameter)* <EnvironmentCommand>
+    end
+
+    rule shadows_string_parameter
+    keyword:('enabled' / 'modulative' / 'stencil')
+    space '=' value:string space <EnvironmentParameter>
+    end
+
+    rule shadows_color_parameter
+    keyword:'color'
+    space '=' value:vector space <EnvironmentParameter>
+    end
+
+    # Physics commands and parameters
+    rule physics
+    keyword:'physics'
+    space
+    parameters:physics_number_parameter* <EnvironmentCommand>
+    end
+
+    rule physics_number_parameter
+    keyword:('erp' / 'gravity' / 'massscale' /
+    'solveriterations' / 'spacescale' / 'stepsperframe' )
+    space '=' value:expression space <EnvironmentParameter>
+    end
+
+    # Observer commands and parameters
+    rule observer
+    keyword:'observer'
+    space
+    parameters:observer_vector_parameter* <EnvironmentCommand>
+    end
+
+    rule observer_vector_parameter
+    keyword:('location' / 'orientation' / 'pointat')
+    space '=' value:vector space <EnvironmentParameter>
+    end
+
+    # Other environment commands and parameters
+    rule ambient
+    keyword:'ambient' space color
+    {
+        def eval(env={})
+            return [keyword.text_value, color.eval(env)]
+        end
+    }
+    end
+
+    rule env_number_parameter
+    keyword:('inertia' / 'mass' / 'render' / 'timescale') space expression
+    {
+        def eval(env={})
+            return [keyword.text_value, expression.eval(env)]
+        end
+    }
+    end
+
+end

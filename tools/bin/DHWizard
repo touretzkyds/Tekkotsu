@@ -1,0 +1,29 @@
+#!/bin/sh
+
+toolsdir="`dirname \"$0\"`/.."
+dhwizard_path="$toolsdir/dhwizard/code"
+
+if [ ! -r $dhwizard_path/DHWizard.class ]; then
+  echo "Error: the DHWizard tool has not been built."
+  echo "cd to Tekkotsu/tools/dhwizard/code and type 'make'"
+  exit 1
+fi;
+
+if [ ! -z "$1" ]; then
+  infile=$(cd "$(dirname "$1")"; pwd)/$(basename "$1")
+  if [ ! -r $infile ]; then
+    echo "No such file or directory: $1"
+    exit 1
+  fi;
+
+  if [ -z "$2" ]; then
+      echo Looking for Mirage on localhost
+      mirage_host=localhost;
+  else
+      mirage_host=$2;
+  fi;
+fi;
+
+cd $dhwizard_path
+
+java -Dfile.encoding=UTF-8 -Dapple.laf.useScreenMenuBar=true DHWizard $infile $mirage_host

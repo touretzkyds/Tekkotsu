@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Physics</key> <dict>
+		<key>LinearDamping</key> <real>0</real>
+		<key>AngularDamping</key> <real>0.4</real>
+	</dict>
+	
+	<key>Objects</key> <dict>
+		<key>Ramp1</key> <dict>
+			<key>Location</key> <array>
+				<real>800</real>
+				<real>0</real>
+				<real>0</real>
+			</array>
+			<key>Orientation</key> <array>
+				<real>0</real>
+				<real>-0.130526192220052</real> <!-- = -sin(angle/2) -->
+				<real>0</real>
+			</array>
+			<key>CollisionModelScale</key>    <array>
+				<real>600</real> <!-- = length of ramp -->
+				<real>500</real> <!-- = width of ramp -->
+				<real>160.76951545867362</real> <!-- = length · tan(angle) -->
+			</array>
+			<key>Material</key> <string>Steel</string>
+			<key>CollisionModel</key>    <string>Cube</string>
+		</dict>
+		
+		<key>Ramp2</key> <dict>
+			<key>Location</key> <array>
+				<real>-800</real>
+				<real>0</real>
+				<real>0</real>
+			</array>
+			<key>Orientation</key> <array>
+				<real>0</real>
+				<real>0.130526192220052</real> <!-- = sin(angle/2) -->
+				<real>0</real>
+			</array>
+			<key>CollisionModelScale</key>    <array>
+				<real>600</real> <!-- = length of ramp -->
+				<real>500</real> <!-- = width of ramp -->
+				<real>160.76951545867362</real> <!-- = length · tan(angle) -->
+			</array>
+			<key>Material</key> <string>Steel</string>
+			<key>CollisionModel</key>    <string>Cube</string>
+		</dict>
+		
+		<key>Ball</key> <dict>
+			<key>Location</key> <array>
+				<real>800</real>
+				<real>0</real>
+				<real>200</real>
+			</array>
+			<key>Material</key> <string>Blue</string>
+			<key>CollisionModel</key> <string>Sphere</string>
+			<key>CollisionModelScale</key> <array>
+				<real>60</real>
+				<real>60</real>
+				<real>60</real>
+			</array>
+			<key>Mass</key> <real>1</real>
+		</dict>
+		
+		
+	</dict>
+</dict>
+</plist>

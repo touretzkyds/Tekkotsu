@@ -1,0 +1,40 @@
+#!/bin/sh
+
+out=$1
+if [ -z "$out" ] ; then
+	out="rehab-data.txt"
+fi
+
+walks=( walk.plist walk2.plist walk3.plist )
+
+echo "Width" > $out;
+for x in barriers/* ; do
+	sed 's/[^0-9]//g' <<< "$x"
+done >> "$out"
+
+tmp=$(mktemp -t $0)
+tmp2=$(mktemp -t $0)
+
+for (( w=0; w<${#walks[@]}; ++w )) ; do
+	echo Adaptive-$((w+1)) Adaptive-$((w+1)) > "$tmp"
+	for x in barriers/* ; do
+		n=$(sed 's/[^0-9]//g' <<< "$x")
+		./footsteps-CHIARA -w "${walks[$w]}" -e "$x" -b 60
+	done | grep DATA | cut -f 2,4 >> "$tmp"
+	paste "$out" "$tmp" > "$tmp2"
+	mv "$tmp2" "$out"
+	head "$out"
+done
+
+for (( w=0; w<${#walks[@]}; ++w )) ; do
+	echo Static-$((w+1)) Static-$((w+1)) > "$tmp"
+	for x in barriers/* ; do
+		n=$(sed 's/[^0-9]//g' <<< "$x")
+		./footsteps-CHIARA -w "${walks[$w]}" -e "$x" -b 60 --no-rehab
+	done | grep DATA | cut -f 2,4 >> "$tmp"
+	paste "$out" "$tmp" > "$tmp2"
+	mv "$tmp2" "$out"
+	head "$out"
+done
+
+rm "$tmp" "$tmp2"

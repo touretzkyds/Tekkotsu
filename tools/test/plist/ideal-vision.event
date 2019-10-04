@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<event egid="visObjEGID" sid="0" hid="4294967295" etid="A" time="0" duration="0" magnitude="1">
+  <param name="x1" value="0"/>
+  <param name="y1" value="0"/>
+  <param name="x2" value="0"/>
+  <param name="y2" value="0"/>
+  <param name="clipLeft" value="0"/>
+  <param name="clipRight" value="0"/>
+  <param name="clipTop" value="0"/>
+  <param name="clipBottom" value="0"/>
+</event>

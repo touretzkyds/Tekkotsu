@@ -1,0 +1,35 @@
+# Mirage world for the ARTSI 2012 Robotics Competition.
+#
+# This world consists of a blue square 750 mm on a side, and
+# five red canisters 132 mm high. The task is to push all five
+# canisters into the interior of the square. In a physical
+# realization we used Folgers 14 oz. coffee canisters.
+
+# Make a blue square from two horizontal and two vertical lines.
+
+set length = 750
+set thickness = 25.4
+set start = 500
+
+define line cube material=Blue collision=false
+
+define vline line scale=[length,thickness,1]
+define hline line scale=[thickness,length,1]
+
+hline location=[start,0,0]
+hline location=[start+length,0,0]
+
+vline location=[start+length/2,length/2,0]
+vline location=[start+length/2,-length/2,0]
+
+
+# Make the canisters: locations are random
+
+define canister cylinder material=Red scale=[100,100,132] mass=1
+
+canister location=[1500,-200,66]
+canister location=[700,800,66]
+canister location=[800,-850,66]
+canister location=[1300,500,66]
+canister location=[350,250,66]
+

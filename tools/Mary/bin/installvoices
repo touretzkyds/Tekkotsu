@@ -1,0 +1,4 @@
+#!/bin/sh
+
+java -ea -Dmary.base="/usr/local/Tekkotsu/tools/Mary" -jar "/usr/local/Tekkotsu/tools/Mary"/java/installvoices.jar
+

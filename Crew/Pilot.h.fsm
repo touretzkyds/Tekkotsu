@@ -1,0 +1,1653 @@
+//-*-c++-*-
+#ifndef INCLUDED_Pilot_h_
+#define INCLUDED_Pilot_h_
+
+// Using a single WaypointWalkMC causes problems if we chain a couple
+// of WaypointWalkNodes together because some of the LocomotionEvents
+// indicating termination of the first one may not arrive until after
+// the second node has been activated, causing the second node to
+// terminate prematurely.  The only reason to use shared MCs is for
+// the Chiara's XWalk, which runs through an elaborate (slow) leg
+// initialization sequence on every start().  No other robots have
+// this problem, so the Pilot will only use shared motion commands for
+// the Chiara.  For everyone else, waypointwalk_id will be invalid_MC_ID.
+#ifdef TGT_IS_CHIARA
+#  define PILOT_USES_SHARED_MOTION_COMMANDS
+#endif
+
+// Try using shared motion commands with Calliope
+#  define PILOT_USES_SHARED_MOTION_COMMANDS
+
+
+#include <queue>
+#include <deque>
+
+// Have to do all our #includes explicitly; can't rely on
+// StateMachine.h because of circular dependencies with the Pilot.
+
+#include "Behaviors/Nodes/HeadPointerNode.h"
+#include "Behaviors/Nodes/PostMachine.h"
+#include "Behaviors/Nodes/PostureNode.h"
+#include "Behaviors/Nodes/SpeechNode.h"
+#include "Behaviors/Nodes/WaypointWalkNode.h"
+#include "Behaviors/Nodes/WalkNode.h"
+
+#include "Behaviors/Transitions/CompletionTrans.h"
+#include "Behaviors/Transitions/EventTrans.h"
+#include "Behaviors/Transitions/NullTrans.h"
+#include "Behaviors/Transitions/PilotTrans.h"
+#include "Behaviors/Transitions/SignalTrans.h"
+#include "Behaviors/Transitions/TextMsgTrans.h"
+#include "Behaviors/Transitions/TimeOutTrans.h"
+
+#include "Crew/MapBuilderNode.h"
+#include "Crew/PilotRequest.h"
+
+#include "Motion/MMAccessor.h"
+#include "Motion/WaypointWalkMC.h"
+#include "Motion/WaypointEngine.h"
+#include "Motion/WaypointList.h"
+
+#include "Planners/RRT/GenericRRT.h"
+
+#include "Vision/VisualOdometry/VisualOdometry.h"
+
+#include "DualCoding/DualCoding.h"
+
+using namespace std;
+
+namespace DualCoding {
+
+using namespace PilotTypes;
+
+//! The Pilot is the top-level navigation engine for Tekkotsu.
+/*! The Pilot accepts and executes PilotRequest instances.
+
+  Navigation involves a combination of path planning, odometry, and
+  landmark-based localization.  The Pilot uses the
+  ShapeSpacePlannerXYTheta planner to find a path from the robot's
+  current position to a target location that avoids collisions with
+  worldShS shapes marked as obstacles.
+
+  Once a path is found, the Pilot formulates a <em>navigation
+  plan</em> consisting of a series of travel steps, turn steps, and
+  localization steps.  The navigation planner is somewhat clever about
+  where it places localization steps in order to avoid slowing down
+  the robot's progress too much, but additional optimizations are
+  possible.
+
+  Finally, the Pilot executes the navigation plan.  Because both
+  motion and odometry are subject to error, the robot can drift off
+  course as it travels.  When this is detected via a localization
+  step, the execution engine attempts a correction by inserting a new
+  turn step in the navigation plan and altering the travel step that
+  follows.
+  
+ */
+
+$nodeclass Pilot : StateNode : 
+    requests(), curReq(NULL), idCounter(0),
+    walk_id(MotionManager::invalid_MC_ID), waypointwalk_id(MotionManager::invalid_MC_ID), dispatch_(NULL) {
+
+  typedef unsigned int PilotVerbosity_t;
+  static const PilotVerbosity_t PVstart =     1<<0;
+  static const PilotVerbosity_t PVevents =    1<<1;
+  static const PilotVerbosity_t PVexecute =   1<<2;
+  static const PilotVerbosity_t PVsuccess =   1<<3;
+  static const PilotVerbosity_t PVfailure =   1<<4;
+  static const PilotVerbosity_t PVcomplete =  1<<5;
+  static const PilotVerbosity_t PVabort =     1<<6;
+  static const PilotVerbosity_t PVpop =       1<<7;
+  static const PilotVerbosity_t PVqueued =    1<<8;
+  static const PilotVerbosity_t PVcollision = 1<<9;
+  static const PilotVerbosity_t PVnavStep =   1<<10;
+  static const PilotVerbosity_t PVshowPath =  1<<11;
+
+  static PilotVerbosity_t getVerbosity() { return verbosity; }
+  static void setVerbosity(PilotVerbosity_t v) { verbosity = v; }
+
+  //! Functor used to sort gaze points by their relative bearing from the robot
+  struct BearingLessThan {
+    AngTwoPi hdg;
+    BearingLessThan(const AngTwoPi heading) : hdg(heading) {}
+
+    bool operator()(AngTwoPi a, AngTwoPi b) {
+      AngTwoPi aBearing = a - hdg;
+      AngTwoPi bBearing = b - hdg;
+      return aBearing < bBearing;
+    }
+  };
+
+  $provide std::vector<ShapeRoot> defaultLandmarks;
+  $provide MapBuilderRequest* defaultLandmarkExtractor(NULL);
+  $provide Point initPos;
+  $provide AngTwoPi initHead;
+  $provide PilotRequest planReq;
+  $provide NavigationPlan plan;
+  $provide AngTwoPi maxTurn(M_PI);
+  $provide bool pushingObj;
+
+  virtual void doStart();
+  virtual void doStop();
+  virtual void doEvent();
+  void unwindForNextRequest();
+  unsigned int executeRequest(BehaviorBase* requestingBehavior, const PilotRequest& req);
+  void executeRequest();
+  void requestComplete(PilotTypes::ErrorType_t errorType);
+  void requestComplete(const PilotEvent &e);
+  void pilotPop();
+  void pilotAbort();
+  void changeVelocity(float vx, float vy=0, float va=0);  //!< Change velocity for walk or setVelocity requests
+  void cancelVelocity(); //!< forces completion of a setVelocity operation
+  void setWorldBounds(float minX, float width, float minY, float height);
+  void setWorldBounds(const Shape<PolygonData> &bounds); //!< Set world bounds to constrain the path planner
+  void randomizeParticles(float widthIncr=1000, float heightIncr=1000); //!< Randomize the particles before localization
+  void computeParticleBounds(float widthIncr=0, float heightIncr=0); //!< Compute bounds for random particle distribution based on world shapes
+
+  void setDefaultLandmarks(const std::vector<ShapeRoot> &landmarks);
+  const std::vector<ShapeRoot>& getDefaultLandmarks() { return defaultLandmarks; }
+
+  void setDefaultLandmarkExtractor(const MapBuilderRequest &mapreq);
+  MapBuilderRequest* getDefaultLandmarkExtractor() const { return defaultLandmarkExtractor; }
+
+  MotionManager::MC_ID getWalk_id() const { return walk_id; }
+  MotionManager::MC_ID getWaypointwalk_id() const { return waypointwalk_id; }
+
+  void setupLandmarkExtractor();
+  //! Find the landmarks that should be visible from current location
+  static std::vector<ShapeRoot> calculateVisibleLandmarks(const DualCoding::Point &currentLocation, 
+							  AngTwoPi currentOrientation, AngTwoPi maxTurn,
+							  const std::vector<DualCoding::ShapeRoot> &possibleLandmarks);
+  static bool isLandmarkViewable(const DualCoding::ShapeRoot &selectedLandmark,
+				 const DualCoding::Point &currentLocation, AngTwoPi currentOrientation, AngTwoPi maxTurn);
+
+  //! Returns true if we have enough landmarks to localize.
+  /*! This could be much more sophisticated: taking landmark geometry
+   into account so we don't settle for two adjacent landmarks if a
+   more widely dispersed set is available.
+  */
+  static bool defaultLandmarkExitTest();
+
+  //! Pilot's setAgent is called by its RunMotionModel behavior.  Or user can call directly.
+  /* If @a quiet is false, the new agent position will be announced on
+     cout. If @a updateWayPoint is true, the Pilot's WaypointWalk
+     engine's position will also be updated.  This doesn't seem to be a good idea,
+     as it leads to fights due to the particle filter preventing the Waypoint Walk
+     engine from reaching its destination.  Needs further study.
+   */
+  void setAgent(const Point &loc, AngTwoPi heading, bool quiet=false, bool updateWaypoint=true);
+
+  //================ Background processes ================
+
+  //! Run the particle filter's motion model every few hundred milliseconds to provide odometry
+  $nodeclass RunMotionModel :  StateNode {
+    virtual void doStart();
+    virtual void doEvent();
+  }
+
+  //! Compute optical flow for visual odometry.  Currently disabled.
+  $nodeclass RunOpticalFlow : StateNode {
+    virtual void doStart();
+    virtual void doEvent();
+  }
+
+  //! Collision checker service; its behavior is model-dependent.
+  /*! On the Create and Calliope it uses the bump switches and motor torques
+   */
+  $nodeclass CollisionChecker : StateNode : overcurrentCounter(0) {
+    virtual void doStart();
+    virtual void doEvent();
+    virtual void enableDetection();
+    virtual void disableDetection(unsigned int howlong);
+    virtual void reportCollision();
+    int overcurrentCounter; //!< count Create overcurrent button events to eliminate transients
+    static unsigned int const collisionEnableTimer = 1;
+    static unsigned int const overcurrentResetTimer = 2;
+  }
+
+  //================ Utility Classes Used By Pilot State Machines ================
+
+  $nodeclass ReportCompletion(PilotTypes::ErrorType_t errorType=noError) : StateNode : doStart {
+    VRmixin::isWalkingFlag = false;
+    VRmixin::pilot->requestComplete(errorType);
+  }
+
+  //! Used by Pilot walk machines to decide how to respond to a collision
+  $nodeclass CollisionDispatch : StateNode {
+    virtual void doStart();
+    virtual void doEvent();
+  }
+
+  //! Terminate a walk operation and indicate that a collision was responsible
+  $nodeclass TerminateDueToCollision : StateNode {
+    virtual void doStart();
+  }
+
+  $nodeclass SetupLandmarkExtractor : StateNode : doStart {
+    VRmixin::pilot->setupLandmarkExtractor();
+  }
+
+  $nodeclass PlanPath : StateNode {
+    virtual void doStart() {
+      $reference Pilot::plan, Pilot::initPos, Pilot::initHead, Pilot::planReq;
+      doPlan(plan, initPos, initHead, planReq);
+    }
+		void clearGraphics();
+    void doPlan(NavigationPlan &plan, Point initPos, AngTwoPi initHead, PilotRequest &req);
+		void showPath(const vector<RRTNodeXYTheta::NodeValue_t> &path);
+  }
+
+  //! Construct a navigation plan: mixture of traveling, turning, and localizing steps
+  $nodeclass ConstructNavPlan : StateNode {
+    virtual void doStart() {
+      $reference Pilot::plan, Pilot::initPos, Pilot::initHead, Pilot::planReq;
+      doAnalysis(plan, initPos, initHead, planReq);
+    }
+    void doAnalysis(NavigationPlan &plan, Point initPos, AngTwoPi initHead, PilotRequest &req);
+  }
+
+  //! Execute a navigation plan; used for both goToShape and pushObject
+  $nodeclass ExecutePlan : StateNode {
+    $provide DisplacementInstruction nextDisplacementInstruction;
+    
+    //! distance in mm we can be from a destination point and be "there"
+    static const float allowableDistanceError;
+    static const float allowableAngularError;
+
+    //! Each turn or travel step in a navigation plan is a DisplacementInstruction
+    struct DisplacementInstruction {
+      DisplacementInstruction() : nextPoint(), angleToTurn(0), walkBackward(false) {};
+      fmat::Column<2> nextPoint;
+      AngSignTwoPi angleToTurn;
+      bool walkBackward;
+    };
+
+    enum TurnAdjustType_t {
+      localizationAdjust,
+      collisionAdjust
+    };
+
+    $nodeclass NextTask : StateNode : doStart {
+      $reference Pilot::plan;
+      if ( ++plan.currentStep == plan.steps.end() )
+	postStateCompletion();  // indicate that we're done
+      else
+	postStateSuccess();     // indicate that we have a task to perform
+    }
+
+    //! Perform a travel step by walking forward or backward
+    $nodeclass Walk : WalkNode : doStart {
+      PilotRequest &curReq = *VRmixin::pilot->curReq;
+      $reference ExecutePlan::nextDisplacementInstruction;
+
+#if defined(TGT_IS_CREATE) || defined(TGT_IS_CREATE2)
+      float vx = (curReq.forwardSpeed > 0) ? curReq.forwardSpeed : 50.f;
+#else
+      // these values are for Chiara
+      float vx = (curReq.forwardSpeed > 0) ? curReq.forwardSpeed : 15.f;
+#endif
+      float dist = nextDisplacementInstruction.nextPoint.norm();
+      if ( nextDisplacementInstruction.walkBackward )
+				dist *= -1;
+      getMC()->setTargetDisplacement(dist,0,0,vx,0,0);
+      motman->setPriority(VRmixin::pilot->getWalk_id(),MotionManager::kStdPriority);
+    }
+
+    //! Perform a turn step
+    $nodeclass Turn : WalkNode : doStart {
+      PilotRequest &curReq = *VRmixin::pilot->curReq;
+      $reference ExecutePlan::nextDisplacementInstruction;
+
+      // std::cout<<"turning \n";
+
+#if defined(TGT_IS_CREATE) || defined(TGT_IS_CREATE2)
+      float va = (curReq.turnSpeed > 0) ? curReq.turnSpeed : 0.25f;
+#else
+      // these values are for Chiara
+      float va = (curReq.turnSpeed > 0) ? curReq.turnSpeed : 0.1f;
+#endif
+      float turnAngle = nextDisplacementInstruction.angleToTurn;
+      getMC()->setTargetDisplacement(0,0,turnAngle,0,0,va);
+      motman->setPriority(VRmixin::pilot->getWalk_id(),MotionManager::kStdPriority);
+    }
+
+    //! Perform an adjusting turn if we localized successfully, or a collision occurred
+    $nodeclass AdjustHeading(const ExecutePlan::TurnAdjustType_t adjustmentType) : WalkNode {
+			virtual void doStart() {
+				$reference Pilot::plan;
+				doAdjust(plan);
+			}
+			virtual void doAdjust(NavigationPlan &plan);
+    }
+
+    $nodeclass ExecuteStep : StateNode {
+      virtual void doStart() {
+				$reference ExecutePlan::nextDisplacementInstruction;
+				$reference Pilot::plan;
+				$reference Pilot::pushingObj;
+
+				doExecute(plan, nextDisplacementInstruction, pushingObj);
+      }
+
+      virtual void doExecute(NavigationPlan &plan, 
+														 DisplacementInstruction &nextDisplacementInstruction, 
+														 const bool pushType);
+    }
+
+    $setupmachine{ // set up ExecutePlan
+      execute : ExecuteStep
+      execute =S<NavigationStepType_t>(localizeStep)=> localizer
+      execute =S<NavigationStepType_t>(travelStep)=> walker
+      execute =S<NavigationStepType_t>(turnStep)=> turner
+      execute =S<NavigationStepType_t>(headingStep)=> turner
+      execute =S<NavigationStepType_t>(preTravelStep)=> pretravel
+      execute =S=> next
+      execute =C=> PostMachineCompletion
+
+      localizer: LocalizationUtility
+      localizer =C=> adjust
+      localizer =F=> next
+
+			adjust: AdjustHeading(localizationAdjust)[setMC(VRmixin::pilot->walk_id)] =C=> next
+
+      walker: Walk[setMC(VRmixin::pilot->walk_id)] =C=> next
+
+      turner: Turn[setMC(VRmixin::pilot->walk_id)] =C=> next
+      
+      pretravel: Turn[setMC(VRmixin::pilot->walk_id)] =C=> execute
+
+      next: NextTask
+      next =S=> execute
+      next =C=> PostMachineCompletion
+
+      collisionDispatch: CollisionDispatch
+      {collisionDispatch, localizer, walker, turner} =PILOT(collisionDetected)=> term
+
+      term: TerminateDueToCollision
+    }
+  }
+  
+  //================ LocalizationUtility ================
+
+  //! State machine called by various Pilot functions to perform a landmark search and localization.
+  $nodeclass LocalizationUtility : StateNode {
+
+    $provide AngTwoPi initialHeading;
+
+    $nodeclass TakeInitialPicture : MapBuilderNode(MapBuilderRequest::localMap) : doStart {
+      $reference LocalizationUtility::initialHeading;
+      initialHeading = VRmixin::theAgent->getOrientation();
+      $reference Pilot::maxTurn;
+      maxTurn = M_PI;
+      if ( VRmixin::pilot->curReq == NULL // needed to prevent crash if behavior is shut down in the ControllerGUI
+					 || VRmixin::pilot->curReq->landmarkExtractor == NULL ) {
+				cancelThisRequest();
+				return;
+      }
+      mapreq = *VRmixin::pilot->curReq->landmarkExtractor;
+      mapreq.clearLocal = true;
+    }
+
+    $nodeclass CheckEnoughLandmarks : StateNode : doStart {
+      if ( VRmixin::pilot->curReq != NULL // needed to prevent crash if behavior is shut down in the ControllerGUI
+					 && VRmixin::pilot->curReq->landmarkExitTest() )
+				postStateSuccess();
+      else
+				postStateFailure();
+    }
+
+#ifdef TGT_HAS_HEAD
+    // Use gazepoints since we have a pan/tilt available
+    $provide std::deque<Point> gazePoints;
+
+    $nodeclass ChooseGazePoints : StateNode {
+      virtual void doStart() {
+				$reference LocalizationUtility::gazePoints;
+				setupGazePoints(gazePoints);
+      }
+      void setupGazePoints(std::deque<Point> &gazePoints);
+    }
+
+    $nodeclass PrepareForNextGazePoint : StateNode {
+      virtual void doStart() {
+	// This node just does a quick check because we'll be using the
+	// pan/tilt for the actual work.  The no-head version (below)
+	// will turn the body.
+				$reference LocalizationUtility::gazePoints;
+				if ( gazePoints.empty() )
+					postStateFailure();
+				else
+					postStateCompletion();
+      }
+      void setMC(const MotionManager::MC_ID) {}  // dummy for compatibility with headless case below
+    }
+
+    $nodeclass TakeNextPicture : MapBuilderNode(MapBuilderRequest::localMap) : doStart {
+      {
+				GET_SHAPE(gazePoint, PointData, VRmixin::localShS);
+				if ( gazePoint.isValid() )
+					VRmixin::localShS.deleteShape(gazePoint);
+      }
+      // send the MapBuilder to the next gaze point
+      $reference LocalizationUtility::gazePoints;
+      NEW_SHAPE(gazePoint, PointData, new PointData(VRmixin::localShS, gazePoints.front()));
+			//std::cout << "Pilot localizer moving to gazepoint " << gazePoints.front() << std::endl;
+      gazePoints.pop_front();
+      mapreq = *VRmixin::pilot->curReq->landmarkExtractor;
+      mapreq.searchArea = gazePoint;
+      mapreq.clearLocal = false;
+    }
+
+    $nodeclass ReturnToInitialHeading : StateNode {
+      virtual void doStart() {
+        // dummy node since we never moved the body (because we have a pan/tilt)
+        postStateCompletion();
+      }
+      void setMC(const MotionManager::MC_ID) {}  // dummy for compatibility with headless case below
+    }
+
+#else
+    // No pan/tilt available; must turn the body to acquire more landmarks
+    $provide std::deque<AngTwoPi> gazeHeadings;
+
+    $nodeclass ChooseGazePoints : StateNode {
+      virtual void doStart() {
+	$reference LocalizationUtility::initialHeading;
+	$reference LocalizationUtility::gazeHeadings;
+	$reference Pilot::maxTurn;
+
+	setupGazeHeadings(initialHeading, gazeHeadings, maxTurn);
+      }
+      void setupGazeHeadings(const AngTwoPi initialHeading, std::deque<AngTwoPi> &gazeHeadings, const AngTwoPi maxTurn);
+    }
+
+    $nodeclass PrepareForNextGazePoint : WalkNode {
+      virtual void doStart() {
+	$reference LocalizationUtility::gazeHeadings;
+        $reference Pilot::maxTurn;
+	prepareForNext(gazeHeadings, maxTurn);
+      }
+      void prepareForNext(std::deque<AngTwoPi> &gazeHeadings, const AngTwoPi maxTurn);
+    }
+
+    $nodeclass TakeNextPicture : MapBuilderNode(MapBuilderRequest::localMap) : doStart {
+      mapreq =  *VRmixin::pilot->curReq->landmarkExtractor;
+      mapreq.clearLocal = false;
+      $reference LocalizationUtility::initialHeading;
+      const AngTwoPi curHeading = VRmixin::theAgent->getOrientation();
+      const float headingShift = float(curHeading-initialHeading);
+      mapreq.baseTransform.rotation() = fmat::rotationZ(headingShift);
+
+    }
+
+    $nodeclass ReturnToInitialHeading : WalkNode : constructor {
+      setMC(VRmixin::pilot->getWaypointwalk_id());
+      $endnodemethod;
+
+      virtual void doStart() {
+	static const float allowableAngularError = 0.10f;
+	$reference LocalizationUtility::initialHeading;
+	const AngTwoPi curHeading = VRmixin::theAgent->getOrientation();
+	const AngSignPi turnAmount = AngSignPi(initialHeading - curHeading);
+	if ( fabs(turnAmount) < allowableAngularError ) {
+	  postStateCompletion();
+	  return;
+	}
+	getMC()->setTargetDisplacement(0,0,turnAmount,0);
+	motman->setPriority(VRmixin::pilot->getWalk_id(),MotionManager::kStdPriority);
+      }
+    }
+
+#endif // TGT_HAS_HEAD
+
+    $nodeclass Localize : StateNode {
+      static float const minConfidentWeight;
+      virtual void doStart();
+    }
+
+    $setupmachine{     // LocalizationUtility
+
+      take: TakeInitialPicture
+      take =F=> outofoptions
+      take =MAP=> checkEnough
+
+      checkEnough: CheckEnoughLandmarks
+      checkEnough =S=> loc
+      checkEnough =F=> ChooseGazePoints =N=> loop
+
+      loop: PrepareForNextGazePoint[setMC(VRmixin::pilot->getWaypointwalk_id())]
+      loop =C=> StateNode =T(1000)=> takenextpic
+			loop =S=> loop   // skip this gaze point (maxTurn exceeded?) and go to the next
+      loop =F=> outofoptions
+
+      takenextpic: TakeNextPicture =MAP=> checkEnough2
+
+      checkEnough2: CheckEnoughLandmarks
+      checkEnough2 =S=> ReturnToInitialHeading[setMC(VRmixin::pilot->getWaypointwalk_id())] =C=> loc
+      checkEnough2 =F=> loop
+
+			loc: Localize =N=> PostMachineSuccess =N=> PostMachineCompletion
+
+      outofoptions: ReturnToInitialHeading =C=> PostMachineFailure =N=> PostMachineCompletion  // ran out of gaze points to try
+    }
+  }
+
+  //================ LocalizationMachine ================
+
+  $nodeclass LocalizationMachine : StateNode {
+    $setupmachine{
+      SetupLandmarkExtractor =N=> loc
+
+      loc: LocalizationUtility
+      loc =S=> PostMachineSuccess
+      loc =F=> PostMachineFailure
+    }
+  }
+
+  //================ WalkMachine ================
+
+  $nodeclass WalkMachine : StateNode {
+
+    $nodeclass WalkMachine_Walker : WalkNode {
+      virtual void doStart();
+    }
+
+    $nodeclass SetWalking : StateNode : doStart {
+      VRmixin::isWalkingFlag = true;
+      // cout << "Turning On Walk" << endl;
+    }
+
+    $setupmachine{
+    startnode: SetWalking =N=> {walker, collisionDispatch}
+      walker: WalkMachine_Walker[setMC(VRmixin::pilot->getWalk_id())]
+      walker =C=> ReportCompletion
+      collisionDispatch: CollisionDispatch
+      {collisionDispatch, walker} =PILOT(collisionDetected)=> TerminateDueToCollision
+    }
+
+  }
+
+  //================ WaypointWalkMachine ================
+
+  $nodeclass WaypointWalkMachine : StateNode {
+
+    $nodeclass WaypointWalkMachine_WaypointWalker : WaypointWalkNode {
+      virtual void doStart();
+    }
+
+    $nodeclass SetWalking : StateNode : doStart {
+      VRmixin::isWalkingFlag = true;
+      // cout << "Turning On Walk" << endl;
+    }
+
+    $setupmachine{
+      startnode: StateNode =N=> {walker, collisionDispatch}
+      walker: WaypointWalkMachine_WaypointWalker[setMC(VRmixin::pilot->getWaypointwalk_id())]
+      walker =C=> ReportCompletion
+      collisionDispatch: CollisionDispatch
+      {collisionDispatch, walker} =PILOT(collisionDetected)=> TerminateDueToCollision
+    }
+
+  }		
+
+  //=============== SetVelocityMachine ==================
+  $nodeclass SetVelocityMachine : StateNode {
+
+    $nodeclass SetVelocityMachine_Walker : WalkNode {
+      virtual void doStart();
+    }
+
+    $setupmachine{
+      startnode: StateNode =N=> {walker, collisionDispatch}
+      walker: SetVelocityMachine_Walker[setMC(VRmixin::pilot->getWalk_id())]
+      walker =C=> StateNode =T(2000)=> ReportCompletion  // allow time for legs to settle (Chiara)
+      collisionDispatch: CollisionDispatch
+      {collisionDispatch, walker} =PILOT(collisionDetected)=> TerminateDueToCollision
+    }
+
+  }
+
+  //================ GoToShapeMachine ================
+
+  $nodeclass GoToShapeMachine : StateNode {
+
+    //! Check that the request's goToShape parameters are valid
+    $nodeclass CheckParameters : StateNode {
+      virtual void doStart();
+    }
+
+    $nodeclass SetUpPlanNode : StateNode : doStart {
+        $reference Pilot::initPos;
+        $reference Pilot::initHead;
+        $reference Pilot::planReq;
+        $reference Pilot::pushingObj;
+
+        initPos = VRmixin::theAgent->getCentroid();
+        initHead = VRmixin::theAgent->getOrientation();
+        planReq = *VRmixin::pilot->curReq;
+        pushingObj = false;
+    }
+
+    $nodeclass SetMaxTurn : StateNode : doStart {
+      $reference Pilot::maxTurn;
+      maxTurn = M_PI;
+    }
+
+    virtual void  setup() {   // setup GoToShapeMachine
+
+      $statemachine{
+        SetMaxTurn =N=> check
+
+        check: CheckParameters
+        check =F=> ReportCompletion(invalidRequest)
+        check =S=> SetupLandmarkExtractor =N=> setupplan // took out initial localization
+
+        loc: LocalizationUtility
+        loc =S=> setupplan
+        loc =F=> setupplan  // if we can't localize, use last known position; maybe say something first?
+
+        setupplan: ClearOldPath =N=> SetUpPlanNode =N=> planpath
+
+        planpath: PlanPath
+        planpath =S<GenericRRTBase::PlanPathResultCode>(GenericRRTBase::START_COLLIDES)=> ReportCompletion(startCollides)
+        planpath =S<GenericRRTBase::PlanPathResultCode>(GenericRRTBase::END_COLLIDES)=> ReportCompletion(endCollides)
+        planpath =S<GenericRRTBase::PlanPathResultCode>(GenericRRTBase::MAX_ITER)=> ReportCompletion(noPath)
+        planpath =C=> constructnavplan
+        planpath =F=> ReportCompletion  // if executePath == false, we're done
+
+        collisionDispatch: CollisionDispatch
+
+        constructnavplan: ConstructNavPlan
+        constructnavplan =C=> {execute, collisionDispatch}
+
+        execute: ExecutePlan =C=> PostMachineCompletion
+
+        {collisionDispatch, execute} =PILOT(collisionDetected)=> term
+
+        term: TerminateDueToCollision
+
+       // term =C=> LostLocalizationUtility =C=> AdjustHeading(collisionType) =C=> {execute, collisionDispatch}
+      }
+    }
+  } //GoToShapeMachine
+  
+  $nodeclass ClearOldPath : StateNode : doStart {
+    GET_SHAPE(plannedInitToObjPath, GraphicsData, VRmixin::worldShS);
+    plannedInitToObjPath.deleteShape();
+    GET_SHAPE(plannedObjToDestPath, GraphicsData, VRmixin::worldShS);
+    plannedObjToDestPath.deleteShape();
+    GET_SHAPE(plannedPath, GraphicsData, VRmixin::worldShS);
+    plannedPath.deleteShape();
+  }
+  
+  $nodeclass LookForObject : MapBuilderNode : doStart {
+    //MapBuilderRequest *m = VRmixin::pilot->curReq->objectExtractor;
+    //if ( m == NULL )
+    //  cancelThisRequest();
+    //else
+    //  mapreq = *m;
+      
+    MapBuilderRequest *m = new MapBuilderRequest(MapBuilderRequest::localMap);
+    std::vector<Point> ptVec;
+    Point pt1 = Point(100, 100, 0, allocentric);
+    Point pt2 = Point(100, -100, 0, allocentric);
+    Point pt3 = Point(-100, -100, 0, allocentric);
+    Point pt4 = Point(-100, 100, 0, allocentric);
+    Point objPt = VRmixin::pilot->curReq->objectShape->getCentroid();
+    ptVec.push_back(objPt);
+    ptVec.push_back(objPt+pt1);
+    ptVec.push_back(objPt+pt2);
+    ptVec.push_back(objPt+pt3);
+    ptVec.push_back(objPt+pt4);
+    ptVec.push_back(objPt);
+    NEW_SHAPE_N(polygon, PolygonData, new PolygonData(VRmixin::worldShS, ptVec, false));
+    polygon->setObstacle(false);
+    m->searchArea = polygon;
+    m->addAttributes(VRmixin::pilot->curReq->objectShape);
+    mapreq = *m;
+  }
+  
+  $nodeclass LookForTarget : MapBuilderNode : doStart {
+    //MapBuilderRequest *m = VRmixin::pilot->curReq->objectExtractor;
+    //if ( m == NULL )
+    //  cancelThisRequest();
+    //else
+    //  mapreq = *m;
+      
+    MapBuilderRequest *m = new MapBuilderRequest(MapBuilderRequest::localMap);
+    std::vector<Point> ptVec;
+    Point pt1 = Point(100, 100, 0, allocentric);
+    Point pt2 = Point(100, -100, 0, allocentric);
+    Point pt3 = Point(-100, -100, 0, allocentric);
+    Point pt4 = Point(-100, 100, 0, allocentric);
+    Point ctPt = VRmixin::pilot->curReq->targetShape->getCentroid();
+    ptVec.push_back(ctPt);
+    ptVec.push_back(ctPt+pt1);
+    ptVec.push_back(ctPt+pt2);
+    ptVec.push_back(ctPt+pt3);
+    ptVec.push_back(ctPt+pt4);
+    ptVec.push_back(ctPt);
+    NEW_SHAPE_N(polygon, PolygonData, new PolygonData(VRmixin::worldShS, ptVec, false));
+    polygon->setObstacle(false);
+    m->searchArea = polygon;
+    m->addAttributes(VRmixin::pilot->curReq->objectShape);
+    mapreq = *m;
+  }
+
+  //================ PushObjectMachine ================
+
+  $nodeclass PushObjectMachine : StateNode {
+  
+    //static const int backupDist = 600;
+    //static const int obstDist = 150;
+    //static const int robotDiam = 150;
+    //static const int objSize = 50;
+    static int backupDist;
+    static int obstDist;
+    static int robotDiam;
+    static int objSize;
+    
+    static float prePushTurnSpeed;
+    static float prePushForwardSpeed;
+    static float pushTurnSpeed;
+    static float pushForwardSpeed;
+
+    $provide NavigationPlan initToObjPlan;
+    $provide NavigationPlan objToDestPlan;
+    
+    $provide Point startPos;
+    $provide Point objPos;
+    $provide Point endPos;
+    
+    $provide AngTwoPi startOri;
+    $provide AngTwoPi acquireOri;
+    $provide AngTwoPi backupOri;
+    
+    $provide Point backupPt;
+    $provide Point acquirePt;
+    
+    $provide bool useSimpleWayObjToDest;
+    $provide bool useSimpleWayInitToObj;
+
+    $provide bool isObs;
+
+    static Point FindFreeSpace(ShapeRoot &targetShape, int targetDistance, int obstacleDistance, AngTwoPi orientation) {
+      float diagonalLength = sqrt(VRmixin::worldSkS.getWidth()*VRmixin::worldSkS.getWidth() + 
+				  VRmixin::worldSkS.getHeight()*VRmixin::worldSkS.getHeight());
+      float scale = diagonalLength / (obstacleDistance * 10);
+      float setx = (VRmixin::worldSkS.getHeight()/2) - targetShape->getCentroid().coordX() * scale;
+      float sety = (VRmixin::worldSkS.getWidth()/2) - targetShape->getCentroid().coordY() * scale;
+      VRmixin::worldSkS.setTmat(scale, setx, sety);
+      bool isObs = targetShape->isObstacle();
+      targetShape->setObstacle(false);
+      
+      NEW_SKETCH_N(obstacles, bool, visops::zeros(VRmixin::worldSkS));
+      NEW_SHAPEVEC(ellipses, EllipseData, select_type<EllipseData>(VRmixin::worldShS));
+      SHAPEVEC_ITERATE(ellipses, EllipseData, ellipse) {
+        if (ellipse->isObstacle()) {
+          NEW_SKETCH_N(s1, bool, ellipse->getRendering());
+          obstacles |= s1;
+        }
+      END_ITERATE }
+      NEW_SHAPEVEC(blobs, BlobData, select_type<BlobData>(VRmixin::worldShS));
+      SHAPEVEC_ITERATE(blobs, BlobData, blob) {
+        if (blob->isObstacle()) {
+          NEW_SKETCH_N(s1, bool, blob->getRendering());
+          obstacles |= s1;
+        }
+      END_ITERATE }
+      NEW_SHAPEVEC(lines, LineData, select_type<LineData>(VRmixin::worldShS));
+      SHAPEVEC_ITERATE(lines, LineData, line) {
+        if (line->isObstacle()) {
+          NEW_SKETCH_N(s1, bool, line->getRendering());
+          obstacles |= s1;
+        }
+      END_ITERATE }
+      
+      NEW_SKETCH_N(dist, float, visops::edist(obstacles));
+      NEW_SKETCH_N(cand, bool, dist > obstacleDistance*scale);
+      //NEW_SKETCH_N(cand, bool, (dist > distance*scale) & (dist < (distance+10)*scale));
+      
+      //NEW_SHAPE(point, PointData, new PointData(VRmixin::worldShS, targetPoint));
+      //NEW_SKETCH_N(target, bool, point->getRendering());
+      NEW_SKETCH_N(target, bool, targetShape->getRendering());
+      NEW_SKETCH_N(tdist, float, visops::ebdist(target, !cand, 2*diagonalLength));
+      NEW_SKETCH_N(cdist, bool, (tdist >= targetDistance*scale) & (tdist <= targetDistance*scale+1));
+      //NEW_SKETCH_N(cdist, bool, tdist2 & cand);
+      
+      AngTwoPi ori = orientation + AngTwoPi(M_PI);
+      //float length = sqrt(VRmixin::worldSkS.getWidth()*VRmixin::worldSkS.getWidth() + VRmixin::worldSkS.getHeight()*VRmixin::worldSkS.getHeight()) / VRmixin::worldSkS.getScaleFactor();
+      float length = diagonalLength / scale;
+      Point bp(targetShape->getCentroid().coordX()+length*std::cos(ori), targetShape->getCentroid().coordY()+length*std::sin(ori), 0, allocentric);
+      NEW_SHAPE(line, LineData, new LineData(VRmixin::worldShS, targetShape->getCentroid(), bp));
+      line->setColor("red");
+      NEW_SKETCH_N(ls, bool, line->getRendering());
+      NEW_SKETCH_N(lsdist, float, visops::edist(ls));
+      NEW_SKETCH_N(ldist, float, visops::edist(ls) * cdist);
+      line.deleteShape();
+      
+      int pos = ldist->findMinPlus();
+      if (pos==-1) return Point(0,0,0,unspecified);
+      NEW_SKETCH_N(final, bool, visops::zeros(ldist));
+      final[pos] = true;
+      final->setColor("green");
+      targetShape->setObstacle(isObs);
+      Point pt = final->indexPoint(pos);
+      std::cout << "Found free space at point: " << pt << std::endl;
+      return pt;
+    }
+    
+    static Point FindFreeSpace2(ShapeRoot &targetShape, int targetDistance, int obstacleDistance, AngTwoPi orientation) {
+      float diagonalLength = sqrt(VRmixin::worldSkS.getWidth()*VRmixin::worldSkS.getWidth() + VRmixin::worldSkS.getHeight()*VRmixin::worldSkS.getHeight());
+      float scale = diagonalLength / (obstacleDistance * 10);
+      float setx = (VRmixin::worldSkS.getHeight()/2) - targetShape->getCentroid().coordX() * scale;
+      float sety = (VRmixin::worldSkS.getWidth()/2) - targetShape->getCentroid().coordY() * scale;
+      VRmixin::worldSkS.setTmat(scale, setx, sety);
+      bool isObs = targetShape->isObstacle();
+      targetShape->setObstacle(false);
+      
+      NEW_SKETCH(obstacles, bool, visops::zeros(VRmixin::worldSkS));
+      NEW_SHAPEVEC(ellipses, EllipseData, select_type<EllipseData>(VRmixin::worldShS));
+      SHAPEVEC_ITERATE(ellipses, EllipseData, ellipse) {
+        if (ellipse->isObstacle()) {
+          NEW_SKETCH(s1, bool, ellipse->getRendering());
+          obstacles |= s1;
+        }
+      END_ITERATE }
+      NEW_SHAPEVEC(blobs, BlobData, select_type<BlobData>(VRmixin::worldShS));
+      SHAPEVEC_ITERATE(blobs, BlobData, blob) {
+        if (blob->isObstacle()) {
+          NEW_SKETCH(s1, bool, blob->getRendering());
+          obstacles |= s1;
+        }
+      END_ITERATE }
+      NEW_SHAPEVEC(lines, LineData, select_type<LineData>(VRmixin::worldShS));
+      SHAPEVEC_ITERATE(lines, LineData, line) {
+        if (line->isObstacle()) {
+          NEW_SKETCH(s1, bool, line->getRendering());
+          obstacles |= s1;
+        }
+      END_ITERATE }
+      
+      NEW_SKETCH(dist, float, visops::edist(obstacles));
+      NEW_SKETCH(cand, bool, dist > obstacleDistance*scale);
+      //NEW_SKETCH(cand, bool, (dist > distance*scale) & (dist < (distance+10)*scale));
+      
+      //NEW_SHAPE(point, PointData, new PointData(VRmixin::worldShS, targetPoint));
+      //NEW_SKETCH(target, bool, point->getRendering());
+      NEW_SKETCH(target, bool, targetShape->getRendering());
+      NEW_SKETCH(tdist, float, visops::ebdist(target, !cand, 2*diagonalLength));
+      NEW_SKETCH(cdist, bool, (tdist >= targetDistance*scale) & (tdist <= targetDistance*scale+1));
+      //NEW_SKETCH(cdist, bool, tdist2 & cand);
+      
+      AngTwoPi ori = orientation + AngTwoPi(M_PI);
+      //float length = sqrt(VRmixin::worldSkS.getWidth()*VRmixin::worldSkS.getWidth() + VRmixin::worldSkS.getHeight()*VRmixin::worldSkS.getHeight()) / VRmixin::worldSkS.getScaleFactor();
+      float length = diagonalLength / scale;
+      Point bp(targetShape->getCentroid().coordX()+length*std::cos(ori), targetShape->getCentroid().coordY()+length*std::sin(ori), 0, allocentric);
+      NEW_SHAPE(line, LineData, new LineData(VRmixin::worldShS, targetShape->getCentroid(), bp));
+      line->setColor("red");
+      NEW_SKETCH(ls, bool, line->getRendering());
+      NEW_SKETCH(lsdist, float, visops::edist(ls));
+      NEW_SKETCH(ldist, float, visops::edist(ls) * cdist);
+      line.deleteShape();
+      
+      int pos = ldist->findMinPlus();
+      if (pos==-1) return Point(0,0,0,unspecified);
+      NEW_SKETCH(final, bool, visops::zeros(ldist));
+      final[pos] = true;
+      final->setColor("green");
+      targetShape->setObstacle(isObs);
+      Point pt = final->indexPoint(pos);
+      std::cout << "Found free space at point: " << pt << std::endl;
+      return pt;
+    }
+	
+    $nodeclass SetMaxTurn(float value=M_PI) : StateNode : doStart {
+      $reference Pilot::maxTurn;
+      maxTurn = value;
+    }
+
+    $nodeclass CheckParameters : StateNode {
+      virtual void doStart();
+    }
+
+    $nodeclass SetUpObjToDest : StateNode : doStart {
+      $reference Pilot::initPos, Pilot::planReq, Pilot::plan, Pilot::pushingObj;
+      $reference PushObjectMachine::startPos, PushObjectMachine::objPos, PushObjectMachine::endPos, PushObjectMachine::startOri;
+      $reference PushObjectMachine::isObs;
+      
+	  //std::cout << "--------SetUpObjToDest" << std::endl;
+      startPos = VRmixin::theAgent->getCentroid();
+      objPos = VRmixin::pilot->curReq->objectShape->getCentroid();
+      endPos = VRmixin::pilot->curReq->targetShape->getCentroid();
+      startOri = VRmixin::theAgent->getOrientation();
+      
+      plan.clear();
+      initPos = objPos;
+      planReq = *VRmixin::pilot->curReq;
+      isObs = planReq.objectShape->isObstacle();
+      planReq.objectShape->setObstacle(false);
+      pushingObj = false;
+      planReq.displayPath = false;
+    }
+
+    $nodeclass AddBackupPt : StateNode : doStart {
+      /*  NEEDS TO BE UPDATED
+      $reference Pilot::plan;
+      $reference PushObjectMachine::endPos, PushObjectMachine::backupPt, PushObjectMachine::backupOri;
+      
+      //std::cout << "--------AddBackupPt" << std::endl;
+      size_t s = plan.path.size();
+      Point final = plan.path[s-1];
+      Point prev = plan.path[s-2];
+      Point vec = final-prev;
+      AngTwoPi ori = AngTwoPi(std::atan2(vec.coordY(), vec.coordX()));
+      Point temp = VRmixin::pilot->curReq->objectShape->getCentroid();
+      VRmixin::pilot->curReq->objectShape->setPosition(final);
+      //std::cout << "tempBackupOri: " << ori << std::endl;
+      backupPt = FindFreeSpace(VRmixin::pilot->curReq->objectShape, backupDist, obstDist, ori);
+      VRmixin::pilot->curReq->objectShape->setPosition(temp);
+      ReferenceFrameType_t t = backupPt.getRefFrameType();
+      if (t == unspecified) {
+        std::cout << "Not enough space at destination." << std::endl;
+        postStateFailure();
+        return;
+      }
+      Point vec2 = endPos - backupPt;
+      backupOri = AngTwoPi(std::atan2(vec2.coordY(), vec2.coordX()));
+      //std::cout << "backupPt: " << backupPt << ", backupOri: " << backupOri << std::endl;
+      */
+      postStateSuccess();
+    }
+
+    $nodeclass AddAcquirePt : StateNode : doStart {
+      /* NEEDS TO BE UPDATED
+      $reference Pilot::plan;
+      $reference PushObjectMachine::objPos, PushObjectMachine::acquirePt, PushObjectMachine::acquireOri;
+      
+      //std::cout << "--------AddAcquirePt" << std::endl;
+      Point first = plan.path[0];
+      Point next = plan.path[1];
+      Point vec = next-first;
+      AngTwoPi ori = AngTwoPi(std::atan2(vec.coordY(), vec.coordX()));
+      //std::cout << "tempAcquireOri: " << ori << std::endl;
+      acquirePt = FindFreeSpace(VRmixin::pilot->curReq->objectShape, backupDist, obstDist, ori);
+      ReferenceFrameType_t t = acquirePt.getRefFrameType();
+      if (t == unspecified) {
+        std::cout << "Not enough space for acquiring object." << std::endl;
+        postStateFailure();
+        return;
+      }
+      Point vec2 = objPos - acquirePt;
+      acquireOri = AngTwoPi(std::atan2(vec2.coordY(), vec2.coordX()));
+      //std::cout << "acquirePt: " << acquirePt << ", acquireOri: " << acquireOri << std::endl;
+      */
+      postStateSuccess();
+    }
+    
+    $nodeclass SetUpObjToDest2 : StateNode : doStart {
+      $reference Pilot::initPos, Pilot::initHead, Pilot::planReq, Pilot::plan, Pilot::pushingObj;
+      $reference PushObjectMachine::backupPt, PushObjectMachine::objPos, PushObjectMachine::acquireOri, PushObjectMachine::backupOri;
+      
+	  //std::cout << "--------SetUpObjToDest2" << std::endl;
+      plan.clear();
+      
+      initPos = objPos;
+      initHead = acquireOri;
+      planReq = *VRmixin::pilot->curReq;
+      planReq.objectShape->setObstacle(false);
+      pushingObj = true;
+      NEW_SHAPE(backup, PointData, new PointData(VRmixin::worldShS, backupPt));
+      backup->setObstacle(false);
+      planReq.targetShape = backup;
+      planReq.targetHeading = backupOri;
+      planReq.displayPath = false;
+    }
+    
+    $nodeclass SetUpInitToObj : StateNode : doStart {
+      $reference Pilot::initPos, Pilot::initHead, Pilot::planReq, Pilot::plan, Pilot::pushingObj;
+      $reference PushObjectMachine::startPos, PushObjectMachine::startOri, PushObjectMachine::acquirePt, PushObjectMachine::acquireOri;
+      
+	  //std::cout << "--------SetUpInitToObj" << std::endl;
+      plan.clear();
+      
+      initPos = startPos;
+      initHead = startOri;
+      planReq = *VRmixin::pilot->curReq;
+      planReq.objectShape->setObstacle(true);
+      pushingObj = false;
+      NEW_SHAPE(acquire, PointData, new PointData(VRmixin::worldShS, acquirePt));
+      acquire->setObstacle(false);
+      planReq.targetShape = acquire;
+      planReq.targetHeading = acquireOri;
+      planReq.displayPath = false;
+      planReq.turnSpeed = prePushTurnSpeed;
+      planReq.forwardSpeed = prePushForwardSpeed;
+    }
+    
+    $nodeclass ChoosePathInitToObj : StateNode : doStart {
+      $reference Pilot::plan;
+      $reference PushObjectMachine::startPos, PushObjectMachine::objPos, PushObjectMachine::acquireOri;
+      $reference PushObjectMachine::objToDestPlan;
+      
+	  //std::cout << "--------ChoosePathInitToObj" << std::endl;
+      objToDestPlan.clear();
+      objToDestPlan.path = plan.path;
+      
+      Point vec = objPos-startPos;
+      AngTwoPi ori = AngTwoPi(std::atan2(vec.coordY(), vec.coordX()));
+      float d = vec.xyNorm();
+      float oriDiff = std::abs(AngSignPi(ori-acquireOri));
+      //std::cout << "d: " << d << ", oriDiff:" << oriDiff << ", ori: " << ori << ", acquireOri: " << acquireOri << std::endl;
+      if (d < backupDist*1.2 && oriDiff < M_PI/180*45) {
+        //FetchObj
+        std::cout << "Use simple way (straight line) from init to obj" << std::endl;
+        postStateSuccess();
+      }
+      else {
+        //plan path
+        std::cout << "Use complex way (need path planning) from init to obj" << std::endl;
+        postStateFailure();
+      }
+    }
+    
+    /*$nodeclass ChoosePathObjToDest : StateNode : doStart {
+      //$reference PushObjectMachine::endPos, PushObjectMachine::backupOri;
+      
+	  std::cout << "--------ChoosePathObjToDest" << std::endl;
+      Point curPos = VRmixin::theAgent->getCentroid();
+      //AngTwoPi curHead = VRmixin::theAgent->getOrientation();
+      Point vec = endPos-curPos;
+      AngTwoPi ori = AngTwoPi(std::atan2(vec.coordY(), vec.coordX()));
+      float d = vec.xyNorm();
+      float oriDiff = std::abs(AngSignPi(ori-backupOri));
+      std::cout << "d: " << d << ", oriDiff:" << oriDiff << ", ori: " << ori << ", backupOri: " << backupOri << std::endl;
+      if (d < backupDist*1.05 && oriDiff < M_PI/180*30) {
+        //AdjustPush
+        std::cout << "Use simple way (straight line) from obj to dest" << std::endl;
+        postStateSuccess();
+      }
+      else {
+        //plan path
+        std::cout << "Use complex way (need path planning) from obj to dest" << std::endl;
+        postStateFailure();
+      }
+    }*/
+    
+    $nodeclass ChoosePathObjToDest : StateNode : doStart {
+      $reference Pilot::plan;
+      $reference PushObjectMachine::endPos, PushObjectMachine::backupPt, PushObjectMachine::backupOri;
+      $reference PushObjectMachine::initToObjPlan;
+      
+	  //std::cout << "--------ChoosePathObjToDest" << std::endl;
+      initToObjPlan.clear();
+      initToObjPlan.path = plan.path;
+      initToObjPlan.steps = plan.steps;
+      
+      Point curPos = VRmixin::theAgent->getCentroid();
+      //AngTwoPi curHead = VRmixin::theAgent->getOrientation();
+      Point vec = endPos-curPos;
+      AngTwoPi ori = AngTwoPi(std::atan2(vec.coordY(), vec.coordX()));
+      Point temp = VRmixin::pilot->curReq->objectShape->getCentroid();
+      VRmixin::pilot->curReq->objectShape->setPosition(endPos);
+      //std::cout << "tempBackupOri: " << ori << std::endl;
+      backupPt = FindFreeSpace(VRmixin::pilot->curReq->objectShape, backupDist, obstDist, ori);
+      VRmixin::pilot->curReq->objectShape->setPosition(temp);
+      ReferenceFrameType_t t = backupPt.getRefFrameType();
+      if (t == unspecified) {
+        std::cout << "Not enough space at destination." << std::endl;
+        //postStateFailure();
+        return;
+      }
+      Point vec2 = endPos - backupPt;
+      backupOri = AngTwoPi(std::atan2(vec2.coordY(), vec2.coordX()));
+      //std::cout << "backupPt: " << backupPt << ", backupOri: " << backupOri << std::endl;
+      float d = vec.xyNorm();
+      float oriDiff = std::abs(AngSignPi(ori-backupOri));
+      //std::cout << "d: " << d << ", oriDiff:" << oriDiff << ", ori: " << ori << ", backupOri: " << backupOri << std::endl;
+      if (d < backupDist*1.2 && oriDiff < M_PI/180*45) {
+        //AdjustPush
+        std::cout << "Use simple way (straight line) from obj to dest" << std::endl;
+        postStateSuccess();
+      }
+      else {
+        //plan path
+        std::cout << "Use complex way (need path planning) from obj to dest" << std::endl;
+        postStateFailure();
+      }
+    }
+    
+    $nodeclass SetUpExecute2 : StateNode : doStart {
+      $reference Pilot::plan, Pilot::initPos, Pilot::initHead, Pilot::planReq, Pilot::maxTurn, Pilot::pushingObj;
+      $reference PushObjectMachine::objToDestPlan;
+
+	  //std::cout << "--------SetUpExecute2" << std::endl;
+      plan.clear();
+      plan.path = objToDestPlan.path;
+
+      initPos = VRmixin::theAgent->getCentroid();
+      initHead = VRmixin::theAgent->getOrientation();
+      PilotRequest &req = *VRmixin::pilot->curReq;
+      req.turnSpeed = pushTurnSpeed;
+      req.forwardSpeed = pushForwardSpeed;
+      planReq = req;
+      maxTurn = 0.f;
+      pushingObj = true;
+      req.collisionAction = PilotTypes::collisionIgnore;
+      planReq.displayPath = false;
+    }
+    
+    $nodeclass DisplayStraightLineInitToObj : StateNode : doStart {
+      $reference PushObjectMachine::objPos, PushObjectMachine::startPos;
+      
+	  //std::cout << "--------DisplayStraightLineInitToObj" << std::endl;
+      // Display path (straight line) from init to obj
+      NEW_SHAPE(plannedInitToObjPath, GraphicsData, new GraphicsData(VRmixin::worldShS));
+      GraphicsData::xyPair U, V;
+      U.first = startPos.coordX(); U.second = startPos.coordY();
+      V.first = objPos.coordX(); V.second = objPos.coordY();
+      plannedInitToObjPath->add(new GraphicsData::LineElement("p", U, V, rgb(0,255,255)));
+      //NEW_SHAPE(plannedInitToObjPath2, LineData, new LineData(VRmixin::worldShS, startPos, objPos));
+      //plannedInitToObjPath2->setColor("red");
+    }
+    
+    $nodeclass DisplayStraightLineObjToDest : StateNode : doStart {
+      $reference PushObjectMachine::objPos, PushObjectMachine::endPos;
+      
+	  //std::cout << "--------DisplayStraightLineObjToDest" << std::endl;
+      // Display path (straight line) from obj to dest
+      NEW_SHAPE(plannedObjToDestPath, GraphicsData, new GraphicsData(VRmixin::worldShS));
+      GraphicsData::xyPair U, V;
+      U.first = objPos.coordX(); U.second = objPos.coordY();
+      V.first = endPos.coordX(); V.second = endPos.coordY();
+      plannedObjToDestPath->add(new GraphicsData::LineElement("p", U, V, rgb(0,255,255)));
+      //NEW_SHAPE(plannedObjToDestPath2, LineData, new LineData(VRmixin::worldShS, objPos, endPos));
+      //plannedObjToDestPath2->setColor("red");
+    }
+    
+    $nodeclass DisplayPathInitToObj : StateNode : doStart {
+      $reference Pilot::plan;
+      $reference PushObjectMachine::objPos;
+      
+      //std::cout << "--------DisplayPathInitToObj" << std::endl;
+      // Display path from init to obj
+      NEW_SHAPE(plannedInitToObjPath, GraphicsData, new GraphicsData(VRmixin::worldShS));
+      GraphicsData::xyPair U, V;
+      for ( size_t i = 1; i < plan.path.size(); i++ ) {
+	U.first = plan.path[i-1].x; U.second = plan.path[i-1].y;
+	V.first = plan.path[i].x; V.second = plan.path[i].y;
+	plannedInitToObjPath->add(new GraphicsData::LineElement("p", U, V, rgb(0,255,255)));
+      }
+      U.first = plan.path.back().x; U.second = plan.path.back().y;
+      V.first = objPos.coordX(); V.second = objPos.coordY();
+      plannedInitToObjPath->add(new GraphicsData::LineElement("p", U, V, rgb(0,255,255)));
+    }
+    
+    $nodeclass DisplayPathObjToDest : StateNode : doStart {
+      $reference Pilot::plan;
+      $reference PushObjectMachine::endPos;
+      
+	  //std::cout << "--------DisplayPathObjToDest" << std::endl;
+      // Display path from obj to dest
+      NEW_SHAPE(plannedObjToDestPath, GraphicsData, new GraphicsData(VRmixin::worldShS));
+      GraphicsData::xyPair U, V;
+      for ( size_t i = 1; i < plan.path.size(); i++ ) {
+	U.first = plan.path[i-1].x; U.second = plan.path[i-1].y;
+	V.first = plan.path[i].x; V.second = plan.path[i].y;
+	plannedObjToDestPath->add(new GraphicsData::LineElement("p", U, V, rgb(0,255,255)));
+      }
+      U.first = plan.path.back().x; U.second = plan.path.back().y;
+      V.first = endPos.coordX(); V.second = endPos.coordY();
+      plannedObjToDestPath->add(new GraphicsData::LineElement("p", U, V, rgb(0,255,255)));
+    }
+
+    $nodeclass WalkBackward : WalkNode : doStart {
+	  //std::cout << "--------WalkBackward" << std::endl;
+      MMAccessor<WalkMC> walk_acc(getMC());
+      getMC()->setTargetDisplacement(-backupDist+robotDiam,0,0,0);
+      motman->setPriority(VRmixin::pilot->getWalk_id(),MotionManager::kStdPriority);
+    }
+    
+    $nodeclass WalkForward : WalkNode : doStart {
+	  //std::cout << "--------WalkForward" << std::endl;
+      getMC()->setTargetDisplacement(backupDist-robotDiam,0,0,0);
+      motman->setPriority(VRmixin::pilot->getWalk_id(),MotionManager::kStdPriority);				
+    }
+    
+    $nodeclass FetchObj : WalkNode : doStart {
+      $reference PushObjectMachine::objPos;
+      
+      std::cout << "--------Fetch the object" << std::endl;
+      std::cout << "curPos: " << VRmixin::theAgent->getCentroid() << ", curHead: "
+		<< VRmixin::theAgent->getOrientation() << std::endl;
+      PilotRequest &preq = *VRmixin::pilot->curReq;
+      preq.collisionAction = PilotTypes::collisionIgnore;
+      
+      AngSignPi turnAng;
+      float dist;
+      if ( preq.objectMatcher == NULL ) {
+        //std::cout << "No objectMatcher specified" << std::endl;
+	Point curPos = VRmixin::theAgent->getCentroid();
+        AngTwoPi curHead = VRmixin::theAgent->getOrientation();
+        Point vec = objPos - curPos;
+        float x = vec.coordX(), y = vec.coordY();
+        turnAng = AngSignPi(std::atan2(y, x)) - curHead;
+        dist = std::sqrt(x*x+y*y) - robotDiam - objSize;
+      } else {
+	ShapeRoot localObj = (*preq.objectMatcher)(preq.objectShape);
+	if ( ! localObj.isValid() ) {
+	  std::cout << "Can't find the object" << std::endl;
+	  Point curPos = VRmixin::theAgent->getCentroid();
+          AngTwoPi curHead = VRmixin::theAgent->getOrientation();
+          Point vec = objPos - curPos;
+          float x = vec.coordX(), y = vec.coordY();
+          turnAng = AngSignPi(std::atan2(y, x)) - curHead;
+          dist = std::sqrt(x*x+y*y) - robotDiam - objSize;
+	  //postStateFailure();
+	  //return;
+	} else {
+	  Point ctPt = localObj->getCentroid();
+          float x = ctPt.coordX(), y = ctPt.coordY();
+          turnAng = AngSignPi(std::atan2(y, x));
+          dist = std::sqrt(x*x+y*y) - robotDiam - objSize;
+        }
+      }
+      
+      std::cout << "Turn " << float(turnAng)/M_PI*180.f << " degree" << std::endl;
+      getMC()->setTargetDisplacement(0, 0, turnAng, 0);
+      std::cout << "Walk forward " << dist << " mm" << std::endl;
+      // wp_acc->addEgocentricWaypoint(dist, 0, 0, true, pushForwardSpeed, 0.f);
+      motman->setPriority(VRmixin::pilot->getWalk_id(),MotionManager::kStdPriority);
+    }
+    
+    $nodeclass AdjustPush : WaypointWalkNode : doStart {
+      $reference PushObjectMachine::endPos;
+      
+      std::cout << "--------Adjust before pushing finish" << std::endl;
+      std::cout << "curPos: " << VRmixin::theAgent->getCentroid() << ", curHead: "
+		<< VRmixin::theAgent->getOrientation() << std::endl;
+      PilotRequest &req = *VRmixin::pilot->curReq;
+      req.collisionAction = PilotTypes::collisionIgnore;
+      
+      Point curPos = VRmixin::theAgent->getCentroid();
+      AngTwoPi curHead = VRmixin::theAgent->getOrientation();
+      Point vec = endPos - curPos;
+      float x = vec.coordX(), y = vec.coordY();
+      AngSignPi turnAng = AngSignPi(std::atan2(y, x)) - AngSignPi(curHead);
+      float dist = std::sqrt(x*x+y*y) - robotDiam - objSize;
+      
+      MMAccessor<WaypointWalkMC> wp_acc(getMC());
+      wp_acc->getWaypointList().clear();
+#if defined(TGT_IS_CREATE) || defined(TGT_IS_CREATE2)
+      std::cout << "Turn " << float(turnAng)/M_PI*180.f << " degree" << std::endl;
+      //std::cout << "Turn " << turnAng << " radians" << std::endl;
+      wp_acc->addEgocentricWaypoint(0, 0, turnAng, true, 0.f, pushTurnSpeed);
+      std::cout << "Walk forward " << dist << " mm" << std::endl;
+      wp_acc->addEgocentricWaypoint(dist, 0, 0, true, pushForwardSpeed, 0.f);
+#else
+      std::cout << "Turn " << float(turnAng)/M_PI*180.f << " degree" << std::endl;
+      //std::cout << "Turn " << turnAng << " radians" << std::endl;
+      wp_acc->addEgocentricWaypoint(0, 0, turnAng, true, 0.f, pushTurnSpeed);
+      std::cout << "Walk forward " << dist << " mm" << std::endl;
+      wp_acc->addEgocentricWaypoint(dist, 0, 0, true, pushForwardSpeed, 0.f);
+#endif
+      motman->setPriority(VRmixin::pilot->getWaypointwalk_id(),MotionManager::kStdPriority);
+    }
+
+    $nodeclass CheckObjectPos : StateNode : doStart {
+      $reference PushObjectMachine::endPos;
+      $reference PushObjectMachine::isObs;
+      
+	  //std::cout << "--------CheckObjectPos" << std::endl;
+      PilotRequest &req = *VRmixin::pilot->curReq;
+      if ( req.objectMatcher == NULL ) {
+	//std::cout << "No objectMatcher specified" << std::endl;
+	VRmixin::pilot->curReq->objectShape->setPosition(endPos);
+	postStateSuccess();
+      } else {
+	ShapeRoot localObj = (*req.objectMatcher)(req.objectShape);
+	if ( ! localObj.isValid() ) {
+	  std::cout << "Can't find the object" << std::endl;
+	  postStateFailure();
+	} else {
+	  localObj->applyTransform(VRmixin::mapBuilder->localToWorldMatrix, unspecified);
+	  Point pt = Point(localObj->getCentroid().coordX(), localObj->getCentroid().coordY(), 0, allocentric);
+	  std::cout << "end position: " << pt << std::endl;
+	  VRmixin::pilot->curReq->objectShape->setPosition(pt);
+	  VRmixin::pilot->curReq->objectShape->setObstacle(isObs);
+	  if (pt.xyDistanceFrom(endPos) < 100) {
+	    std::cout << "Push finish" << std::endl;
+	    postStateSuccess();
+	  }
+	  else {
+	    std::cout << "To much error on end position" << std::endl;
+	    postStateSuccess();
+	  }
+	}
+      }
+    }
+
+    $nodeclass MoveObjectPos : StateNode : doStart {
+      $reference PushObjectMachine::endPos;
+
+	  //std::cout << "--------MoveObjectPos" << std::endl;
+      //Should using vision first
+      VRmixin::pilot->curReq->objectShape->setPosition(endPos);
+    }
+
+    virtual void setup() { // set up PushObjectMachine
+      $statemachine{
+        SetMaxTurn =N=> checkparams
+
+	  checkparams: CheckParameters
+	  checkparams =S=> localize
+	  checkparams =F=> ReportCompletion(invalidRequest)
+
+	  localize: SetupLandmarkExtractor =N=>
+	  locutil: LocalizationUtility
+	  locutil =S=> plandelivery
+	  locutil =F=> plandelivery // if we can't localize, use last known position; maybe say something first?
+
+	  // Plan path to deliver object to destination
+	  plandelivery: ClearOldPath =N=> SetUpObjToDest =N=>
+	  planpath3: PlanPath
+	  planpath3 =S<GenericRRTBase::PlanPathResultCode>(GenericRRTBase::START_COLLIDES)=> ReportCompletion(startCollides)
+	  planpath3 =S<GenericRRTBase::PlanPathResultCode>(GenericRRTBase::END_COLLIDES)=> ReportCompletion(endCollides)
+	  planpath3 =S<GenericRRTBase::PlanPathResultCode>(GenericRRTBase::MAX_ITER)=> ReportCompletion(noPath)
+	  planpath3 =C=> plandelivery2
+	  planpath3 =F=> ReportCompletion  // if executePath == false, we're done
+
+	  // constructnavplan1 : ConstructNavPlan
+	  // constructnavplan1 =C=> {execute, collisionDispatch}
+	  
+	  plandelivery2: AddBackupPt =S=> addacquire: AddAcquirePt =S=> SetUpObjToDest2 =N=> planpath2
+	  plandelivery2 =F=> ReportCompletion(noSpace)
+	  addacquire =F=> ReportCompletion(noSpace)
+	  planpath2: PlanPath
+	  planpath2 =S<GenericRRTBase::PlanPathResultCode>(GenericRRTBase::START_COLLIDES)=> ReportCompletion(startCollides)
+	  planpath2 =S<GenericRRTBase::PlanPathResultCode>(GenericRRTBase::END_COLLIDES)=> ReportCompletion(endCollides)
+	  planpath2 =S<GenericRRTBase::PlanPathResultCode>(GenericRRTBase::MAX_ITER)=> ReportCompletion(noPath)
+	  planpath2 =C=> planacquire
+	  planpath2 =F=> ReportCompletion  // if executePath == false, we're done
+	  
+	  // Plan path from initial position to object acquire point
+	  planacquire: ChoosePathInitToObj
+	  planacquire =S=> DisplayStraightLineInitToObj =N=> lookforobj
+	  planacquire =F=> SetUpInitToObj =N=>
+	  planpath1: PlanPath
+	  planpath1 =S<GenericRRTBase::PlanPathResultCode>(GenericRRTBase::START_COLLIDES)=> ReportCompletion(startCollides)
+	  planpath1 =S<GenericRRTBase::PlanPathResultCode>(GenericRRTBase::END_COLLIDES)=> ReportCompletion(endCollides)
+	  planpath1 =S<GenericRRTBase::PlanPathResultCode>(GenericRRTBase::MAX_ITER)=> ReportCompletion(noPath)
+	  planpath1 =C=> execute
+	  planpath1 =F=> ReportCompletion  // if executePath == false, we're done
+
+	  execute: ConstructNavPlan =C=> DisplayPathInitToObj =N=> ExecutePlan =C=> lookforobj
+	  
+	  lookforobj: LookForObject
+	  lookforobj =F=> fetch
+	  lookforobj =C=> fetch
+	  
+	  fetch: FetchObj =C=> planpush: ChoosePathObjToDest
+	  planpush =S=> DisplayStraightLineObjToDest =N=> adjustpush
+	  planpush =F=> SetUpExecute2 =N=> execute2
+	  execute2: ConstructNavPlan =C=> DisplayPathObjToDest =N=> ExecutePlan =C=> adjustpush  // can't use localize2
+	  
+	  // using vision to adjust and localize at the end?
+	  //localize2: SetupLandmarkExtractor =N=>
+	  //locutil2: LocalizationUtility
+	  //locutil2 =S=> laststep
+	  //locutil2 =F=> laststep  // if we can't localize, use last known position; maybe say something first?
+	  
+	  //adjustpush: AdjustPush =C=> MoveTheObject =N=> WalkBackward[setMC(VRmixin::pilot->waypointwalk_id)] =C=> ReportCompletion
+	  adjustpush: AdjustPush =C=> WalkBackward[setMC(VRmixin::pilot->waypointwalk_id)] =C=> lookforobj2
+	  
+	  lookforobj2: LookForTarget
+	  lookforobj2 =F=> checkobj
+	  lookforobj2 =C=> checkobj
+	  
+	  checkobj: CheckObjectPos
+	  checkobj =S=> complete
+	  checkobj =F=> complete
+	  complete: ReportCompletion
+      }
+    }
+
+  } // end PushObjectMachine
+
+  //================ VisualSearchMachine ================
+
+  $nodeclass VisualSearchMachine : StateNode {
+
+    $nodeclass Search : MapBuilderNode : doStart {
+      if (VRmixin::pilot->curReq->searchObjectExtractor == NULL) {
+	cout << "Pilot received visualSearch request with invalid searchObjectExtractor field" << endl;
+	VRmixin::pilot->requestComplete(invalidRequest);
+      }
+      else if (VRmixin::pilot->curReq->searchExitTest == NULL) {
+	cout << "Pilot received visualSearch request with no exitTest" << endl;
+	VRmixin::pilot->requestComplete(invalidRequest);
+      }
+      mapreq = *VRmixin::pilot->curReq->searchObjectExtractor;
+    }
+
+    $nodeclass Check : StateNode : doStart {
+      if (VRmixin::pilot->curReq->searchExitTest())
+	VRmixin::pilot->requestComplete(noError);
+      else if (VRmixin::pilot->curReq->searchRotationAngle == 0)
+	VRmixin::pilot->requestComplete(searchFailed);
+      else
+	postStateCompletion();
+    }
+
+    $nodeclass Rotate : WalkNode : doStart {
+      getMC()->setTargetDisplacement(0,0,VRmixin::pilot->curReq->searchRotationAngle,0);
+    }
+
+    $setupmachine {
+      startnode: Search() =MAP=> Check =C=>
+	Rotate[setMC(VRmixin::pilot->walk_id)] =C=> startnode
+    }		
+  }
+
+
+  $nodeclass* SetOdometryMachine : StateNode : turn1_(NULL), turn2_(NULL) {
+
+    $nodeclass TurnHead(float angle) : HeadPointerNode, CurrVisualOdometry {
+    
+      virtual void preStart() {
+	HeadPointerNode::preStart();
+ #ifdef TGT_HAS_HEAD
+	getMC()->setMaxSpeed(RobotInfo::PanOffset, 1.5f);
+ #endif
+      }
+
+      virtual void doStart() {
+	HeadPointerNode::doStart();
+	update(true);
+ #ifdef TGT_HAS_HEAD
+	getMC()->setJointValue(RobotInfo::PanOffset, mathutils::deg2rad(angle));
+ #endif
+      }
+
+      virtual void doEvent() {
+	HeadPointerNode::doEvent();
+	postStateCompletion();
+      }
+
+      virtual void doStop() {
+	update(true);
+	std::cout << "Translation: " << getTranslation() << std::endl;
+      }
+    }
+
+    TurnHead *turn1_;
+    TurnHead *turn2_;
+
+    virtual void doStop() {
+      // CreateMotionModel<LocalizationParticle> *model = 
+      //   (CreateMotionModel<LocalizationParticle>*)VRmixin::particleFilter->getMotionModel();
+      // model->getOdo().setConversionParameters(turn1_->getTranslation()/15.0f, 0.0f);
+      if ( VRmixin::imageOdometry != NULL ) {
+	std::cout << "Setting visual odometry parameters" << std::endl;
+	VRmixin::imageOdometry->setConversionParameters(turn1_->getTranslation()/5.0f, 0.0f);
+      }
+    }
+
+    virtual void setup() {
+      $statemachine {
+        turn1: TurnHead(5.0f)
+	turn2: TurnHead(0.0f)
+
+	turn1 =T(2000)=> turn2 =T(2000)=> ReportCompletion
+      }
+
+      turn1_ = turn1;
+      turn2_ = turn2;
+    }
+  }
+
+
+  //================ Dispatch ================
+  // All the Pilot's little state machines are children of the
+  // Dispatch node, so when a call to Dispatch::finish() causes it to
+  // complete and exit, everything gets shut down.
+
+  $nodeclass* Dispatch : StateNode : localizeMachine_(NULL),
+    walkMachine_(NULL), waypointWalkMachine_(NULL), setVelocityMachine_(NULL),
+    goToShapeMachine_(NULL), pushObjectMachine_(NULL), visualSearchMachine_(NULL),
+    setOdometryMachine_(NULL), reportSuccess_(NULL) {
+
+    StateNode *localizeMachine_, *walkMachine_, *waypointWalkMachine_, *setVelocityMachine_, 
+      *goToShapeMachine_, *pushObjectMachine_, *visualSearchMachine_, *setOdometryMachine_,
+			*reportSuccess_;
+
+    void finish() {
+      postStateCompletion();
+    }
+
+    virtual void doStart() {
+      PilotTypes::RequestType_t reqType = VRmixin::pilot->curReq->getRequestType();
+      switch ( reqType) {
+      case localize:
+        localizeMachine_->start();
+	break;
+
+      case walk:
+	walkMachine_->start();
+	break;
+
+      case waypointWalk:
+	waypointWalkMachine_->start();
+	break;
+
+      case setVelocity:
+	setVelocityMachine_->start();
+	break;
+
+      case goToShape:
+	goToShapeMachine_->start();
+	break;
+
+      case pushObject:
+	pushObjectMachine_->start();
+	break;
+
+      case visualSearch:
+	visualSearchMachine_->start();
+	break;
+
+      case setOdometry:
+	setOdometryMachine_->start();
+	break;
+
+			case noRequest:
+				reportSuccess_->start();
+				break;
+
+      default:
+	cout << "Illegal Pilot request type: " << reqType << endl;
+	VRmixin::pilot->requestComplete(invalidRequest);
+      }
+    }
+
+    virtual void setup() {
+      $statemachine{
+        dispatchDummyStart: StateNode  // dummy start node; never called
+
+	reportSuccess: ReportCompletion
+	reportFailure: ReportCompletion(someError)
+
+	localizemachine: LocalizationMachine =S=> reportSuccess
+	localizemachine =F=> ReportCompletion(cantLocalize)
+
+	walkmachine: WalkMachine
+
+	waypointwalkmachine: WaypointWalkMachine =C=> reportSuccess
+	waypointwalkmachine =F=>  reportFailure
+
+	setvelocitymachine: SetVelocityMachine // =N=> reportSuccess
+
+	gotoshapemachine: GoToShapeMachine =C=> reportSuccess
+	gotoshapemachine =F=> reportFailure
+
+	pushobjectmachine: PushObjectMachine =C=> reportSuccess
+	pushobjectmachine =F=> reportFailure
+
+	visualsearchmachine: VisualSearchMachine =C=> reportSuccess
+	visualsearchmachine =F=> reportFailure
+
+	setOdometryMachine: SetOdometryMachine =C=> reportSuccess
+      }
+
+      startnode = NULL; // keeps the dummy node out of the Event Logger trace
+      // Save these statenode pointers for use by dispatch,
+      localizeMachine_ = localizemachine;
+      walkMachine_ = walkmachine;
+      waypointWalkMachine_ = waypointwalkmachine;
+      setVelocityMachine_ = setvelocitymachine;
+      goToShapeMachine_ = gotoshapemachine;
+      pushObjectMachine_ = pushobjectmachine;
+      visualSearchMachine_ = visualsearchmachine;
+      setOdometryMachine_ = setOdometryMachine;
+			reportSuccess_ = reportSuccess;
+    }
+  }
+
+  virtual void setup() {   // Pilot's setup
+    SharedObject<WaypointWalkMC> waypointwalk_mc;
+    SharedObject<WalkMC> walk_mc;
+#ifdef PILOT_USES_SHARED_MOTION_COMMANDS
+    walk_id = motman->addPersistentMotion(walk_mc, MotionManager::kIgnoredPriority);
+    waypointwalk_id = motman->addPersistentMotion(waypointwalk_mc, MotionManager::kIgnoredPriority);
+#endif
+    $statemachine {
+    pilotWaitForDispatch: StateNode  // start node
+	// The =C=> will shut down Dispatch which will shut down all its children
+	dispatch: Dispatch =pilot_dispatch:C=> pilotWaitForDispatch
+	}
+    VRmixin::pilot->dispatch_ = dispatch;
+  }
+
+private:
+  Pilot(const Pilot&); //!< copy constructor; do not call
+  Pilot& operator=(const Pilot&); //!< assignment operator; do not call
+
+  static PilotVerbosity_t verbosity;
+
+  std::queue<PilotRequest*> requests;   //!< Queue of Pilot requests
+  PilotRequest *curReq;
+  unsigned int idCounter;   //!< Pilot request counter for assigning a unique id
+  MotionManager::MC_ID walk_id;
+  MotionManager::MC_ID waypointwalk_id;
+  Dispatch *dispatch_;
+
+  /*! @endcond */
+
+};  // Pilot class
+
+std::ostream& operator<<(std::ostream& os, const NavigationStep &step);
+std::ostream& operator<<(std::ostream& os, const NavigationPlan &plan);
+
+} // namespace
+
+#endif

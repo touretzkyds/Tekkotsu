@@ -1,0 +1,11 @@
+#define WANT_STREAM
+#define WANT_MATH
+#define WANT_STRING
+#include "include.h"
+#include "newmat.h"
+#include "newmatap.h"
+#include "newmatrc.h"
+#include "controlw.h"
+#include "myexcept.h"
+#include "newmatnl.h"
+#include "precisio.h"

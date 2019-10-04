@@ -1,0 +1,386 @@
+LWSC
+1
+
+FirstFrame 1
+LastFrame 60
+FrameStep 1
+PreviewFirstFrame 1
+PreviewLastFrame 60
+PreviewFrameStep 1
+FramesPerSecond 30.000000
+
+LoadObject objects-ERS-210/body2.lwo
+ShowObject 8 7
+ObjectMotion (unnamed)
+  9
+  1
+  0 0.177 0.014 0 0 0 1 1 1
+  0 0 0 0 0
+EndBehavior 1
+ShadowOptions 7
+
+LoadObject objects-ERS-210/tail2.lwo
+ShowObject 8 7
+ObjectMotion (unnamed)
+  9
+  1
+  0 0.05715 0.08279999 0 0 0 1 1 1
+  0 0 0 0 0
+EndBehavior 1
+ParentObject 1
+ShadowOptions 7
+
+LoadObject objects-ERS-210/neck.lwo
+ShowObject 8 7
+ObjectMotion (unnamed)
+  9
+  1
+  0 0.0627 -0.10004999 0 0 0 1 1 1
+  0 0 0 0 0
+EndBehavior 1
+ParentObject 1
+ShadowOptions 7
+
+LoadObject objects-ERS-210/head.lwo
+ShowObject 8 7
+ObjectMotion (unnamed)
+  9
+  1
+  0 0.02689999 -0.0004500076 0 0 0 1 1 1
+  0 0 0 0 0
+EndBehavior 1
+ParentObject 3
+ShadowOptions 7
+
+LoadObject objects-ERS-210/jaw.lwo
+ShowObject 8 7
+ObjectMotion (unnamed)
+  9
+  1
+  0 -0.00475 -0.02945 0 0 0 1 1 1
+  0 0 0 0 0
+EndBehavior 1
+ParentObject 4
+ShadowOptions 7
+
+LoadObject objects-ERS-210/ear-l.lwo
+ShowObject 8 7
+ObjectMotion (unnamed)
+  9
+  1
+  0.02704999 0.06610002 0.006099998 0 0 0 1 1 1
+  0 0 0 0 0
+EndBehavior 1
+LockedChannels 6
+ParentObject 4
+ShadowOptions 7
+
+LoadObject objects-ERS-210/ear-r.lwo
+ShowObject 8 7
+ObjectMotion (unnamed)
+  9
+  1
+  -0.02705 0.06610002 0.006149998 0 0 0 1 1 1
+  0 0 0 0 0
+EndBehavior 1
+LockedChannels 7
+ParentObject 4
+ShadowOptions 7
+
+LoadObject objects-ERS-210/leg-b-up-l.lwo
+ShowObject 8 7
+ObjectMotion (unnamed)
+  9
+  1
+  0.07045 0.0033 0.06394999 0 0 0 1 1 1
+  0 0 0 0 0
+EndBehavior 1
+LockedChannels 6
+ParentObject 1
+ShadowOptions 7
+
+LoadObject objects-ERS-210/leg-b-low-l.lwo
+ShowObject 8 7
+ObjectMotion (unnamed)
+  9
+  1
+  -0.001850001 -0.09015001 0.0225 0 0 0 1 1 1
+  0 0 0 0 0
+EndBehavior 1
+LockedChannels 6
+ParentObject 8
+ShadowOptions 7
+
+LoadObject objects-ERS-210/foot-b-l.lwo
+ShowObject 8 7
+ObjectMotion (unnamed)
+  9
+  1
+  0 -0.07345001 0.02495 0 0 0 1 1 1
+  0 0 0 0 0
+EndBehavior 1
+LockedChannels 1
+ParentObject 9
+ShadowOptions 7
+
+LoadObject objects-ERS-210/leg-b-up-r.lwo
+ShowObject 8 7
+ObjectMotion (unnamed)
+  9
+  1
+  -0.07064998 0.003349999 0.06394999 0 0 0 1 1 1
+  0 0 0 0 0
+EndBehavior 1
+LockedChannels 6
+ParentObject 1
+ShadowOptions 7
+
+LoadObject objects-ERS-210/leg-b-low-r.lwo
+ShowObject 8 7
+ObjectMotion (unnamed)
+  9
+  1
+  0.00205 -0.09019998 0.0225 0 0 0 1 1 1
+  0 0 0 0 0
+EndBehavior 1
+LockedChannels 6
+ParentObject 11
+ShadowOptions 7
+
+LoadObject objects-ERS-210/foot-b-r.lwo
+ShowObject 8 7
+ObjectMotion (unnamed)
+  9
+  1
+  0 -0.0735 0.025 0 0 0 1 1 1
+  0 0 0 0 0
+EndBehavior 1
+LockedChannels 1
+ParentObject 12
+ShadowOptions 7
+
+LoadObject objects-ERS-210/leg-f-up-l.lwo
+ShowObject 8 7
+ObjectMotion (unnamed)
+  9
+  1
+  0.07045001 -0.0007499999 -0.07510001 0 0 0 1 1 1
+  0 0 0 0 0
+EndBehavior 1
+LockedChannels 6
+ParentObject 1
+ShadowOptions 7
+
+LoadObject objects-ERS-210/leg-f-low-l.lwo
+ShowObject 8 7
+ObjectMotion (unnamed)
+  9
+  1
+  -0.00165 -0.09469999 -0.01165 0 0 0 1 1 1
+  0 0 0 0 0
+EndBehavior 1
+LockedChannels 6
+ParentObject 14
+ShadowOptions 7
+
+LoadObject objects-ERS-210/foot-f-l.lwo
+ShowObject 8 7
+ObjectMotion (unnamed)
+  9
+  1
+  0 -0.06485 -0.02929999 0 0 0 1 1 1
+  0 0 0 0 0
+EndBehavior 1
+LockedChannels 1
+ParentObject 15
+ShadowOptions 7
+
+LoadObject objects-ERS-210/leg-f-up-r.lwo
+ShowObject 8 7
+ObjectMotion (unnamed)
+  9
+  1
+  -0.07044999 -0.0006499998 -0.07515001 0 0 0 1 1 1
+  0 0 0 0 0
+EndBehavior 1
+LockedChannels 6
+ParentObject 1
+ShadowOptions 7
+
+LoadObject objects-ERS-210/leg-f-low-r.lwo
+ShowObject 8 7
+ObjectMotion (unnamed)
+  9
+  1
+  0.00105 -0.0948 -0.0116 0 0 0 1 1 1
+  0 0 0 0 0
+EndBehavior 1
+LockedChannels 6
+ParentObject 17
+ShadowOptions 7
+
+LoadObject objects-ERS-210/foot-f-r.lwo
+ShowObject 8 7
+ObjectMotion (unnamed)
+  9
+  1
+  0 -0.0649 -0.0293 0 0 0 1 1 1
+  0 0 0 0 0
+EndBehavior 1
+LockedChannels 1
+ParentObject 18
+ShadowOptions 7
+
+LoadObject objects-ERS-210/LED_g01.lwo
+ShowObject 8 7
+ObjectMotion (unnamed)
+  9
+  1
+  0 0 0 0 0 0 1 1 1
+  0 0 0 0 0
+EndBehavior 1
+ParentObject 4
+ShadowOptions 7
+
+LoadObject objects-ERS-210/LED_g02.lwo
+ShowObject 8 7
+ObjectMotion (unnamed)
+  9
+  1
+  0 0 0 0 0 0 1 1 1
+  0 0 0 0 0
+EndBehavior 1
+ParentObject 4
+ShadowOptions 7
+
+LoadObject objects-ERS-210/LED_g03.lwo
+ShowObject 8 7
+ObjectMotion (unnamed)
+  9
+  1
+  0 0 0 0 0 0 1 1 1
+  0 0 0 0 0
+EndBehavior 1
+ParentObject 4
+ShadowOptions 7
+
+LoadObject objects-ERS-210/LED_r01.lwo
+ShowObject 8 7
+ObjectMotion (unnamed)
+  9
+  1
+  0 0 0 0 0 0 1 1 1
+  0 0 0 0 0
+EndBehavior 1
+ParentObject 4
+ShadowOptions 7
+
+LoadObject objects-ERS-210/LED_r02.lwo
+ShowObject 8 7
+ObjectMotion (unnamed)
+  9
+  1
+  0 0 0 0 0 0 1 1 1
+  0 0 0 0 0
+EndBehavior 1
+ParentObject 4
+ShadowOptions 7
+
+LoadObject objects-ERS-210/LED_r03.lwo
+ShowObject 8 7
+ObjectMotion (unnamed)
+  9
+  1
+  0 0 0 0 0 0 1 1 1
+  0 0 0 0 0
+EndBehavior 1
+ParentObject 4
+ShadowOptions 7
+
+LoadObject objects-ERS-210/LED_r04.lwo
+ShowObject 8 7
+ObjectMotion (unnamed)
+  9
+  1
+  0 0 0 0 0 0 1 1 1
+  0 0 0 0 0
+EndBehavior 1
+ParentObject 4
+ShadowOptions 7
+
+LoadObject objects-ERS-210/LED_tail.lwo
+ShowObject 8 7
+ObjectMotion (unnamed)
+  9
+  1
+  0 0 0 0 0 0 1 1 1
+  0 0 0 0 0
+EndBehavior 1
+ParentObject 2
+ShadowOptions 7
+
+AmbientColor 255 255 255
+AmbIntensity 0.50000
+
+AddLight
+LightName Light
+ShowLight 1 7
+LightMotion (unnamed)
+  9
+  1
+  -2 2 -2 45 35 0 1 1 1
+  0 0 0 0 0
+EndBehavior 1
+LightColor 255 255 255
+LgtIntensity 0.700000
+LightType 0
+ShadowType 1
+
+ShowCamera 1 7
+CameraMotion (unnamed)
+  9
+  1
+  -0.6381658 0.5205013 -0.6771318 0 0 0 1 1 1
+  0 0 0 0 0
+EndBehavior 1
+TargetObject 1
+ZoomFactor 3.200000
+Resolution 1
+PixelAspectRatio 2
+SegmentMemory 2200000
+Antialiasing 0
+AdaptiveSampling 1
+AdaptiveThreshold 16
+FilmSize 2
+FieldRendering 0
+MotionBlur 0
+DepthOfField 0
+
+SolidBackdrop 1
+BackdropColor 80 80 180 
+ZenithColor 0 40 80
+SkyColor 120 180 240
+GroundColor 50 40 30
+NadirColor 100 80 60
+FogType 0
+DitherIntensity 1
+AnimatedDither 0
+
+RenderMode 2
+RayTraceEffects 0
+ClipRayColors 0
+DataOverlayLabel  
+FullSceneParamEval 0
+
+ViewMode 5
+ViewAimpoint -0.006362 0.165064 -0.119767
+ViewDirection 0.300197 -0.314159 0.000000
+ViewZoomFactor 0.526749
+GridNumber 40
+GridSize 0.010000
+ShowMotionPath 1
+ShowBGImage 0
+ShowFogRadius 0
+ShowRedraw 0
+ShowSafeAreas 0
+ShowFieldChart 0

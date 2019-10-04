@@ -1,0 +1,9 @@
+H1 { letter-spacing: 0; padding-top:1.5em; text-align: center; margin-top:1em; }
+H2 { letter-spacing: 2px; border: none; text-align:left; margin-bottom: 0px; font-size:125%;}
+
+PRE.fragment { border:none; background-color:transparent; margin:0; padding:10px 0; }
+DIV.fragment {
+	margin: 1em 0 1.25em 0;
+	padding: .5em 1em .5em 0;
+	font-size:80%;
+}

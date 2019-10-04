@@ -1,0 +1,370 @@
+#ifndef PILOTDEMO_H_
+#define PILOTDEMO_H_
+
+#include <sstream>
+#include <map>
+
+#include "Behaviors/StateMachine.h"
+
+using namespace std;
+using namespace DualCoding;
+
+//! Extensible command processor to drive the robot around manually and check odometry and localization
+$nodeclass* PilotDemo :  VisualRoutinesStateNode : pilotDemoIsSetup(false) {
+
+  $provide std::map<std::string,StateNode*> cmdRegistry;
+  $provide std::vector<std::string> helpText;
+  $provide std::string commandLine;
+  $provide PilotDemo *pilotdemo(this);
+  $provide StateNode* reportWait;
+  $provide float fwdSpeed(0);
+  $provide float strafeSpeed(0);
+  $provide float turnSpeed(0);
+
+  virtual void addCommand(std::string name, StateNode* node, const std::string &help="") {
+    cmdRegistry[name] = node;
+    node->addTransition(new TextMsgTrans("quit_"+node->getName(), reportWait, "q"));
+    if ( name != "rundemo" )
+      node->addTransition(new CompletionTrans("complete_"+node->getName(), reportWait));
+    if ( help.size() > 0 )
+      helpText.push_back(help);
+  }
+
+  $nodeclass PrintInstructions : StateNode : doStart {
+    $reference PilotDemo::helpText;
+    cout << "PilotDemo keyboard commands:" << endl;
+    for (std::vector<string>::const_iterator it = helpText.begin();
+	 it != helpText.end(); it++)
+      fprintf(stdout, "%s\n", it->c_str());
+    cout << "Type 'msg <command>' to perform one of these commands." << endl;
+    postStateCompletion();
+  }
+
+  $nodeclass ClearWorldMap : VisualRoutinesStateNode : doStart {
+    worldShS.deleteShapes<AprilTagData>();
+    worldShS.deleteShapes<PolygonData>();
+    worldShS.deleteShapes<GraphicsData>();
+    cout << "World map cleared." << endl;
+    postStateCompletion();
+  }
+
+  $nodeclass BuildWorldMap : VisualRoutinesStateNode {
+    $nodeclass Builder : MapBuilderNode(MapBuilderRequest::worldMap) : doStart {
+      mapreq.setAprilTagFamily();
+      mapreq.clearVerbosity = -1U;
+      mapreq.setVerbosity = MapBuilder::MBVimportShapes;
+      cout << "Looking for shapes to add to world map." << endl;
+    }
+    // Nested state machine converts the MapBuilder event to a completion event
+    $setupmachine{
+      Builder =MAP=> PostMachineCompletion
+    }
+  }
+
+  $nodeclass Randomize : VisualRoutinesStateNode  : doStart {
+    pilot->computeParticleBounds(1000,1000);
+    particleFilter->resetFilter();
+    cout << "Particles have been randomized." << endl;
+    postStateCompletion();
+  }
+
+  $nodeclass Localize : VisualRoutinesStateNode : setup {
+    $statemachine{
+      PilotNode(PilotTypes::localize) =PILOT=> PostMachineCompletion
+    }
+  }
+
+  $nodeclass DisplayParticles : VisualRoutinesStateNode : doStart {
+    $reference PilotDemo::commandLine;
+    std::istringstream is(commandLine);
+    string cmd;
+    float arg1 = -1;
+    is >> cmd >> arg1;
+    if ( arg1 == int(fabs(arg1)) ) {
+      cout << "Displaying " << arg1 << " individual particles." << endl;
+      VRmixin::particleFilter->displayIndividualParticles(arg1);
+    }
+    else
+      cout << "Invalid argument to disp command." << endl;
+    postStateCompletion();
+  }
+
+  $nodeclass ReportPosition : VisualRoutinesStateNode : doStart {
+    AngTwoPi heading = theAgent->getOrientation();
+    cout << "Agent now at " << theAgent->getCentroid() << " hdg " << heading
+         << " (= " << float(heading)*180/M_PI << " deg.) " 
+         << "std. dev. " << sqrt(((ShapeBasedParticleFilter*)particleFilter)->getVariance().x) << " mm, "
+         << float(((ShapeBasedParticleFilter*)particleFilter)->getVariance().theta) * 180 / M_PI << " deg."
+         << endl;
+  }
+
+  $nodeclass Quit : StateNode : doStart {
+    cout << "Quit!" << endl;
+    postStateCompletion();
+  }
+
+  $nodeclass ParseCommand : StateNode : doStart {
+    const TextMsgEvent *txtev = dynamic_cast<const TextMsgEvent*>(event);
+    if ( txtev != NULL ) {
+      $reference PilotDemo::commandLine;
+      commandLine = txtev->getText();
+      std::istringstream is(commandLine);
+      string cmd;
+      is >> cmd;
+      $reference PilotDemo::cmdRegistry;
+      StateNode *node = cmdRegistry[cmd];
+      if ( node != NULL ) {
+        node->start();
+        if ( node->getName() == "rundemo" )
+          postStateSuccess();
+        else
+          postStateCompletion();
+      } else {
+        if (! cmd.empty() )
+          cout << "Unrecognized command '" << cmd << "'" << endl;
+        postStateFailure();
+      }
+    }
+  }
+
+  $nodeclass Motion : VisualRoutinesStateNode {
+    $nodeclass Mover : PilotNode(PilotTypes::walk) : doStart {
+      $reference PilotDemo::fwdSpeed, PilotDemo::turnSpeed, PilotDemo::strafeSpeed;
+      pilotreq.dx = 0;
+      pilotreq.dy = 0;
+      pilotreq.da = 0;
+      pilotreq.forwardSpeed = fwdSpeed;
+      pilotreq.turnSpeed = turnSpeed;
+      pilotreq.strafeSpeed = strafeSpeed;
+
+      $reference PilotDemo::commandLine;
+      std::istringstream is(commandLine);
+      string cmd;
+      float arg1 = 0;
+      is >> cmd >> arg1;
+      if ( cmd == "f" )
+	pilotreq.dx = 100;
+      else if ( cmd == "F" )
+	pilotreq.dx = 500;
+      else if ( cmd == "b" )
+	pilotreq.dx = -100;
+      else if ( cmd == "B" )
+	pilotreq.dx = -500;
+      else if ( cmd == "l" )
+	pilotreq.da = M_PI/18;
+      else if ( cmd == "L" )
+	pilotreq.da = M_PI/2;
+      else if ( cmd == "r" )
+	pilotreq.da = -M_PI/18;
+      else if ( cmd == "R" )
+	pilotreq.da = -M_PI/2;
+      else if ( cmd == "fwd" ) {
+	if ( is.fail() ) {
+	  cout << "Missing or invalid argument to 'fwd' command" << endl;
+	  cancelThisRequest();
+	}
+	else
+	  pilotreq.dx = arg1;
+      }
+      else if ( cmd == "turn" ) {
+	if ( is.fail() ) {
+	  cout << "Missing or invalid argument to 'turn' command" << endl;
+	  cancelThisRequest();
+	}
+	else
+	  pilotreq.da = arg1/180*M_PI;
+      }
+#ifdef TGT_HAS_LEGS
+      else if ( cmd == "strafe" ) {
+	if ( is.fail() ) {
+	  cout << "Missing or invalid argument to 'strafe' command" << endl;
+	  cancelThisRequest();
+	}
+	else
+	  pilotreq.dy = arg1;
+      }
+#endif
+      else if ( cmd == "fwdSpeed" ) {
+	if ( is.fail() )
+	  cout << "Missing or invalid argument to 'fwdSpeed' command" << endl;
+	else
+	  fwdSpeed = arg1;
+	cancelThisRequest();
+      }
+      else if ( cmd == "turnSpeed" ) {
+	if ( is.fail() )
+	  cout << "Missing or invalid argument to 'fwdSpeed' command" << endl;
+	else
+	  turnSpeed = arg1;
+	cancelThisRequest();
+      }
+#ifdef TGT_HAS_LEGS
+      else if ( cmd == "strafeSpeed" ) {
+	if ( is.fail() )
+	  cout << "Missing or invalid argument to 'fwdSpeed' command" << endl;
+	else
+	  strafeSpeed = arg1;
+	cancelThisRequest();
+      }
+#endif
+    }
+
+    $setupmachine{
+      mover: Mover =PILOT=> PostMachineCompletion
+      mover =F=> PostMachineCompletion
+    }
+  }
+
+  $nodeclass SetHome : StateNode : doStart {
+		$reference PilotDemo::commandLine;
+		std::istringstream is(commandLine);
+		string cmd, arg1("");
+		is >> cmd >> arg1;
+    if ( arg1 != "" )
+      cout << "The sethome command does not take an argument." << endl;
+    else
+      pilot->setAgent(Point(0,0,0,allocentric), 0, false, false);
+    postStateCompletion();
+  }
+
+	$nodeclass SetXYQ : StateNode : doStart {
+		$reference PilotDemo::commandLine;
+		std::istringstream is(commandLine);
+		string cmd;
+		float arg1 = 0;
+		is >> cmd >> arg1;
+		Point where = theAgent->getCentroid();
+		AngTwoPi heading = theAgent->getOrientation();
+		bool goodCommand = true;
+		if ( cmd == "setx" )
+			where.setCoords(arg1, where.coordY(), where.coordZ());
+		else if ( cmd == "sety" )
+			where.setCoords(where.coordX(), arg1, where.coordZ());
+		else if ( cmd == "setq" ) {
+			if ( arg1 >= -2*M_PI && arg1 <= 2*M_PI )
+				heading = arg1;
+			else {
+				cout << "\n*** Error in setq command: heading must be in radians" << endl;
+				goodCommand = false;
+			}
+		}
+		if ( goodCommand )
+			pilot->setAgent(where, heading, false, false);
+		postStateCompletion();
+	}
+
+
+  //! Set up the built-in PilotDemo commands
+  virtual void registerBuiltInCommands() {
+    $statemachine{
+      motion:      Motion
+      clearmap:    ClearWorldMap
+      buildmap:    BuildWorldMap
+      localize:    Localize
+      randomize:   Randomize
+      display:     DisplayParticles
+			setxyq:      SetXYQ
+      sethome:     SetHome
+      help:        PrintInstructions
+      quit:        Quit
+    }
+    addCommand("f", motion, "   f/b\t\t move forward/back 100 mm");
+    addCommand("b", motion);
+    addCommand("F", motion, "   F/B\t\t move forward/back 500 mm");
+    addCommand("B", motion);
+    addCommand("fwd", motion, "   fwd <mm>\t move forward x millimeters (negative to go backward)");
+
+    addCommand("l", motion, "   l/r\t\t turn left/right 10 degrees");
+    addCommand("r", motion);
+    addCommand("L", motion, "   L/R\t\t turn left/right 90 degrees");
+    addCommand("R", motion);
+    addCommand("turn", motion, "   turn <deg>\t turn by specified angle (positive turns left)");
+
+#ifdef TGT_HAS_LEGS
+    addCommand("strafe", motion, "   strafe <mm>\t move sideways specified distance (positive moves left)");
+#endif
+
+    addCommand("fwdSpeed", motion, "   fwdSpeed\t set forward speed in mm/sec (0 for default speed)");
+    addCommand("turnSpeed", motion, "   turnSpeed\t set turn speed in rad/sec (0 for default speed)");
+#ifdef TGT_HAS_LEGS
+    addCommand("strafeSpeed", motion, "   strafeSpeed\t set strafe speed in mm/sec (0 for default speed)");
+#endif
+    addCommand("clear", clearmap, "   clear\t clear the world map");
+    addCommand("build", buildmap, "   build\t build world map from vision");
+    addCommand("loc", localize, "   loc\t\t localize");
+    addCommand("rand", randomize, "   rand\t\t randomize the particles (to solve the kidnapped robot problem)");
+    addCommand("disp", display, "   disp <n>\t display n particles");
+		addCommand("setx", setxyq, "   setx/y/q\t set agent's x, y, or theta coordinate");
+		addCommand("sety", setxyq);
+		addCommand("setq", setxyq);
+    addCommand("sethome", sethome, "   set agent's x,y,theta to 0");
+    addCommand("help", help, "   help\t\t Print these instructions");
+    addCommand("q", quit, "   q\t\t quit (abort) current operation");
+
+    // If user's setup() defined a "rundemo" node, add it as a command
+    StateNode *rundemoNode = getChild("rundemo");
+    if ( rundemoNode )
+      addCommand("rundemo", rundemoNode, "   rundemo\t Run the demo");
+  }
+
+  //! Users should override this to add their own commands
+  virtual void registerUserCommands() {}
+
+  virtual void pilotDemoSetup() {
+    if ( pilotDemoIsSetup )
+      return;
+    else
+      pilotDemoIsSetup = true;
+    $statemachine{
+      pilotdemostart: SpeechNode("Pilot Demo Ready") =N=> PrintInstructions =N=> waitForCommand
+
+      waitForCommand: StateNode =TM=> parse
+
+      parse: ParseCommand
+      parse =C=> StateNode  // gets us out of the "parse" state so we can reenter it upon completion of the command
+      parse =S=> waitForCommand // for "rundemo", listen immediately for new commands
+      parse =F=> reporter // for invalid command
+
+      // wait 250 msec for robot to come to a stop before reporting position
+      reportwait: StateNode =T(250)=> reporter: ReportPosition =N=> waitForCommand
+    }
+    reportWait = reportwait;
+
+    registerBuiltInCommands();
+    registerUserCommands();
+    startnode = pilotdemostart;  // do this last so user doesn't accidentally overwrite startnode
+  }
+
+  // Call buildMap before running the user's doStart, because the user may count on the map being present.
+  virtual void preStart() {
+    VisualRoutinesStateNode::preStart();
+    pilotDemoSetup();
+    buildMap();
+    GET_SHAPE(worldBounds, PolygonData, worldShS);
+    pilot->setWorldBounds(worldBounds);
+  }
+
+  // Call user's startdemo node if one exists
+  virtual void postStart() {
+    VisualRoutinesStateNode::postStart();
+    StateNode *startdemo = getChild("startdemo");
+    if ( startdemo )
+      startdemo->start();
+  }
+
+  //! Users can override this method to set up a map of their choice.
+  virtual void buildMap() {
+    cout << "PilotDemo::buildMap():  no map loaded." << endl;
+  }
+
+  static std::string getClassDescription() {
+    return "Demo Pilot functions by keyboard command.";
+  }
+
+ private:
+  bool pilotDemoIsSetup;
+
+ public:
+}
+
+#endif   // PILOTDEMO_H_

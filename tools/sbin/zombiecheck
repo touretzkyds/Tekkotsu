@@ -1,0 +1,49 @@
+#!/bin/bash
+
+NUMTEKS=`ps -A | grep tekkotsu- | wc -l`
+NUMGUIS=`ps -A -opid,args | grep java | grep ControllerGUI | wc -l`
+
+if [ "$NUMTEKS" == "0" -a "$NUMGUIS" == "0" ]; then
+echo No Tekkotsu or ControllerGUI jobs found.
+exit 0
+fi
+
+if [ "$NUMTEKS" == "1" ]; then
+echo There is one Tekkotsu running.
+fi
+
+if [ "$NUMGUIS" == "1" ]; then
+echo There is one ControllerGUI running.
+fi
+
+if [ "$NUMTEKS" == "0" -o $NUMTEKS == "1" ]; then
+  echo >/dev/null
+else
+  echo "****************************************************************"
+  echo "*       ZZZZZ   OOO   M   M  BBB   IIIII  EEEEE                *"
+  echo "*          Z   O   O  MM MM  B  B    I    E                    *"
+  echo "*         Z    O   O  M M M  BBB     I    EEE                  *"
+  echo "*        Z     O   O  M   M  B  B    I    E                    *"
+  echo "*       ZZZZZ   OOO   M   M  BBB   IIIII  EEEEE                *"
+  echo "*                                                              *"
+  echo "*                                                              *"
+  echo "*  You have more than one Tekkotsu running.  Probably this is  *"
+  echo "*  because a job didn't terminate normally, leaving a zombie.  *"
+  echo "*  To find zombies at any time, do:                            *"
+  echo "*                                                              *"
+  echo "*         ps -A | grep tek                                     *"
+  echo "*                                                              *"
+  echo "*  Then kill them with 'kill -9 <pid>'. If you can't kill them *"
+  echo "*  you will need to reboot the computer.                       *"
+  echo "****************************************************************"
+  echo "Current zombie list:"
+  ps -A| grep -E "(PID)|(tekkotsu-)"
+  exit 1
+fi
+
+if [ "$NUMGUIS" == "0" -o $NUMGUIS == "1" ]; then
+  echo >/dev/null
+else
+  echo "Warning: there are multiple ControllerGUIs running:"
+  ps -A -opid,args | grep java | grep ControllerGUI
+fi

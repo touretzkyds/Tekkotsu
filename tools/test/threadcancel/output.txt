@@ -1,0 +1,63 @@
+Hello World!
+Callback test 1 
+Callback test 2
+
+Mutex stress test, 1 thread
+Ascending cancels: 0   
+Mutex stress test, 2 threads
+Ascending cancels: 0   
+Ascending cancels: 0   
+Mutex stress test, 3 threads
+Ascending cancels: 0   
+Ascending cancels: 0   
+Ascending cancels: 0   
+Mutex stress test, 4 threads
+Ascending cancels: 0   
+Ascending cancels: 0   
+Ascending cancels: 0   
+Ascending cancels: 0   
+
+Blocking on semaphore
+cancelling semop
+SemaphoreThread interrupted!
+1
+cancel successful
+
+Testing thread increment race condition
+
+
+
+test1 started
+cancelling (should be immediate)
+Foo was cancelled
+testing lock
+works
+test2 started
+cancelling (should be ignored until end of sleep, 2 seconds)
+should still get here
+Foo cancel failed
+testing lock
+works
+test3 started
+cancelling (should be immediate)
+Exception thrown!
+Foo was cancelled
+testing lock
+works
+test4 started
+got client
+cancelling (should be immediate)
+Exception thrown!
+Foo was cancelled
+testing lock
+works
+
+Testing cancellation from conditional:
+0 child waiting
+1 Parent cancelling child...
+2 Parent cancelling child again...
+3 Parent releasing lock
+3 child exited wait (cancellation)
+4 Parent reaquire lock
+5 child exiting, releasing lock
+5 Parent got lock

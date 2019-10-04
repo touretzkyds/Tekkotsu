@@ -1,0 +1,37 @@
+# environment settings
+background material=CloudySky model=Dome
+
+# default shapes
+define castle_wall cube material=RustySteel
+define castle_tower cylinder material=RustySteel group=tower
+
+# castle walls
+# special case on the front wall [along the x-axis] for a door
+castle_wall location=[3000,0,2500] scale=[4000,1000,5000]
+castle_wall location=[9000,0,2500] scale=[4000,1000,5000]
+# castle_wall location=[6000,0,1500] scale=[2000,1000,3000] material=Wood visible=false
+castle_wall location=[6000,0,4000] scale=[2000,1000,2000]
+
+# other walls
+castle_wall location=[1000,5000,2500] scale=[1000,10000,5000]
+castle_wall location=[6000,10000,2500] scale=[10000,1000,5000]
+castle_wall location=[11000,5000,2500] scale=[1000,10000,5000]
+
+# castle tower
+castle_tower location=[1000,0,3000] scale=[2000,2000,6000]
+castle_tower location=[1000,0,6500] scale=[3000,3000,1000]
+# parapets
+castle_wall location=[1000,1250,7500] scale=[1000,500,1000] group=tower
+castle_wall location=[2080,-620,7500] scale=[1000,500,1000] group=tower rotation=[0,0,0.44]
+castle_wall location=[-80,-620,7500] scale=[1000,500,1000] group=tower rotation=[0,0,-0.44]
+
+# grass and a moat
+plane material=Green location=[6000,5000,10] scale=[150000,150000,200]
+cylinder material=Blue location=[6000,5000,10] scale=[5000,5000,80]
+
+# clone the tower
+copy tower [10000,0,0]
+copy tower [0,10000,0]
+copy tower [10000,10000,0]
+
+copy all [0,-20000,0] flipy

@@ -1,0 +1,6 @@
+each line is a 9 char name, tab, value, tab, weight
+not all joints need to be listed, and can be in any order
+don't delete leading #POS or ending #END\n
+remember to pad all joint names with '~' (reads 9 chars per name)
+
+

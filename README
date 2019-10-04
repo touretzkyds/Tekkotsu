@@ -1,0 +1,57 @@
+Welcome to the Tekkotsu framework.
+Unless otherwise noted, all source code and related files are
+Copyright 2007-2016, Carnegie Mellon University Tekkotsu Lab
+Released under the LGPL, see LICENSE.
+
+Documentation and Usage Guides:
+------------------------------
+  * http://www.Tekkotsu.org/
+  * http://www.cs.cmu.edu/~tekkotsu/
+
+Contact info:
+------------
+  * Developer BBS: http://groups.yahoo.com/group/tekkotsu_dev/
+  * CVS info: http://cvs.tekkotsu.org/
+  * Bugzilla: http://bugs.tekkotsu.org/
+
+  * General: info@tekkotsu.org
+  * Bugs: bugs@tekkotsu.org
+
+Directory Descriptions:
+----------------------
+
+  * User Code Template *
+    ------------------
+    project - project template directory, copy to another location for local development
+
+  * Source Files *
+    ------------
+
+     -Platform Specific Files-
+      -----------------------
+      aperios - provides support for Sony AIBO robots (through OPEN-R SDK)
+                (includes MMCombo, which forks into Main and Motion processes,
+                in addition to Sound and TinyFTPD processes)
+      local - provides simulation support for the host platform (UNIX variants),
+                as well as communication and device drivers for various hardware.
+
+     -General Source Code-
+      -------------------
+      Behaviors - Base classes and demo code
+      DualCoding - Vision processing package, see http://www.cs.cmu.edu/~dst/Tekkotsu/Tutorial/vr-intro.shtml
+      Events - Base classes and 'custom' events
+      IPC - Inter-Process Communication, mutual exclusion and message passing
+      Motion - Most motion related classes
+      Planners - Algorithms for planning, e.g. an RRT implementation
+      Shared - Utility code
+      Sound - Handles mixing and sending sound buffers to system
+      Vision - Vision processing code
+      Wireless - Networking code
+
+  * Non-Source Framework Files *
+    --------------------------
+    contrib - additional code which either hasn't been inlined, or the
+              original submissions of code that has been imported (thanks!)
+    docs - scripts, configuration, and other files for the doxygen documentation
+    tools - build scripts, utilities, and PC-side tools.
+    deprecated - archaic source, but may still be of some interest

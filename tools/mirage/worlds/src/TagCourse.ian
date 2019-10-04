@@ -1,0 +1,77 @@
+# TagCourse world: see wiki.Tekkotsu.org
+# Author: David S. Touretzky, Carnegie Mellon University
+
+# environment settings
+background material=CloudySky model=Dome
+light location=[1000,1000,2000] pointat=[1000,0,0]
+light location=[-1000,0,2000] pointat=[1000,0,0]
+
+# box parameters
+set boxWidth = 16 * 25.4
+set boxDepth = 4 * 25.4
+set boxHeight = 12 * 25.4
+define Box cube  scale=[boxWidth, boxDepth, boxHeight]
+define RedBox Box material=RustySteel
+define GreenBox Box material=TarnishedBronze
+
+# tag parameters
+set tagSize = 7 * 25.4            # tag width and height
+set tagSep = 10
+set leftTag = tagSize/2 + tagSep
+set rightTag = -tagSize/2 - tagSep
+set tagZ = 7 * 25.4               # height above ground of tag center (millimeters)
+define Tag cube scale=[tagSize,1,tagSize]
+
+# robot parameters
+set robotRadius = 6 * 25.4            # the Create has a 12 inch diameter (so 6 inch radius)
+set robotBuffer = 4 * 25.4            # minimum allowable distance between edge of robot and a box
+set totalOffset = robotRadius + robotBuffer + boxDepth/2
+set tagOffset = robotRadius + robotBuffer - 5
+
+# Box 1
+set pointX = 2000
+set pointY = 0
+set angle = deg2rad(90)
+RedBox location=[pointX+totalOffset, pointY, boxHeight/2] orientation=rotz(angle)
+Tag location=[pointX+tagOffset,  pointY+leftTag, tagZ] orientation=rotz(angle) material="AprilTag/tag16h5/01"
+Tag location=[pointX+tagOffset, pointY+rightTag, tagZ] orientation=rotz(angle) material="AprilTag/tag16h5/02"
+
+# Box 2
+set pointX = 2000
+set pointY = 1000
+set angle = deg2rad(0)
+GreenBox location=[pointX, pointY+totalOffset, boxHeight/2] orientation=rotz(angle)
+Tag location=[pointX+leftTag,  pointY+tagOffset, tagZ] orientation=rotz(angle) material="AprilTag/tag16h5/00"
+Tag location=[pointX+rightTag, pointY+tagOffset, tagZ] orientation=rotz(angle) material="AprilTag/tag16h5/02"
+
+# Box 3
+set pointX = 1000
+set pointY = 1000
+set angle = deg2rad(90)
+RedBox location=[pointX-totalOffset, pointY, boxHeight/2] orientation=rotz(angle)
+Tag location=[pointX-tagOffset,  pointY-leftTag, tagZ] orientation=rotz(angle) material="AprilTag/tag16h5/00"
+Tag location=[pointX-tagOffset, pointY-rightTag, tagZ] orientation=rotz(angle) material="AprilTag/tag16h5/02"
+
+# Box 4
+set pointX = 1000
+set pointY = -1000
+set angle = deg2rad(0)
+GreenBox location=[pointX, pointY-totalOffset, boxHeight/2] orientation=rotz(angle)
+Tag location=[pointX+leftTag,  pointY-tagOffset, tagZ] orientation=rotz(angle) material="AprilTag/tag16h5/01"
+Tag location=[pointX+rightTag, pointY-tagOffset, tagZ] orientation=rotz(angle) material="AprilTag/tag16h5/03"
+
+# Box 5
+set pointX = 0
+set pointY = -1000
+set angle = deg2rad(90)
+RedBox location=[pointX-totalOffset, pointY, boxHeight/2] orientation=rotz(angle)
+Tag location=[pointX-tagOffset,  pointY-leftTag, tagZ] orientation=rotz(angle) material="AprilTag/tag16h5/00"
+Tag location=[pointX-tagOffset, pointY-rightTag, tagZ] orientation=rotz(angle) material="AprilTag/tag16h5/04"
+
+# Start marker
+sphere location=[0,0,0] scale=[100, 100, 0.2] material=Green collision=false
+
+# End marker
+sphere location=[0,-1000,0] scale=[100, 100, 0.2] material=Red collision=false
+
+# End of TagCourse world

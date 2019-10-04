@@ -1,0 +1,17 @@
+@INCLUDE = doxygencfg
+
+PROJECT_NAME = "Tekkotsu Hardware Abstraction Layer"
+INPUT = ../local
+EXCLUDE = ../local/terk
+EXCLUDE_PATTERNS =
+OUTPUT_DIRECTORY = generated/html
+EXTRACT_ALL = YES
+ALWAYS_DETAILED_SEC = NO
+GENERATE_TREEVIEW = YES
+HTML_OUTPUT = hal
+HIDE_SCOPE_NAMES = YES
+SEARCHENGINE = YES
+GENERATE_TAGFILE = generated/hal.tag
+HTML_HEADER = exthead.html
+HTML_FOOTER = dualcodingfoot.html
+PREDEFINED += use_namespace

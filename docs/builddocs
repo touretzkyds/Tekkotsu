@@ -1,0 +1,153 @@
+#!/bin/bash
+
+myloc="`echo $0 | sed 's/\/[^/]*$//'`/..";
+cd "$myloc"
+src="`pwd`"
+target=$src/docs/generated/html
+
+update=0;
+search=0;
+clean=0;
+tree=0;
+extract_all="EXTRACT_ALL = NO";
+always_detailed_sec="ALWAYS_DETAILED_SEC = NO";
+generate_treeview="GENERATE_TREEVIEW = NO";
+searchengine="SEARCHENGINE = NO";
+#enabled_sections="ENABLED_SECTIONS += INTERNAL";
+input="$src";
+exclude="$input/docs $input/build $input/TinyFTPD $input/ms $input/tools $input/contrib $input/deprecated $input/Shared/jpeg-6b $input/Motion/Spline.h $input/Motion/gvector.h $input/Motion/Path.h $input/SoundPlay/WAV.h $input/SoundPlay/WAV.cc $input/Wireless/ionetstream.h $input/Motion/OldKinematics.h $input/Motion/OldKinematics.cc $input/Motion/Geometry.h $input/Shared/Util.h $input/DualCoding $input/local";
+
+while [ $# -gt 0 ] ; do
+	case $1 in
+		-a | --all) extract_all="EXTRACT_ALL = YES"; shift;;
+		-u | --update) update=1; shift;;
+		-d | --detailed) always_detailed_sec="ALWAYS_DETAILED_SEC = YES"; shift;;
+		-t | --tree) tree=1; generate_treeview="GENERATE_TREEVIEW = YES"; shift;;
+		-s | --search) search=1; searchengine="SEARCHENGINE = YES"; shift;;
+		-r | --release) enabled_sections=""; shift;;
+		-c | --clean) clean=1; shift;;
+		*) target="$1"; shift;;
+	esac;
+done;
+
+output_directory="`echo OUTPUT_DIRECTORY = $target | sed 's/\/[^/]*$//'`";
+html_output="`echo $target | sed 's/.*\//HTML_OUTPUT = /'`";
+
+cd "$input/docs" ;
+
+echo INPUT = $input > doxygenbuildcfg;
+echo $enabled_sections >> doxygenbuildcfg;
+echo EXCLUDE = $exclude >> doxygenbuildcfg;
+echo $output_directory >> doxygenbuildcfg;
+echo $extract_all >> doxygenbuildcfg;
+echo $always_detailed_sec >> doxygenbuildcfg;
+echo $generate_treeview >> doxygenbuildcfg;
+echo $html_output >> doxygenbuildcfg;
+echo $searchengine >> doxygenbuildcfg;
+echo "GENERATE_TAGFILE = generated/tekkotsu.tag" >> doxygenbuildcfg
+echo "TAGFILES += generated/newmat.tag=newmat" >> doxygenbuildcfg
+#generated/dualcoding.tag=dualcoding
+
+cancelupdate=0;
+if [ $update -ne 0 -a ! -d "$target" ] ; then
+	printf "\`\`$target'' does not exist - rebuilding...\n";
+	cancelupdate=1;
+fi;
+
+if [ $update -eq 0 -o $clean -ne 0 ] ; then
+	printf "Cleaning previous build of \`\`$target''...";
+	rm -rf ${target};
+	rm -rf generated/*.tag;
+	printf "done\n";
+	if [ $update -ne 0 ] ; then
+		update=0;
+	fi;
+fi;
+
+if [ $cancelupdate -ne 0 ] ; then
+	update=0;
+fi;
+
+echo "Running state parser on .fsm files...";
+fsms=`find .. -name "*.fsm"`
+fsmsrcs=`sed 's/.fsm$//' <<< "$fsms"`
+for x in $fsms ; do
+	../tools/sbin/stateparser "$x" - | grep -v '^#line' > `sed 's/.fsm$//' <<< "$x"` || exit 1;
+done;
+
+printf "Building documentation for \`\`$input'' ...";
+mv doxygenbuildcfg doxygenbuildcfg.tmp;
+touch doxygenbuildcfg;
+if [ -f "generated/tekkotsu.tag" ] ; then
+echo "TAGFILES += generated/tekkotsu.tag=.." >> doxygenbuildcfg
+echo "INCLUDE_PATH += $src" >> doxygenbuildcfg
+fi;
+mkdir -p generated/html;
+
+doxygen newmat.doxycfg;
+cp ${target}/newmat/annotated.html ${target}/newmat/main.html
+doxygen dualcoding.doxycfg;
+cp ${target}/dualcoding/namespaceDualCoding.html ${target}/dualcoding/main.html
+
+mv doxygenbuildcfg.tmp doxygenbuildcfg
+doxygen doxygencfg ;
+
+mv doxygenbuildcfg doxygenbuildcfg.tmp;
+touch doxygenbuildcfg;
+if [ -f "generated/tekkotsu.tag" ] ; then
+echo "TAGFILES += generated/tekkotsu.tag=.." >> doxygenbuildcfg
+echo "INCLUDE_PATH += $src" >> doxygenbuildcfg
+fi;
+doxygen hal.doxycfg;
+cp ${target}/hal/annotated.html ${target}/hal/main.html
+mv doxygenbuildcfg.tmp doxygenbuildcfg
+
+printf "done\n";
+
+if [ $search -ne 0 ] ; then
+	printf "Updating search.php form action...";
+	find "$target" -name "*.html" -exec "${src}/tools/bin/filewordreplace" -c "@" -q '"search.php"' '"http://cvs.tekkotsu.org/search.php"' \{\} \;;
+	printf "done\n";
+fi;
+
+#if [ $update -eq 0 ] ; then
+	printf "Copying additional documentation..."
+	for x in ${src}/docs/html/* ; do
+		printf "${x}, "
+		if echo "$x" | grep -q /index.html\$ ; then
+			if [ $tree -eq 0 ] ; then
+				cp -f $x $target ;
+			else
+				cp -f $x ${target}/main.html ;
+			fi;
+		else
+			if echo "$x" | grep -v -q /CVS\$ ; then
+				cp -rf $x $target ;
+			fi;
+		fi;
+	done;
+  printf "${src}/docs/html/.htaccess..."
+	cp -f "$src"/docs/html/.htaccess $target ;
+#	rm -rf $target/CVS ;
+	printf "done\n"
+#else
+#	if [ $tree -eq 0 ] ; then
+#		printf "Replacing generated index.html with docs/html/index.html..."
+#		cp -f "$src"/docs/html/index.html $target ;
+#	else
+#		printf "Replacing generated main.html with docs/html/index.html..."
+#		cp -f "$src"/docs/html/index.html $target/main.html ;
+#	fi;
+#	printf "done\n"
+#fi;
+
+if [ $tree -ne 0 ] ; then
+	printf "Adding favicon tag to index.html..."
+	mv $target/index.html $target/indextmp.html
+	cat $target/indextmp.html | sed 's/<head>/<head><link href="favicon.ico" rel="SHORTCUT ICON">/' > $target/index.html
+	printf "done\n"
+fi;
+
+rm $fsmsrcs;
+
+exit 0;

@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# This is used by doxygen to extract file version numbers from the CVS info
+# The name of the file to be queried is passed as the sole argument ($1)
+
+sed -n "s@^/$1/\([^/]*\)/.*@\1@p" CVS/Entries

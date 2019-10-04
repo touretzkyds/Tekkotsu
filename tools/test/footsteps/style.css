@@ -1,0 +1,102 @@
+circle line svg {
+	/* optimizeSpeed crispEdges geometricPrecision */
+	shape-rendering: geometricPrecision
+}
+
+#Start {
+	/*fill: rgb(192,192,255);*/
+	/*fill-opacity: 0.4;
+	fill: rgb(0,64,255);*/
+	fill: rgb(153,179,255);
+	stroke: rgb(0,64,255);
+	stroke-width: 3;
+}
+
+#Goal {
+	/*fill: rgb(64,192,64);*/
+	/*fill-opacity: 0.4;
+	fill: rgb(0,128,64);*/
+	fill: rgb(153,234,179);
+	stroke: rgb(0,140,64);
+	stroke-width: 3;
+}
+
+.Obstacle1 {
+	/*opacity:.75;
+	fill: rgb(255,160,160);*/
+	fill: rgb(255,184,184);
+	stroke: none;
+}
+.Obstacle2 {
+	fill: none;
+	stroke: rgb(160,96,96);
+	stroke-width: 2;
+}
+
+.GridLine {
+	/*opacity:.65;
+	stroke: rgb(192,192,92);*/
+	stroke: rgb(214,214,149);
+	stroke-width: 1;
+}
+
+.OriginLine {
+	/*opacity:.65;
+	stroke: rgb(128,128,32);*/
+	stroke: rgb(172,172,110);
+	stroke-width: 5;
+}
+
+.OrientationLine {
+	stroke: rgb(0,0,0);
+	stroke-width: 2;
+}
+
+.Foot {
+	stroke: rgb(128,0,0);
+	stroke-width: 2;
+}
+#Footstep {
+	fill: rgb(128,0,0);
+	/*stroke: rgb(128,0,0);
+	stroke-width: 4;*/
+}
+
+.Open, .Closed, .Live {
+	stroke-width: 3;
+}
+.Open {
+	stroke: rgb(0,128,64);
+}
+#OpenNode {
+	fill: rgb(255,255,255);
+	stroke: rgb(0,128,64);
+}
+.Live {
+	stroke: rgb(96,96,96);
+}
+#LiveNode {
+	fill: rgb(96,96,96);
+}
+.Closed {
+	stroke: rgb(160,160,160);
+}
+#ClosedNode {
+	fill: rgb(160,160,160);
+}
+
+.Path {
+	stroke: rgb(0,64,255);
+	stroke-width: 10;
+}
+#PathNode {
+	fill: rgb(0,64,255);
+	/*stroke: rgb(0,64,255);
+	stroke-width: .3;*/
+}
+
+.Support {
+	fill: rgb(255,255,0);
+	stroke: black;
+	opacity: .4;
+}

@@ -1,0 +1,626 @@
+<?xml version="1.0"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><array>
+<!--
+##################################################################
+##################   Kinematics Configuration   ##################
+##################################################################
+
+This is an XML-based format using the Property List (plist) layout.
+
+Each joint is defined by a <dict> element with the keys listed below.
+A branch in the chain is denoted by an <array> containing the
+joints of the sub-chain.
+
+  JointType: Indicates the type of motion produced by the joint
+    One of: revolute | prismatic
+
+  Modified Denavit-Hartenberg parameters: (here in order of application)
+    θ: Rotation about the previous joint's z axis (theta, U+03B8)
+    d: Displacement along the previous joint's z axis
+    α: Rotation about the current joint's x axis (alpha, U+03B1)
+    r: Displacement along the current joint's x axis
+  In other words, θ and d align the previous joint's x axis with
+  this joint's x axis, and then a displacement of r (radius of
+  rotation) along this x defines the current joint's origin.
+  α then defines the current joint's z axis (the axis of actuation).
+
+  The "modified" form of Denavit-Hartenberg parameters must be used
+  so that we can support branching chains... basically this means you
+  are specifying the transformation from the previous joint to the
+  current one instead of from the current to the next.
+
+  qOffset: An additional parameter which shifts the final reference
+    frame to the physical joint's 0 position.  This is a rotation
+    about the joint's z axis for revolute joints, or translation
+    along z for prismatic.
+  Min: The minimum acceptable joint value for inverse kinematics
+  Max: The maximum acceptable joint value for inverse kinematics
+    Inverse kinematics ignores this joint if Min==Max (immobile).
+
+  Model: for 3D graphics, the name of the OGRE mesh file to render
+    for the link following the joint. (drop the ".mesh" suffix)
+  Material: for 3D graphics, the name of the material to apply to
+    the model, or blank to use the model's defaults
+
+All distances are in millimeters.  Angles are radians, unless a
+'unit' attribute is specified, or a '°' is suffixed.  You can
+also specify radians as multiples of Pi, e.g. 'π/2'.
+-->
+
+<dict>
+	<key>Name</key>      <string>BaseFrame</string>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key>         <real>0</real>
+	<key>d</key>         <real>0</real>
+	<key>α</key>         <real>0</real>
+	<key>r</key>         <real>0</real>
+	<key>qOffset</key>   <real>0</real>
+	<key>Min</key>       <real>0</real>
+	<key>Max</key>       <real>0</real>
+	<key>Model</key>                  <string>Calliope/Chassis</string>
+	<key>CollisionModel</key>         <string>Cylinder</string>
+	<key>CollisionModelScale</key>    <array> <real>329.950</real> <real>329.950</real> <real>61.2</real> </array>
+	<key>CollisionModelOffset</key>   <array> <real>0</real> <real>0</real> <real>47.2</real> </array>
+	<key>Mass</key>                   <real>50</real> <!-- 2.403 -->
+	<key>CenterOfMass</key>           <array> <real>40</real> <real>0</real> <real>100</real> </array>
+	<key>Components</key> <array>
+		<!-- Modular arm base -->
+		<dict>
+			<key>Model</key> <string>Calliope/2DOF-Base</string>
+		</dict>
+		<!-- Modular neck -->
+		<dict>
+			<key>Model</key> <string>Calliope/Neck</string>
+		</dict>
+		<!-- Lower neck -->
+		<dict>
+			<key>Model</key> <string></string>
+			<key>CollisionModel</key> <string>Cube</string>
+			<key>CollisionModelOffset</key> <array> <real>89.027</real> <real>0</real> <real>226.928</real> </array>
+			<key>CollisionModelScale</key> <array> <real>71.637</real> <real>44.450</real> <real>196.056</real> </array>
+		</dict>
+		<!-- Upper neck -->
+		<dict>
+			<key>Model</key> <string></string>
+			<key>CollisionModel</key> <string>Cube</string>
+			<key>CollisionModelOffset</key> <array> <real>55.720</real> <real>0</real> <real>362.462</real> </array>
+			<key>CollisionModelScale</key> <array> <real>67.260</real> <real>26</real> <real>75.013</real> </array>
+		</dict>
+		<!-- Laptop base -->
+		<dict>
+			<key>Model</key> <string></string>
+			<key>CollisionModel</key> <string>Cube</string>
+			<key>CollisionModelOffset</key> <array> <real>0</real> <real>0</real> <real>106.55</real> </array>
+			<key>CollisionModelScale</key> <array> <real>225.413</real> <real>241.3</real> <real>57.9</real> </array>
+		</dict>
+		<!-- Laptop screen -->
+		<dict>
+			<key>Model</key> <string></string>
+			<key>CollisionModel</key> <string>Cube</string>
+			<key>CollisionModelOffset</key> <array> <real>49.863</real> <real>0</real> <real>210.25</real> </array>
+			<key>CollisionModelScale</key> <array> <real>5</real> <real>225</real> <real>150</real> </array>
+		</dict>
+		<!-- Front marker1 -->
+		<dict>
+			<key>Model</key> <string>Sphere</string>
+			<key>Material</key>  <string>Red</string>
+			<key>ModelScale</key> <array> <real>1</real> <real>15</real> <real>15</real> </array>
+			<key>ModelOffset</key> <array> <real>165</real> <real>-15</real> <real>55</real> </array>
+		</dict>
+		<!-- Front marker2 -->
+		<dict>
+			<key>Model</key> <string>Sphere</string>
+			<key>Material</key>  <string>Red</string>
+			<key>ModelScale</key> <array> <real>1</real> <real>15</real> <real>15</real> </array>
+			<key>ModelOffset</key> <array> <real>165</real> <real>15</real> <real>30</real> </array>
+		</dict>
+		<!-- Front marker3 -->
+		<dict>
+			<key>Model</key> <string>Sphere</string>
+			<key>Material</key>  <string>Red</string>
+			<key>ModelScale</key> <array> <real>1</real> <real>15</real> <real>15</real> </array>
+			<key>ModelOffset</key> <array> <real>165</real> <real>-15</real> <real>30</real> </array>
+		</dict>
+		<!-- Front marker4 -->
+		<dict>
+			<key>Model</key> <string>Sphere</string>
+			<key>Material</key>  <string>Green</string>
+			<key>ModelScale</key> <array> <real>1</real> <real>15</real> <real>15</real> </array>
+			<key>ModelOffset</key> <array> <real>165</real> <real>15</real> <real>55</real> </array>
+		</dict>
+		<!-- Back marker1 -->
+		<dict>
+			<key>Model</key> <string>Sphere</string>
+			<key>Material</key>  <string>Red</string>
+			<key>ModelScale</key> <array> <real>1</real> <real>15</real> <real>15</real> </array>
+			<key>ModelOffset</key> <array> <real>-165</real> <real>-15</real> <real>55</real> </array>
+		</dict>
+		<!-- Back marker2 -->
+		<dict>
+			<key>Model</key> <string>Sphere</string>
+			<key>Material</key>  <string>Red</string>
+			<key>ModelScale</key> <array> <real>1</real> <real>15</real> <real>15</real> </array>
+			<key>ModelOffset</key> <array> <real>-165</real> <real>15</real> <real>55</real> </array>
+		</dict>
+		<!-- Back marker3 -->
+		<dict>
+			<key>Model</key> <string>Sphere</string>
+			<key>Material</key>  <string>Red</string>
+			<key>ModelScale</key> <array> <real>1</real> <real>15</real> <real>15</real> </array>
+			<key>ModelOffset</key> <array> <real>-165</real> <real>15</real> <real>30</real> </array>
+		</dict>
+		<!-- Back marker4 -->
+		<dict>
+			<key>Model</key> <string>Sphere</string>
+			<key>Material</key>  <string>Green</string>
+			<key>ModelScale</key> <array> <real>1</real> <real>15</real> <real>15</real> </array>
+			<key>ModelOffset</key> <array> <real>-165</real> <real>-15</real> <real>30</real> </array>
+		</dict>
+		<!-- Left marker1 -->
+		<dict>
+			<key>Model</key> <string>Sphere</string>
+			<key>Material</key>  <string>Red</string>
+			<key>ModelScale</key> <array> <real>15</real> <real>1</real> <real>15</real> </array>
+			<key>ModelOffset</key> <array> <real>-15</real> <real>165</real> <real>55</real> </array>
+		</dict>
+		<!-- Left marker2 -->
+		<dict>
+			<key>Model</key> <string>Sphere</string>
+			<key>Material</key>  <string>Red</string>
+			<key>ModelScale</key> <array> <real>15</real> <real>1</real> <real>15</real> </array>
+			<key>ModelOffset</key> <array> <real>15</real> <real>165</real> <real>30</real> </array>
+		</dict>
+		<!-- Left marker3 -->
+		<dict>
+			<key>Model</key> <string>Sphere</string>
+			<key>Material</key>  <string>Red</string>
+			<key>ModelScale</key> <array> <real>15</real> <real>1</real> <real>15</real> </array>
+			<key>ModelOffset</key> <array> <real>-15</real> <real>165</real> <real>30</real> </array>
+		</dict>
+		<!-- Left marker4 -->
+		<dict>
+			<key>Model</key> <string>Sphere</string>
+			<key>Material</key>  <string>Green</string>
+			<key>ModelScale</key> <array> <real>15</real> <real>1</real> <real>15</real> </array>
+			<key>ModelOffset</key> <array> <real>15</real> <real>165</real> <real>55</real> </array>
+		</dict>
+		<!-- Right marker1 -->
+		<dict>
+			<key>Model</key> <string>Sphere</string>
+			<key>Material</key>  <string>Red</string>
+			<key>ModelScale</key> <array> <real>15</real> <real>1</real> <real>15</real> </array>
+			<key>ModelOffset</key> <array> <real>-15</real> <real>-165</real> <real>55</real> </array>
+		</dict>
+		<!-- Right marker2 -->
+		<dict>
+			<key>Model</key> <string>Sphere</string>
+			<key>Material</key>  <string>Red</string>
+			<key>ModelScale</key> <array> <real>15</real> <real>1</real> <real>15</real> </array>
+			<key>ModelOffset</key> <array> <real>15</real> <real>-165</real> <real>55</real> </array>
+		</dict>
+		<!-- Right marker3 -->
+		<dict>
+			<key>Model</key> <string>Sphere</string>
+			<key>Material</key>  <string>Red</string>
+			<key>ModelScale</key> <array> <real>15</real> <real>1</real> <real>15</real> </array>
+			<key>ModelOffset</key> <array> <real>15</real> <real>-165</real> <real>30</real> </array>
+		</dict>
+		<!-- Right marker4 -->
+		<dict>
+			<key>Model</key> <string>Sphere</string>
+			<key>Material</key>  <string>Green</string>
+			<key>ModelScale</key> <array> <real>15</real> <real>1</real> <real>15</real> </array>
+			<key>ModelOffset</key> <array> <real>-15</real> <real>-165</real> <real>30</real> </array>
+		</dict>
+	</array>
+	<key>SensorInfo</key> <array>
+		<dict>
+			<key>SensorType</key> <string>Contact</string>
+			<key>SensorName</key> <string>LBump</string>
+			<key>LinZ</key> <array> <real>17.6</real> <real>76.8</real> </array>
+			<key>AngZ</key> <array> <real>-12.5°</real> <real>90°</real> </array>
+		</dict>
+		<dict>
+			<key>SensorType</key> <string>Contact</string>
+			<key>SensorName</key> <string>RBump</string>
+			<key>LinZ</key> <array> <real>17.6</real> <real>76.8</real> </array>
+			<key>AngZ</key> <array> <real>-90°</real> <real>12.5°</real> </array>
+		</dict>
+		<dict>
+			<key>SensorType</key> <string>Odometry</string>
+			<key>ForwardSensorName</key> <string>Distance</string>
+			<key>HeadingSensorName</key> <string>Angle</string>
+		</dict>
+ 		<dict>
+ 			<key>SensorType</key> <string>GPS</string>
+ 			<key>SensorName</key> <string>GPS</string>
+ 		</dict>
+
+</array>
+</dict>
+
+<array>
+	<!-- need this extra frame so we can put wheel origins in center of wheels -->
+	<dict>
+		<!--center of axle-->
+		<key>Name</key>      <string>UNUSED</string>
+		<key>d</key>         <real>30</real>
+		<key>θ</key>         <real>0</real>
+		<key>r</key>         <real>0</real>
+		<key>α</key>         <real>-90°</real>
+	</dict>	
+	<!-- LEFT WHEEL -->
+	<array>
+		<dict>
+			<key>Name</key>      <string>WHEEL:L</string>
+			<key>JointType</key> <string>revolute</string>
+			<key>d</key>         <real>130.5</real> <!-- wheelbase / 2 -->
+			<key>Min</key>       <real>-100</real>
+			<key>Max</key>       <real>100</real>
+			<key>Model</key>                  <string>Calliope/Wheel</string>
+			<key>CollisionModel</key>         <string>Cylinder</string>
+			<key>CollisionModelScale</key>    <array> <real>60</real> <real>60</real> <real>20</real> </array>
+			<key>Mass</key>                   <real>0.1</real> <!-- 0.1 -->
+			<key>FrictionForce</key>          <real>100</real>
+			<key>ControllerInfo</key> <dict><key>Velocity</key><true/></dict>
+		</dict>
+	</array>
+	
+	<!-- RIGHT WHEEL -->
+	<array>
+		<dict>
+			<key>Name</key>      <string>WHEEL:R</string>
+			<key>JointType</key> <string>revolute</string>
+			<key>d</key>         <real>-130.5</real> <!-- wheelbase / 2 -->
+			<key>Min</key>       <real>-100</real>
+			<key>Max</key>       <real>100</real>
+			<key>Model</key>                  <string>Calliope/Wheel</string>
+			<key>CollisionModel</key>         <string>Cylinder</string>
+			<key>CollisionModelScale</key>    <array> <real>60</real> <real>60</real> <real>20</real> </array>
+			<key>Mass</key>                   <real>0.1</real> <!-- 0.1 -->
+           		<key>FrictionForce</key>          <real>100</real>
+			<key>ControllerInfo</key> <dict><key>Velocity</key><true/></dict>
+		</dict>
+	</array>
+</array>
+<!-- HEAD / CAMERA -->
+<array>
+	<dict>
+		<key>Name</key>      <string>NECK:pan</string>
+		<key>JointType</key> <string>revolute</string>
+		<key>θ</key>         <real>0°</real>
+		<key>d</key>         <real>384.6752</real>
+		<key>α</key>         <real>0</real>
+		<key>r</key>         <real>77.4516</real>
+		<key>qOffset</key>   <real>0°</real>
+		<key>Min</key>       <real>-150°</real>
+		<key>Max</key>       <real>150°</real>
+		<key>Mass</key>      <real>0.0775</real>
+		<key>Model</key>     <string>Calliope/Pan</string>
+		<key>IKSolver</key>  <string>IKThreeLink</string>
+		<key>CollisionModel</key> <string>Cube</string>
+		<key>CollisionModelScale</key> <array> <real>50</real> <real>38</real> <real>32</real> </array>
+		<key>CollisionModelOffset</key> <array> <real>9.1</real> <real>0</real> <real>40</real> </array>
+		<key>CenterOfMass</key> <array> <real>9.1</real> <real>0</real> <real>38.5</real> </array>
+	</dict>
+	<dict>
+		<key>Name</key>      <string>NECK:tilt</string>
+		<key>JointType</key> <string>revolute</string>
+		<key>θ</key>         <real>0</real>
+		<key>d</key>         <real>39.999</real>
+		<key>α</key>         <real>90°</real>
+		<key>r</key>         <real>22.6</real>
+		<key>qOffset</key>   <real>0</real>
+		<key>Min</key>       <real>-92°</real>
+		<key>Max</key>       <real>75°</real>
+		<key>Mass</key>      <real>0.1175</real>
+		<key>Model</key>     <string>Calliope/TiltSP</string>
+		<key>IKSolver</key>  <string>IKThreeLink</string>
+		<key>CenterOfMass</key> <array> <real>50</real> <real>0</real> <real>0</real> </array>
+		<key>Components</key> <array>
+			<!-- Camera -->
+			<dict>
+				<key>Model</key>     <string></string>
+				<key>CollisionModel</key> <string>Cube</string>
+				<key>CollisionModelScale</key> <array> <real>29.5</real> <real>45.199</real> <real>85.5</real> </array>
+				<key>CollisionModelOffset</key> <array> <real>43.05</real> <real>47.65</real> <real>0.5</real> </array>
+			</dict>
+			<!-- AX-S1 -->
+			<dict>
+				<key>Model</key>     <string></string>
+				<key>CollisionModel</key> <string>Cube</string>
+				<key>CollisionModelScale</key> <array> <real>54</real> <real>41</real> <real>32.119</real> </array>
+				<key>CollisionModelOffset</key> <array> <real>55</real> <real>1.5</real> <real>0</real> </array>
+			</dict>
+		</array>
+	</dict>
+	<array>
+		<dict>
+			<key>JointType</key> <string>revolute</string>
+			<key>θ</key>         <real>90°</real>
+			<key>d</key>         <real>0</real>
+			<key>α</key>         <real>90°</real>
+			<key>r</key>         <real>63.56367</real>
+			<key>qOffset</key>   <real>0</real>
+			<key>Min</key>       <real>0</real>
+			<key>Max</key>       <real>0</real>
+		</dict>
+		<dict>
+			<key>Name</key>      <string>CameraFrame</string>
+			<key>JointType</key> <string>prismatic</string>
+			<key>θ</key>         <real>90°</real>
+			<key>d</key>         <real>41.48601</real>
+			<key>α</key>         <real>0</real>
+			<key>r</key>         <real>0</real>
+			<key>qOffset</key>   <real>0</real>
+			<key>Min</key>       <real>0</real>
+			<key>Max</key>       <real>1000000</real>
+                        <!-- <key>Model</key>     <string>ReferenceFrame</string> -->
+			<key>IKSolver</key>  <string>IKThreeLink</string>
+			<key>Visible</key>   <false/>
+                </dict>  
+                <!-- Reference frame offset adjustment -->
+                <dict>
+                        <key>θ</key>         <real>0°</real>
+                        <key>d</key>         <real>14.5</real>
+                        <key>α</key>         <real>0°</real>
+                        <key>r</key>         <real>0</real>
+                        <key>Model</key>     <string>ReferenceFrame</string> 
+		</dict>
+	</array>
+	<array>
+		<dict>
+			<key>Name</key>      <string>LeftIRFrame</string>
+			<key>JointType</key> <string>prismatic</string>
+			<key>θ</key>         <real>0</real>
+			<key>d</key>         <real>-14.4</real>
+			<key>α</key>         <real>180°</real>
+			<key>r</key>         <real>63.27781</real>
+			<key>Min</key>       <real>0</real>
+			<key>Max</key>       <real>1000</real>
+			<key>SensorInfo</key><array><dict>
+				<key>SensorType</key> <string>RangeFinder</string>
+				<key>SensorName</key> <string>LeftIRDist</string>
+				<key>MinRange</key> <real>20</real>
+				<key>MaxRange</key> <real>1000</real>
+			</dict></array>
+			<key>IKSolver</key>  <string>IKThreeLink</string>
+		</dict>
+	</array>
+	<array>
+		<dict>
+			<key>Name</key>      <string>CenterIRFrame</string>
+			<key>JointType</key> <string>prismatic</string>
+			<key>θ</key>         <real>90°</real>
+			<key>d</key>         <real>3.5</real>
+			<key>α</key>         <real>90°</real>
+			<key>r</key>         <real>0</real>
+			<key>qOffset</key>   <real>83.77751</real>
+			<key>Min</key>       <real>0</real>
+			<key>Max</key>       <real>1000</real>
+			<key>SensorInfo</key><array><dict>
+				<key>SensorType</key> <string>RangeFinder</string>
+				<key>SensorName</key> <string>CenterIRDist</string>
+				<key>MinRange</key> <real>20</real>
+				<key>MaxRange</key> <real>1000</real>
+			</dict></array>
+			<key>IKSolver</key>  <string>IKThreeLink</string>
+		</dict>
+	</array>
+	<array>
+		<dict>
+			<key>Name</key>      <string>RightIRFrame</string>
+			<key>JointType</key> <string>prismatic</string>
+			<key>θ</key>         <real>0</real>
+			<key>d</key>         <real>14.4</real>
+			<key>α</key>         <real>0</real>
+			<key>r</key>         <real>63.27781</real>
+			<key>Min</key>       <real>0</real>
+			<key>Max</key>       <real>1000</real>
+			<key>SensorInfo</key><array><dict>
+				<key>SensorType</key> <string>RangeFinder</string>
+				<key>SensorName</key> <string>RightIRDist</string>
+				<key>MinRange</key> <real>20</real>
+				<key>MaxRange</key> <real>1000</real>
+			</dict></array>
+			<key>IKSolver</key>  <string>IKThreeLink</string>
+		</dict>
+	</array>
+</array>
+
+<!-- ARM, 380g total (~77.5g per link) -->
+<array>
+	<dict>
+		<key>Name</key>      <string>ARM:base</string>
+		<key>JointType</key> <string>revolute</string>
+		<key>θ</key>         <real>-41.739°</real>
+		<key>d</key>         <real>107.0695</real>
+		<key>r</key>         <real>151.53</real>
+		<key>α</key>         <real>0</real>
+		<key>qOffset</key>   <real>46.739°</real>
+		<key>Min</key>       <real>-150°</real>
+		<key>Max</key>       <real>75°</real>
+		<key>Model</key>     <string>Calliope/2DOF-Arm1</string>
+		<key>CollisionModel</key> <string>Cube</string>
+		<key>CollisionModelScale</key> <array> <real>108.696</real> <real>36.302</real> <real>54.614</real> </array>
+		<key>CollisionModelOffset</key> <array> <real>42.06</real> <real>0</real> <real>10.308</real> </array>
+		<key>CenterOfMass</key> <array> <real>70</real> <real>0</real> <real>0</real> </array>
+		<key>Mass</key> <real>0.1</real>
+	</dict>
+	<array>
+		<dict>
+			<key>Name</key>      <string>ARM:shoulder</string>
+			<key>JointType</key> <string>revolute</string>
+			<key>θ</key>         <real>0</real>
+			<key>d</key>         <real>19.043</real>
+			<key>α</key>         <real>90°</real>
+			<key>r</key>         <real>84.982</real>
+			<key>qOffset</key>   <real>0</real>
+			<key>Min</key>       <real>-60°</real>
+			<key>Max</key>       <real>49°</real>
+			<key>Model</key>     <string>Calliope/2DOF-ArmUpperLink</string>
+			<key>CollisionModel</key> <string>Cube</string>
+			<key>CollisionModelScale</key> <array> <real>69.691</real> <real>12.621</real> <real>5.207</real> </array>
+			<key>CollisionModelOffset</key> <array> <real>31.7490</real> <real>3.1350</real> <real>23.6040</real> </array>
+			<key>CenterOfMass</key> <array> <real>31.7490</real> <real>1</real> <real>23.604</real> </array>
+			<key>Mass</key> <real>0.1</real>
+		</dict>
+	<array>
+		<dict>
+			<key>Name</key>      <string>GripperFrame</string>
+			<key>JointType</key> <string>prismatic</string>
+			<key>θ</key>         <real>0</real>
+			<key>d</key>         <real>1.2830</real>
+			<key>α</key>         <real>90°</real>
+			<key>r</key>         <real>106.75</real>
+			<key>qOffset</key>   <real>-10.3755</real>
+			<key>Min</key>       <real>0</real>
+			<key>Max</key>       <real>0</real>
+			<key>Model</key>     <string>ReferenceFrame</string>
+			<key>IKSolver</key>  <string>IKCalliope</string>
+			<key>Visible</key>   <false/>
+		</dict>
+	</array>
+	</array>
+
+	<dict>
+		<key>Name</key>      <string>ARM:shoulder</string>
+		<key>JointType</key> <string>revolute</string>
+		<key>θ</key>         <real>0</real>
+		<key>d</key>         <real>0</real>
+		<key>α</key>         <real>90°</real>
+		<key>r</key>         <real>84.982</real>
+		<key>qOffset</key>   <real>0</real>
+		<key>Min</key>       <real>-60°</real>
+		<key>Max</key>       <real>49°</real>
+		<key>Model</key>     <string>Calliope/2DOF-ArmLowerLink</string>
+		<key>CollisionModel</key> <string>Cube</string>
+		<key>CollisionModelScale</key> <array> <real>85.725</real> <real>12.699</real> <real>5.080</real> </array>
+		<key>CollisionModelOffset</key> <array> <real>30.162</real> <real>0</real> <real>23.54</real> </array>
+		<key>CenterOfMass</key> <array> <real>30.162</real> <real>0</real> <real>23.54</real> </array>
+		<key>Mass</key> <real>0.1</real>
+	</dict>
+
+	<dict>
+		<key>Name</key>      <string>ARM:shoulder</string>
+		<key>JointType</key> <string>revolute</string>
+		<key>θ</key>         <real>0</real>
+		<key>d</key>         <real>0</real>
+		<key>α</key>         <real>180°</real>
+		<key>r</key>         <real>63.726</real>
+		<key>qOffset</key>   <real>0</real>
+		<key>Min</key>       <real>-60°</real>
+		<key>Max</key>       <real>49°</real>
+		<key>Model</key>     <string>Calliope/2DOF-Palm</string>
+		<key>CollisionModel</key> <string>Cube</string>
+		<key>CollisionModelScale</key> <array> <real>3</real> <real>49</real> <real>88.9</real> </array>
+		<key>CollisionModelOffset</key> <array> <real>8.369</real> <real>-7.739</real> <real>-1.2</real> </array>
+		<!-- Here are the original values that more closely match the model; they were scaled
+		     back to provide more clearance for grasping dumbbells.
+		  <key>CollisionModelScale</key> <array> <real>32</real> <real>49</real> <real>88.9</real> </array>
+		  <key>CollisionModelOffset</key> <array> <real>28.369</real> <real>-7.739</real> <real>-1.2</real> </array>
+		-->
+		<key>CenterOfMass</key> <array> <real>28.369</real> <real>-18.717</real> <real>-1.2</real> </array>
+		<key>Mass</key> <real>0.1</real>
+	</dict>
+	<array>
+		<dict>
+			<key>Name</key>      <string>ARM:gripper</string>
+			<key>JointType</key> <string>revolute</string>
+			<key>θ</key>         <real>0</real>
+			<key>d</key>         <real>23.675</real>
+			<key>α</key>         <real>90°</real>
+			<key>r</key>         <real>28.232</real>
+			<key>qOffset</key>   <real>0.02</real>
+			<key>Min</key>       <real>0°</real>
+			<key>Max</key>       <real>150°</real>
+			<key>Model</key>     <string>Calliope/2DOF-LFinger</string>
+			<key>Material</key>  <string>DarkGrey</string>
+			<key>ControllerInfo</key> <dict><key>ForceControl</key><true/></dict>
+			<key>Components</key> <array>
+				<dict>
+					<key>Model</key> <string></string>
+					<key>CollisionModel</key> <string>Cube</string>
+					<key>CollisionModelScale</key> <array> <real>36.281</real> <real>12.214</real> <real>5.206</real> </array>
+					<key>CollisionModelOffset</key> <array> <real>29.493</real> <real>8.163</real> <real>-10.3755</real> </array>
+					<key>CollisionModelRotation</key> <array> <real>0</real> <real>0</real> <real>0.0115276</real> </array>
+					<key>CenterOfMass</key> <array> <real>29.493</real> <real>8.163</real> <real>-10.3755</real> </array>
+					<key>Mass</key> <real>0.01</real>
+				</dict>
+				<dict>
+					<key>Model</key> <string></string>
+					<key>CollisionModel</key> <string>Cube</string>
+					<key>CollisionModelScale</key> <array> <real>48.279</real> <real>19.248</real> <real>15.206</real> </array>
+					<key>CollisionModelOffset</key> <array> <real>62.815</real> <real>-4.528</real> <real>-10.3755</real> </array>
+					<key>CollisionModelRotation</key> <array> <real>0</real> <real>0</real> <real>-0.346739</real> </array>
+					<key>CenterOfMass</key> <array> <real>62.815</real> <real>-4.528</real> <real>-10.3755</real> </array>
+					<key>Mass</key> <real>0.01</real>
+				</dict>
+			</array>
+		</dict>
+	</array>
+	<array>
+		<dict>
+			<key>Name</key>      <string>ARM:gripper</string>
+			<key>JointType</key> <string>revolute</string>
+			<key>θ</key>         <real>0°</real>
+			<key>d</key>         <real>-21.025</real>
+			<key>α</key>         <real>-90°</real>
+			<key>r</key>         <real>28.232</real>
+			<key>qOffset</key>   <real>0.02</real>
+			<key>Min</key>       <real>0°</real>
+			<key>Max</key>       <real>150°</real>
+			<key>Model</key>     <string>Calliope/2DOF-RFinger</string>
+			<key>Material</key>  <string>DarkGrey</string>
+			<key>ControllerInfo</key> <dict><key>ForceControl</key><true/></dict>
+			<key>Components</key> <array>
+				<dict>
+					<key>Model</key> <string></string>
+					<key>CollisionModel</key> <string>Cube</string>
+					<key>CollisionModelScale</key> <array> <real>36.281</real> <real>12.214</real> <real>5.206</real> </array>
+					<key>CollisionModelOffset</key> <array> <real>29.493</real> <real>8.163</real> <real>10.3755</real> </array>
+					<key>CollisionModelRotation</key> <array> <real>0</real> <real>0</real> <real>0.0115276</real> </array>
+					<key>CenterOfMass</key> <array> <real>29.493</real> <real>8.163</real> <real>10.3755</real> </array>
+					<key>Mass</key> <real>0.01</real>
+				</dict>
+				<dict>
+					<key>Model</key> <string></string>
+					<key>CollisionModel</key> <string>Cube</string>
+					<key>CollisionModelScale</key> <array> <real>48.279</real> <real>19.248</real> <real>15.206</real> </array>
+					<key>CollisionModelOffset</key> <array> <real>62.815</real> <real>-4.528</real> <real>10.3755</real> </array>
+					<key>CollisionModelRotation</key> <array> <real>0</real> <real>0</real> <real>-0.346739</real> </array>
+					<key>CenterOfMass</key> <array> <real>62.815</real> <real>-4.528</real> <real>10.3755</real> </array>
+					<key>Mass</key> <real>0.01</real>
+				</dict>
+			</array>
+		</dict>
+	</array>
+</array>
+
+<!-- Front and back casters, could be components of body, but we want
+	frictionless contact here, so need a separate KinematicJoint instance -->
+<array>
+	<dict>
+		<!--front caster-->
+		<key>Name</key>			<string>UNUSED</string>
+		<key>FrictionForce</key>	<real>0</real>
+		<key>Model</key>		<string></string>
+		<key>CollisionModel</key>       <string>Sphere</string>
+		<key>CollisionModelScale</key>  <array> <real>32</real> <real>32</real> <real>32</real> </array>
+		<key>CollisionModelOffset</key> <array> <real>130.8</real> <real>0</real> <real>16.2</real> </array>
+	</dict>
+</array>
+<array>
+	<dict>
+		<!--back caster-->
+		<key>Name</key>			<string>UNUSED</string>
+		<key>FrictionForce</key>	<real>0</real>
+		<key>Model</key>		<string></string>
+		<key>CollisionModel</key>       <string>Sphere</string>
+		<key>CollisionModelScale</key>  <array> <real>32</real> <real>32</real> <real>32</real> </array>
+		<key>CollisionModelOffset</key> <array> <real>-120.65</real> <real>0</real> <real>16.2</real> </array>
+	</dict>
+</array>
+
+</array></plist>

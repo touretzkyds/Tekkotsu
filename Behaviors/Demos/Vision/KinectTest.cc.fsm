@@ -1,0 +1,9 @@
+#include "Behaviors/StateMachine.h"
+
+$nodeclass KinectTest : VisualRoutinesStateNode : doStart {
+  NEW_SKETCH(yuvFrame, yuv, sketchFromYUV());
+  NEW_SKETCH(depthFrame, usint, sketchFromDepth());
+  cout << "Look in the camera sketch space for the results." << endl;
+}
+
+REGISTER_BEHAVIOR_MENU(KinectTest,DEFAULT_TK_MENU"/Vision Demos");

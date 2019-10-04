@@ -1,0 +1,68 @@
+Setup:
+  Default build for ERS-2xx
+  Pink ball in view (8.5in from snout)
+  Press power button, start timer
+  Telnet to system console (port 59000)
+  Launch StareAtBallBehavior (leave E-Stop ON)
+  Navigate to Status Reports -> Profiler
+  Wait until 5 minutes from initial press of power button.
+  Recorded profiler run shown below
+
+Note: The profile reporting code for this version contained a bug -
+  the inter-call times shown here are in seconds, not milliseconds as
+  they should be.  Frames per second (fps) are accurate however.
+
+
+~~~ Main: ~~~
+Profiling information since: 16.514395 to 298.147164
+ReadySendJoints():
+        2188 calls
+        0.217932 ms avg
+        0.213683 ms exp.avg
+        0.001279 ms avg child time (0.500000%)
+        0.128304 ms avg inter (7.794019 fps)
+        0.128021 ms exp.avg (7.811245 fps)
+        Exec: 0 0 2186 0 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+        Inter: 0 1 0 0 0 1 0 0 1 0 2182 0 1 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 
+GotSensorFrame():
+        8739 calls
+        0.329321 ms avg
+        0.342395 ms exp.avg
+        0.000000 ms avg child time (0.000000%)
+        0.032102 ms avg inter (31.151004 fps)
+        0.031826 ms exp.avg (31.421064 fps)
+        Exec: 0 0 8640 93 5 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+        Inter: 0 0 0 0 0 1 1 8698 37 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 
+GotImage():
+        6972 calls
+        4.063311 ms avg
+        4.000539 ms exp.avg
+        0.000000 ms avg child time (0.000000%)
+        0.040237 ms avg inter (24.852686 fps)
+        0.040477 ms exp.avg (24.705526 fps)
+        Exec: 0 0 0 0 6924 48 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+        Inter: 0 0 0 0 0 0 1 2 6967 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 
+PowerEvent():
+        51 calls
+        21.837059 ms avg
+        0.561889 ms exp.avg
+        0.000000 ms avg child time (0.000000%)
+        4.992561 ms avg inter (0.200298 fps)
+        6.131495 ms exp.avg (0.163092 fps)
+        Exec: 0 0 44 6 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 
+        Inter: 0 0 0 0 0 0 0 0 0 0 0 0 0 9 0 0 0 0 1 0 5 15 0 0 1 2 0 6 0 1 0 10 
+Bucket distribution (in ms):
+        0<0.00802, <0.133, <0.686, <2.2, <5.43, <11.4, <21.2, <36.4, <58.7, <90, <132, <188, <260, <352, <465, <604, <772, <973, <1.21e+03, <1.49e+03, <1.82e+03, <2.19e+03, <2.63e+03, <3.12e+03, <3.68e+03, <4.31e+03, <5.03e+03, <5.82e+03, <6.71e+03, <7.7e+03, <8.79e+03, <1e+04, 
+~~~ Motion: ~~~
+Profiling information since: 16.514479 to 298.151038
+ReadySendJoints():
+        8742 calls
+        1.298250 ms avg
+        1.066623 ms exp.avg
+        0.000000 ms avg child time (0.000000%)
+        0.032088 ms avg inter (31.164436 fps)
+        0.031972 ms exp.avg (31.277559 fps)
+        Exec: 0 0 4 8702 9 0 1 0 6 20 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+        Inter: 0 0 0 3 1 0 3 8700 9 23 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Bucket distribution (in ms):
+        0<0.00802, <0.133, <0.686, <2.2, <5.43, <11.4, <21.2, <36.4, <58.7, <90, <132, <188, <260, <352, <465, <604, <772, <973, <1.21e+03, <1.49e+03, <1.82e+03, <2.19e+03, <2.63e+03, <3.12e+03, <3.68e+03, <4.31e+03, <5.03e+03, <5.82e+03, <6.71e+03, <7.7e+03, <8.79e+03, <1e+04, 

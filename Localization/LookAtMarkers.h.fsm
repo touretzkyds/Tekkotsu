@@ -1,0 +1,340 @@
+//-*-c++-*-
+#ifndef _LookAtMarkers_h_
+#define _LookAtMarkers_h_
+
+#include "DualCoding/DualCoding.h"
+#include "Events/DataEvent.h"
+#include "Motion/MotionPtr.h"
+#include "Behaviors/StateMachine.h"
+
+#define LOOK_AT_MARKERS_EVENT 1010
+
+// should have provided a map already in the world space
+class LookAtMarkers : public StateNode {
+public:
+
+  class SelectMarker : public VisualRoutinesStateNode {
+  private:
+    MotionPtr<HeadPointerMC> pointer;
+    
+  public:
+    SelectMarker(const std::string& name, MotionPtr<HeadPointerMC> _pointer)
+      : VisualRoutinesStateNode(name), pointer(_pointer) {}
+
+    virtual void doStart() {
+      //cout << "Selecting the nearest marker!" << endl;
+
+      Shape<MarkerData> best;
+      float bestDistance = std::numeric_limits<float>::infinity();
+      
+      NEW_SHAPEVEC(markers, MarkerData, select_type<MarkerData>(worldShS));
+
+      DualCoding::Point pR = theAgent->getCentroid();
+      AngTwoPi oR = theAgent->getOrientation();
+      //cout << "We think the agent is at: " << pR << ", " << oR << endl;
+      
+      GET_SHAPE(worldBounds, PolygonData, worldShS);
+      SHAPEVEC_ITERATE(markers, MarkerData, m) {
+	DualCoding::Point pM = m->getCentroid();
+	//cout << "Checking marker at: " << pM << endl;
+	
+	// find angle between two
+	fmat::Column<2> heading = fmat::SubVector<2>(pM.coords) - fmat::SubVector<2>(pR.coords);
+	AngSignPi angle = (std::atan2(heading[1], heading[0]) - oR);
+	
+	// is the camera within our possible field of view (in front of us)?
+	if (fabs(angle) > Pi/2.0)
+	  continue;
+	
+	//cout << "In front of us!" << endl;
+	
+	// are we further away than the closest one so far?
+	if (pR.xyDistanceFrom(pM) >= bestDistance)
+	  continue;
+	
+	//cout << "It's closer!" << endl;
+	
+	// do we intersect with the world bounds when looking at marker?
+	LineData lineOfSight(worldShS, pR, pM);
+	if (worldBounds.isValid() && worldBounds->intersectsLine(lineOfSight))
+	  continue;
+	
+	//cout << "We can see it!" << endl;
+	
+	// this marker is viewable and the closest so far!
+	best = m;
+	bestDistance = pR.xyDistanceFrom(pM);
+				
+      } END_ITERATE;
+      
+      //cout << "Best marker is: " << best << endl;
+
+      // there's a marker in sight!
+      if (best.isValid()) {
+	// get the point in local space
+	Shape<MarkerData> localCopy = mapBuilder->importWorldToLocal(best);
+	Point p = localCopy->getCentroid();
+	pointer->lookAtPoint(p.coordX(), p.coordY(), p.coordZ());
+	localShS.deleteShape(localCopy);
+	
+	postStateSignal<Shape<MarkerData> >(best);
+      }
+      else
+	postStateCompletion();
+    }
+
+  private:
+    SelectMarker(const SelectMarker&); //!< don't call (copy constructor)
+    SelectMarker& operator=(const SelectMarker&); //!< don't call (assignment operator)
+  };
+  
+  class TrackMarker : public VisualRoutinesStateNode {
+  private:
+    MotionPtr<HeadPointerMC> pointer;
+    Shape<MarkerData> target;
+
+    // number of frames we've missed the marker for
+    int misses;
+    // did we see it at all?
+    bool seenIt;
+    
+  public:
+    TrackMarker(const std::string& name, MotionPtr<HeadPointerMC> _pointer)
+      : VisualRoutinesStateNode(name), pointer(_pointer), target(),
+	misses(), seenIt() {}
+    
+    virtual void doStart() {
+      const DataEvent<Shape<MarkerData> > *de = dynamic_cast<const DataEvent<Shape<MarkerData> >*>(event);
+		if(de==NULL) {
+			std::cout << "ERROR: TrackMarker needs signal trans to provide Shape<MarkerData> to specify target" << std::endl;
+			return;
+		}
+      target = (de->getData());
+      //cout << "Tracking." << endl;
+
+      // reset detection misses
+      misses = 0;
+      seenIt = false;
+
+      // currently, update the head pointer based on timer events
+      erouter->addTimer(this, 0, 1000, false);
+    }
+
+    virtual void doEvent() {
+      switch (event->getGeneratorID()) {
+      case EventBase::timerEGID: {
+	if (event->getSourceID() == 0)
+	  erouter->addTimer(this, 0, 200);
+	
+	if (!target.isValid())
+	  return;
+	
+	//cout << "*";
+	MapBuilderRequest mapreq(MapBuilderRequest::cameraMap);
+	mapreq.markerTypes = MarkerData::allMarkerTypes();
+	mapreq.immediateRequest = true;
+	mapBuilder->executeRequest(mapreq);
+	NEW_SHAPEVEC(markers, MarkerData, select_type<MarkerData>(camShS));
+	
+	SHAPEVEC_ITERATE(markers, MarkerData, m) {
+	  if (m->isMatchingMarker(target)) {
+	    // we found a matching marker for the target in the image
+	    // TODO: if markers are non-unique, find closest matching marker?
+	    seenIt = true;
+	    misses = 0;
+	    
+	    // get local coordinates
+	    const PlaneEquation groundplane = kine->calculateGroundPlane();
+	    const fmat::Transform camToBase = kine->linkToBase(CameraFrameOffset);
+	    
+	    Shape<MarkerData> localCopy = m->copy();
+	    localCopy->projectToGround(camToBase, groundplane);
+	    Point p = localCopy->getCentroid();
+	    
+	    // how far back are we looking?
+	    if (p.coordX() > 0)
+	      pointer->lookAtPoint(p.coordX(), p.coordY(), p.coordZ());
+	    else
+	      postStateCompletion();
+	    
+	    // localCopy gets deleted because it was never imported (i think)
+	    camShS.clear();
+	    return;
+	  }
+	} END_ITERATE;
+	
+	// if we make it here, no match found
+	camShS.clear();
+	
+	//cout << "We lost it." << endl;
+	if (misses++ > 5) {
+	  if (seenIt) { // were tracking it and lost it
+	    postStateCompletion();
+	  } else { // never saw it in the first place (initial estimate of location was wrong)
+	    postStateSignal<Shape<MarkerData> >(target);
+	  }
+	}
+	
+	break;
+      }
+      default:
+	break;
+      }
+    }
+  };
+
+  class Search : public VisualRoutinesStateNode {
+  private:
+    MotionPtr<HeadPointerMC> pointer;
+    Shape<MarkerData> target;
+
+    std::vector<float> panPoints;
+    
+  public:
+    Search(const std::string& name, MotionPtr<HeadPointerMC> _pointer)
+      : VisualRoutinesStateNode(name), pointer(_pointer), target(), panPoints() {}
+    
+    virtual void doStart() {
+      const DataEvent<Shape<MarkerData> > *de = dynamic_cast<const DataEvent<Shape<MarkerData> >*>(event);
+		if(de==NULL) {
+			std::cout << "ERROR: Search node needs signal trans to provide Shape<MarkerData> to specify target" << std::endl;
+			return;
+		}
+		target = (de->getData());
+      //cout << "Searching for a marker." << endl;
+      
+      // setup points to pan to while searching
+      panPoints = std::vector<float>(5);
+      panPoints.push_back(-((float)Pi));
+      panPoints.push_back(-((float)Pi*0.75));
+      panPoints.push_back(-((float)Pi*0.375));
+      panPoints.push_back(0.0);
+      panPoints.push_back(Pi*0.375);
+      panPoints.push_back(Pi*0.75);
+      panPoints.push_back(Pi);
+      panPoints.push_back(Pi*0.5);
+      panPoints.push_back(Pi*0.25);
+      panPoints.push_back(0.0);
+      panPoints.push_back(-((float)Pi*0.25));
+      panPoints.push_back(-((float)Pi*0.5));
+
+      erouter->addTimer(this, 0, 500, false);
+    }
+
+    virtual void doEvent()
+    {
+      switch (event->getGeneratorID()) {
+      case EventBase::timerEGID: {
+	if (event->getSourceID() == 0) {
+	  MapBuilderRequest mapreq(MapBuilderRequest::cameraMap);
+	  mapreq.markerTypes = MarkerData::allMarkerTypes();
+	  mapreq.immediateRequest = true;
+	  mapBuilder->executeRequest(mapreq);
+	  NEW_SHAPEVEC(markers, MarkerData, select_type<MarkerData>(camShS));
+	  Shape<MarkerData> fallback;
+	  SHAPEVEC_ITERATE(markers, MarkerData, m) {
+	    if (m->isMatchingMarker(target)) {
+	      // we found a matching marker for the target in the image
+	      // TODO: if markers are non-unique, find closest matching marker?
+	      
+	      // get local coordinates
+	      const PlaneEquation groundplane = kine->calculateGroundPlane();
+	      const fmat::Transform camToBase = kine->linkToBase(CameraFrameOffset);
+	      
+	      Shape<MarkerData> localCopy = m->copy();
+	      localCopy->projectToGround(camToBase, groundplane);
+	      Point p = localCopy->getCentroid();
+	      pointer->lookAtPoint(p.coordX(), p.coordY(), p.coordZ());
+	      
+	      // localCopy gets deleted because it was never imported (i think)
+	      camShS.clear();
+	      postStateSignal<Shape<MarkerData> >(target);
+	      return;
+	    }
+	    else {
+	      fallback = m;
+	    }
+	  } END_ITERATE;
+	  
+	  // if we make it here, no match found
+	  if (fallback.isValid()) {
+	    // get local coordinates
+	    const PlaneEquation groundplane = kine->calculateGroundPlane();
+	    const fmat::Transform camToBase = kine->linkToBase(CameraFrameOffset);
+	    
+	    Shape<MarkerData> localCopy = fallback->copy();
+	    localCopy->projectToGround(camToBase, groundplane);
+	    Point p = localCopy->getCentroid();
+	    pointer->lookAtPoint(p.coordX(), p.coordY(), p.coordZ());
+	    
+	    // localCopy gets deleted because it was never imported (i think)
+	    camShS.clear();
+	    postStateSignal<Shape<MarkerData> >(fallback);
+	    return;
+	  }
+	  
+	  camShS.clear();
+	  
+	  // focus on next point
+	  if (panPoints.size() > 0) {
+	    //cout << "Panning to: " << panPoints.back() << endl;
+	    //cout << "Current pan is: " << pointer->getJointValue(RobotInfo::PanOffset) << endl;
+	    pointer->setJointValue(RobotInfo::PanOffset, panPoints.back());
+	    panPoints.pop_back();
+	    erouter->addTimer(this, 0, 1000, false);
+	  }
+	  
+	  postStateCompletion();
+	}
+	
+	break;
+      }
+      default: {
+	break;
+      }
+      }
+    }
+  };
+
+  class DummyFinish : public StateNode {
+  public:
+    DummyFinish(const std::string &nodename): StateNode(nodename) {}
+    virtual void doStart(){
+      getParent()->stop();
+    }
+  };
+
+public:
+  LookAtMarkers(const std::string &name) : StateNode(name) {}
+
+  virtual void setup() {
+    MotionPtr<HeadPointerMC> pointer;
+    /*MotionManager::MC_ID pointID = */addMotion(pointer);
+    
+    pointer->defaultMaxSpeed(0.5f);
+#statemachine
+  startnode: SpeechNode($, "Looking for markers.") =T(3000)=>
+      select: SelectMarker($, pointer) =S<Shape<MarkerData> >=>
+      track: TrackMarker($, pointer) =C=>
+      select =C=> finish: DummyFinish
+      
+      track =S<Shape<MarkerData> >=>
+      search: Search($, pointer) =S<Shape<MarkerData> >=> track
+      
+      pause: OutputNode("Pausing marker tracker...",std::cout)
+      {track, select, search} =E(EventBase::unknownEGID, LOOK_AT_MARKERS_EVENT, EventBase::deactivateETID)=> pause
+      pause =E(EventBase::unknownEGID, LOOK_AT_MARKERS_EVENT, EventBase::activateETID)=> select
+				 
+#endstatemachine
+  }
+
+  static std::string getClassDescription() {
+    return "Search for and track markers";
+  }
+
+private:
+  LookAtMarkers(const LookAtMarkers&); //!< don't call (copy constructor)
+  LookAtMarkers& operator=(const LookAtMarkers&); //!< don't call (assignment operator)
+};
+
+#endif //included

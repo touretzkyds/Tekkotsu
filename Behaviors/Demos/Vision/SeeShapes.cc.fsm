@@ -1,0 +1,76 @@
+#include "Shared/RobotInfo.h"
+#ifdef TGT_HAS_CAMERA
+
+#include "Behaviors/StateMachine.h"
+#include <sstream>
+
+$nodeclass SeeShapes : VisualRoutinesStateNode {
+
+  $nodeclass BuildMap : MapBuilderNode(MapBuilderRequest::worldMap) : doStart {
+    mapreq.addAllObjectColors(lineDataType);
+    mapreq.addAllObjectColors(ellipseDataType);
+    mapreq.addAllObjectColors(cylinderDataType);
+		mapreq.addAllMinBlobAreas(1000);
+		mapreq.setAprilTagFamily();
+		mapreq.maxDist = 2000;
+  }
+
+  $nodeclass ExamineMap : SpeechNode : doStart {
+    NEW_SHAPEVEC(lines, LineData, select_type<LineData>(worldShS));
+    NEW_SHAPEVEC(ellipses, EllipseData, select_type<EllipseData>(worldShS));
+		NEW_SHAPEVEC(cylinders, CylinderData, select_type<CylinderData>(worldShS));
+		NEW_SHAPEVEC(apriltags, AprilTagData, select_type<AprilTagData>(worldShS));
+    int const numLines = lines.size();
+    int const numEllipses = ellipses.size();
+		int const numCylinders = cylinders.size();
+		int const numAprilTags = apriltags.size();
+		int const numShapes = numLines + numEllipses + numCylinders + numAprilTags;
+    if ( numShapes == 0 )
+      textstream << "I did not see any valid shapes.";
+    else {
+			bool firstItem = true;
+      textstream << "I saw ";
+      if ( numLines > 0 ) {
+				if ( ! firstItem )
+					textstream << " and ";
+				textstream << numLines;
+				textstream << " line";
+				textstream <<  ( numLines != 1 ? "s" : "");
+				firstItem = false;
+			}
+      if ( numEllipses > 0 ) {
+				if ( ! firstItem )
+					textstream << " and ";
+				textstream << numEllipses;
+				textstream << " ellipse";
+				textstream <<  ( numEllipses != 1 ? "s" : "");
+				firstItem = false;
+			}
+      if ( numCylinders > 0 ) {
+				if ( ! firstItem )
+					textstream << " and ";
+				textstream << numCylinders;
+				textstream << " cylinder";
+				textstream <<  ( numCylinders != 1 ? "s" : "");
+				firstItem = false;
+			}
+      if ( numAprilTags > 0 ) {
+				if ( ! firstItem )
+					textstream << " and ";
+				textstream << numAprilTags;
+				textstream << " -april tag";  // hyphen blocks Mary's "1 april" -> "1st april"
+				textstream <<  ( numAprilTags != 1 ? "s" : "");
+				firstItem = false;
+			}
+    }
+  }
+
+  $setupmachine{
+    BuildMap =MAP=> ExamineMap
+  }
+
+}
+
+REGISTER_BEHAVIOR_MENU(SeeShapes,DEFAULT_TK_MENU"/Vision Demos");
+
+#endif

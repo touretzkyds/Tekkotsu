@@ -1,0 +1,16 @@
+This directory holds .png and .pos files to be loaded by the
+LoggedData driver when running Tekkotsu in simulator mode on stored
+data, which you can do by typing:
+
+  cd ~/project
+  ./tekkotsu-<model> -c sim.plist
+
+Files are loaded in alphabetical order.  If you do not want Tekkotsu
+to load certain files, move them to the project/logged/reserve
+directory (or anywhere other than project/logged).  See the Simulator
+chapter of the Tekkotsu tutorial for more information on running in
+simulator mode.
+
+Note: another way of providing simulated inputs to Tekkotsu is to run
+it using the Mirage virtual environment.  See the Tekkotsu wiki for
+instructions on using Mirage.

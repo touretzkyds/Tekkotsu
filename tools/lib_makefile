@@ -1,0 +1,116 @@
+override TEKKOTSU_TARGET_MODEL:=TGT_DYNAMIC
+ifndef TEKKOTSU_ENVIRONMENT_CONFIGURATION
+$(error An error has occured, TEKKOTSU_ENVIRONMENT_CONFIGURATION was not defined)
+endif
+include $(shell echo "$(TEKKOTSU_ENVIRONMENT_CONFIGURATION)" | sed 's/ /\\ /g')
+BUILDDIR:=$(subst $(TEKKOTSU_ROOT),$(TK_LIB_BD),$(shell pwd))
+
+# Source files, defaults to all files ending matching *$(SRCSUFFIX)
+SRCSUFFIX?=.cc
+SRCS?=$(shell find . -name "*$(SRCSUFFIX)")
+# For any Tekkotsu files if you want to the lib to be self-contained
+# Will be compiled as TGT_DYNAMIC
+#TKSRCS:=$(addprefix $(TEKKOTSU_ROOT)/, $(addsuffix $(SRCSUFFIX), list files here))\
+
+CXXFLAGS:=-g -Os \
+	-ffast-math -frename-registers -fomit-frame-pointer -fno-common \
+	-Wall -Wshadow -Wlarger-than-8192 -Wpointer-arith -Wcast-qual \
+	-Woverloaded-virtual -Weffc++ -Wdeprecated -Wnon-virtual-dtor \
+	-fmessage-length=0 -pipe \
+	-I$(TEKKOTSU_ROOT) -D$(TEKKOTSU_TARGET_PLATFORM) -D$(TEKKOTSU_TARGET_MODEL) \
+	$(CXXFLAGS) $(ENVCXXFLAGS)
+
+LDFLAGS:=$(LDFLAGS) $(ENV_LDFLAGS)
+
+INCLUDE_PCH=$(if $(TEKKOTSU_PCH),-include $(BUILDDIR)/pch.h)
+
+ifneq ($(TEKKOTSU_TARGET_PLATFORM),PLATFORM_APERIOS)
+  #enable -fPIC if we are building shared libraries on x86_64/amd64
+  ifneq ($(filter __amd64__ __x86_64__,$(shell $(CXX) $(ENV_CXXFLAGS) -dM -E - < /dev/null)),)
+    CXXFLAGS:=$(CXXFLAGS) -fPIC
+  endif
+endif
+
+# Take library name from directory name
+BIN:=$(TK_LIB_BD)/lib$(shell pwd | sed 's@.*/@@')
+
+OBJS:=$(patsubst %$(SRCSUFFIX),$(BUILDDIR)/%.o,$(patsubst ./%,%,$(SRCS)))
+DEPS:=$(OBJS:.o=.d)
+TKOBJS:=$(patsubst $(TEKKOTSU_ROOT)/%$(SRCSUFFIX),$(TK_BD)/%.o,$(TKSRCS))
+TKDEPS:=$(TKOBJS:.o=.d)
+
+$(shell mkdir -p $(BUILDDIR))
+
+all: $(BIN)$(suffix $(LIBTEKKOTSU))
+
+.PHONY: all test clean
+
+$(BIN).a: $(OBJS) $(TKOBJS)
+	@echo "Linking $@ <- $(OBJS) $(TKOBJS)" | sed 's@ $(BUILDDIR)/@ @g';
+	@rm -f $@;
+	@$(AR) $@ $(OBJS) $(TKOBJS);
+	@$(AR2) $@
+
+$(BIN).dylib: $(OBJS) $(TKOBJS)
+	@echo "Linking $@ <- $(OBJS) $(TKOBJS)" | sed 's@ $(BUILDDIR)/@ @g';
+	@$(CXX) -dynamiclib -o $@ $(OBJS) $(TKOBJS) -undefined dynamic_lookup $(LDFLAGS)
+
+$(BIN).so: $(OBJS) $(TKOBJS)
+	@echo "Linking $@ <- $(OBJS) $(TKOBJS)" | sed 's@ $(BUILDDIR)/@ @g';
+	@$(CXX) -shared -o $@ $(OBJS) $(TKOBJS) -Wl,-rpath,$(TK_LIB_BD) $(LDFLAGS);
+
+ifeq ($(findstring clean,$(MAKECMDGOALS)),)
+-include $(DEPS) $(TKDEPS)
+ifneq ($(TEKKOTSU_PCH),)
+-include $(BUILDDIR)/pch.d
+endif
+endif
+
+$(DEPS): %.d :
+	@mkdir -p $(dir $@)
+	@src="$(patsubst $(BUILDDIR)/%,%,$*$(SRCSUFFIX))"; \
+	echo "Generating $(patsubst $(TK_LIB_BD)/%,%,$@)..."; \
+	$(CXX) $(CXXFLAGS) -MP -MG -MT "$@" -MT "$(@:.d=.o)" -MM "$$src" > $@ || (rm -f "$@"; exit 1)
+
+$(TKDEPS): %.d :
+	@echo $@
+	@mkdir -p $(dir $@)
+	@src="$(patsubst $(TK_BD)/%,$(TEKKOTSU_ROOT)/%,$*$(SRCSUFFIX))"; \
+	echo "Generating $(patsubst $(TK_BD)/%,%,$@)..."; \
+	$(CXX) $(CXXFLAGS) -MP -MG -MT "$@" -MT "$(@:.d=.o)" -MM "$$src" > $@ || (rm -f "$@"; exit 1)
+
+$(BUILDDIR)/pch.d : %.d:
+	@mkdir -p $(dir $@)
+	@src="$(patsubst $(BUILDDIR)/%,%,$*.h)"; \
+	echo "Generating $(patsubst $(BUILDDIR)/%,%,$@)..."; \
+	$(CXX) $(CXXFLAGS) -x c++-header -MP -MG -MT "$@" -MT "$(@:.d=.h$(PCHSUFFIX))" -MM "$$src" > $@ || (rm -f "$@"; exit 1)
+
+$(BUILDDIR)/pch.h$(PCHSUFFIX) : $(BUILDDIR)/%$(PCHSUFFIX): $*
+	@mkdir -p $(dir $@)
+	@src="$*"; \
+	echo "Compiling $$src..." | sed 's@$(BUILDDIR)/@@g'; \
+	$(CXX) $(CXXFLAGS) -x c++-header -o $@ -c $$src > $(BUILDDIR)/$*.log 2>&1; \
+	retval=$$?; \
+	cat $(BUILDDIR)/$*.log | $(FILTERSYSWARN) | $(COLORFILT) | $(TEKKOTSU_LOGVIEW); \
+	test $$retval -eq 0;
+
+$(OBJS): %.o: $(if $(TEKKOTSU_PCH),$(BUILDDIR)/pch.h$(PCHSUFFIX))
+	@mkdir -p $(dir $@)
+	@src="$(patsubst $(BUILDDIR)/%,%,$*$(SRCSUFFIX))"; \
+	echo "Compiling $(subst $(TK_LIB_BD)/,,$*$(SRCSUFFIX))..."; \
+	$(CXX) $(CXXFLAGS) $(INCLUDE_PCH) -o $@ -c $$src > $*.log 2>&1; \
+	retval=$$?; \
+	cat $*.log | $(FILTERSYSWARN) | $(COLORFILT) | $(TEKKOTSU_LOGVIEW); \
+	test $$retval -eq 0;
+
+$(TKOBJS): %.o:
+	@mkdir -p $(dir $@)
+	@src="$(patsubst $(TK_BD)/%,$(TEKKOTSU_ROOT)/%,$*$(SRCSUFFIX))"; \
+	echo "Compiling $(subst $(TK_BD)/,,$*$(SRCSUFFIX))..."; \
+	$(CXX) $(CXXFLAGS) -o $@ -c $$src > $*.log 2>&1; \
+	retval=$$?; \
+	cat $*.log | $(FILTERSYSWARN) | $(COLORFILT) | $(TEKKOTSU_LOGVIEW); \
+	test $$retval -eq 0;
+
+clean:
+	rm -rf $(BUILDDIR) $(BIN).a $(BIN)$(suffix $(LIBTEKKOTSU))

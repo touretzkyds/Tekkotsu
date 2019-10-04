@@ -1,0 +1,71 @@
+# Tekkotsu WorldBuilder
+# Logo parsing expression grammar
+#
+# Robert Lee (rslee / perihare)
+# 2-14-2011
+
+require "shape"
+
+require "grammar_support"
+
+require "expression_grammar"
+require "string_grammar"
+require "vector_grammar"
+
+grammar LogoGrammar
+    include ExpressionGrammar
+    include StringGrammar
+    include VectorGrammar
+
+    rule logo
+    (logo_none / logo_string / logo_number / logo_vector / logo_shapetype)
+    end
+
+    rule logo_none
+    keyword:('penup' / 'pendown') space
+    {
+        def eval(env={})
+            return ['logo', [keyword.text_value]]
+        end
+    }
+    end
+  
+    rule logo_string
+    keyword:'pencolor' space string space
+    {
+        def eval(env={})
+            return ['logo', [keyword.text_value, string.eval(env)]]
+        end
+    }
+    end
+    
+    rule logo_number
+    keyword:('penwidth' / 'penheight' / 'forward' /
+    'up' / 'turn' / 'heading')
+    space expression space
+    {
+        def eval(env={})
+            return ['logo', [keyword.text_value, expression.eval(env)]]
+        end
+    }
+    end
+    
+    rule logo_vector
+    keyword:('moveto') space vector space
+    {
+        def eval(env={})
+            return ['logo', [keyword.text_value, vector.eval(env)]]
+        end
+    }
+    end
+    
+    rule logo_shapetype
+    keyword:('penshape') space shape_type space
+    {
+        def eval(env={})
+            return ['logo', [keyword.text_value, shape_type.eval(env)]]
+        end
+    }
+    end
+    
+end

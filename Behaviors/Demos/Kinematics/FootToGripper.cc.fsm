@@ -1,0 +1,45 @@
+#include "Shared/RobotInfo.h"
+#if defined(TGT_HAS_ARMS) && defined(TGT_HAS_LEGS) && TGT_HAS_LEGS>=4
+
+#include "Behaviors/StateNode.h"
+#include "IPC/SharedObject.h"
+#include "Motion/Kinematics.h"
+#include "Motion/MotionPtr.h"
+#include "Motion/PIDMC.h"
+#include "Sound/SoundManager.h"
+
+using namespace std;
+
+//! Relaxes the arm and right front leg and then repeatedly calculates the distance between them.
+$nodeclass FootToGripper : StateNode : 
+  armRelaxer(SharedObject<PIDMC>(ArmOffset, ArmOffset+JointsPerArm, 0.f)), 
+  legRelaxer(SharedObject<PIDMC>(RFrRotatorOffset, RFrRotatorOffset+JointsPerLeg+1, 0.f)) {
+
+  MotionPtr<PIDMC> armRelaxer, legRelaxer;
+
+  virtual void doStart() {
+    cout << "The arm and right front leg are relaxed so you can move them." << endl;
+    sndman->speak("Move the gripper or right front leg");
+    addMotion(armRelaxer);
+    addMotion(legRelaxer);
+    erouter->addTimer(this, 0, 500, true);
+  }
+
+  virtual void doEvent() {
+    fmat::Transform rfrFoot = kine->linkToBase(FootFrameOffset+RFrLegOrder);
+    fmat::Column<3> rfrFootPos = rfrFoot.translation();
+
+    fmat::Transform gripper = kine->linkToBase(GripperFrameOffset);
+    fmat::Column<3> gripperPos = gripper.translation();
+
+    float dist = (rfrFootPos-gripperPos).norm();
+
+    cout << "Foot=" << rfrFootPos.fmt("%5.1f")
+	 << " Gripper=" << gripperPos.fmt("%5.1f")
+	 << " Distance=" << setw(5) << dist << " mm." << endl;
+  }
+}
+
+REGISTER_BEHAVIOR_MENU(FootToGripper,DEFAULT_TK_MENU"/Kinematics Demos");
+
+#endif

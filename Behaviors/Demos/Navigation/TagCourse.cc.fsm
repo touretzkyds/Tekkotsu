@@ -1,0 +1,83 @@
+#include "Motion/WalkMC.h"
+#ifdef TGT_HAS_WALK
+
+#include "Behaviors/Demos/Navigation/PilotDemo.h"
+
+$nodeclass TagCourse : PilotDemo {
+
+  enum TagSignals {
+    fwd1000 = 0,
+    fwd2000 = 1,
+    left90 = 2,
+    right90 = 3,
+    halt = 4
+  };
+
+  $nodeclass LookForTags : MapBuilderNode(MapBuilderRequest::worldMap) : constructor {
+    mapreq.setAprilTagFamily();
+  }
+
+  $nodeclass CheckTags : VisualRoutinesStateNode : doStart {
+    NEW_SHAPEVEC(tags, AprilTagData, select_type<AprilTagData>(camShS));
+    if ( tags.size() == 2 )
+      postStateCompletion();
+    else
+      postStateFailure();
+  }
+
+  $nodeclass TravelForward : PilotNode(PilotTypes::walk) : doStart {
+    pilotreq.collisionAction = collisionReport;
+    if ( AprilTagData::findTag(camShS, (int)fwd1000) )
+      pilotreq.dx = 1000;
+    else if ( AprilTagData::findTag(camShS, (int)fwd2000) )
+      pilotreq.dx = 2000;
+    else
+      cancelThisRequest();
+  }
+
+  $nodeclass Turn : PilotNode(PilotTypes::walk) : doStart {
+    pilotreq.collisionAction = collisionReport;
+    if ( AprilTagData::findTag(camShS, (int)left90) )
+      pilotreq.da = M_PI/2;
+    else if ( AprilTagData::findTag(camShS, (int)right90) )
+      pilotreq.da = -M_PI/2;
+    else if ( AprilTagData::findTag(camShS, (int)halt) )
+      pilotreq.da = 0;
+    else
+      cancelThisRequest();
+  }
+
+  $nodeclass ContinueOrStop : VisualRoutinesStateNode : doStart {
+    if ( AprilTagData::findTag(camShS, (int)halt) )
+      postStateFailure();
+    else
+      postStateCompletion();
+  }
+
+  $setupmachine{
+  startdemo: StateNode =N=> loop
+
+    loop: LookForTags =C=> check
+
+    check: CheckTags
+    check =F=> SpeechNode("I don't see exactly two good tags.  Type 'msg go' to retry.") =TM("go")=> loop
+    check =C=> fwd
+
+    fwd: TravelForward
+    fwd =F=> SpeechNode("I don't see a forward command tag.  Type 'msg go' to retry.") =TM("go")=> loop
+    fwd =C=> turn
+
+    turn: Turn
+    turn =F=> SpeechNode("I don't see a turn or stop command tag.  Type 'msg go' to retry.") =TM("go")=> loop
+    turn =C=> cont
+
+    cont: ContinueOrStop
+    cont =F=> SpeechNode("done")
+    cont =C=> loop
+  }
+
+}
+
+REGISTER_BEHAVIOR_MENU(TagCourse,DEFAULT_TK_MENU"/Navigation Demos");
+
+#endif

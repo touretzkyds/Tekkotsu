@@ -1,0 +1,80 @@
+//-*-c++-*-
+
+/****************************************************************
+
+Sample code for running a Create around and reporting pink blobs.
+This is the first bit of demo code to help people get started
+using Tekkotsu and the Create for the Tapia competition.
+
+  David S. Touretzky
+  November, 2008
+****************************************************************/
+
+#ifndef _TapiaWander_h_
+#define _TapiaWander_h_
+
+#include "Behaviors/StateMachine.h"
+#include "DualCoding/DualCoding.h"
+#include "Events/DataEvent.h"
+#include "Behaviors/Nodes/SpeechNode.h"
+
+using namespace std;
+using namespace DualCoding;
+
+class FindEllipses : public MapBuilderNode {
+public:
+  FindEllipses(const std::string &name) : MapBuilderNode(name) {}
+
+  virtual void doStart() {
+    int const color_pink = ProjectInterface::getColorIndex("pink");
+    mapreq.objectColors[ellipseDataType].insert(color_pink);
+  }
+};
+
+class CheckForTarget : public VisualRoutinesStateNode {
+public:
+  CheckForTarget(const std::string &name) : VisualRoutinesStateNode(name) {}
+
+  virtual void doStart() {
+    sndman->speak("I saw ellipses");
+    NEW_SHAPEVEC(ellipses, EllipseData, select_type<EllipseData>(camShS));
+    if ( ellipses.empty() ) {
+      postStateCompletion();
+      return;
+    }
+    cout << "I saw: " << ellipses[0] << endl;
+    postStateSignal<Shape<EllipseData> >(ellipses[0]);
+  }
+};
+
+class TapiaWander : public VisualRoutinesStateNode {
+public:
+  TapiaWander() : VisualRoutinesStateNode("TapiaWander") {}
+
+  virtual void setup() {
+#statemachine
+
+  startnode: SpeechNode($,"Tapia wander") =N=> FindEllipses =MAP=> check: CheckForTarget
+
+  // If no pink ellipse found (completion event) , walk forward
+  check =C[setSound("fart.wav")]=> walk
+
+  // If we did find an ellipse, anounce it, then turn around and go the other way
+  check =S<Shape<EllipseData> >=> SoundNode($,"ping.wav") =T(2000)=>
+    aboutFace: WalkNode($, 0, 0, M_PI, 3.5, false) =C=> startnode
+
+  // Walk section: go forward 200 mm, but if we hit something, back up and turn.
+  // Bump buttons are defined in Shared/CreateInfo.h
+  walk: WalkNode($, 200, 0, 0, 1.4, false) =C=> startnode
+
+  walk =B(BumpLeftButOffset)[setSound("crash.wav")]=>
+    lbump: WalkNode($, -50, 0, -M_PI/3, 1.2, false) =C=> startnode
+
+  walk =B(BumpRightButOffset)[setSound("crash.wav")]=>
+    rbump: WalkNode($, -50, 0, M_PI/3, 1.2, false) =C=> startnode
+
+#endstatemachine
+  }
+};
+
+#endif

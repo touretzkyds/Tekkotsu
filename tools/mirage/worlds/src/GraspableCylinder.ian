@@ -1,0 +1,88 @@
+# This is a canister that appears cylindrical, but is actually a
+# dumbbell shape that can be trapped by the Calliope2SP fingers.  The
+# masses are set very low so that it is easily liftable and does not
+# press into the fingers, making it less likely to fall out.  The
+# black cap on top allows the vision system to correctly estimate the
+# height of the cylinder, and the AprilTag allows for recognition of
+# the object up close, when the cylinder walls are hard to see.
+
+# ================ Red Canisters ================
+define MediumRedCanister cylinder scale=[50,50,132] material=Red mass=0.0001
+define MediumRedCanister_bottom cylinder scale=[100,100,20] material=Blue mass=0.0005 attachto=MediumRedCanister moffset=[0,0,-56]
+define MediumRedCanister_top cylinder scale=[100,100,20] material=Green mass=0.0001 attachto=MediumRedCanister moffset=[0,0,56.05]
+define MediumRedCanister_walls cylinder scale=[100.5,100.5,132] material=Red mass=0 collision=false attachto=MediumRedCanister
+define MediumRedCanister_cover cylinder scale=[100,100,0.1] material=Black mass=0 collision=false attachto=MediumRedCanister moffset=[0,0,66.1]
+define MediumRedCanister_label cube scale=[50,50,0.1] material="AprilTag/tag16h5/00" mass=0 collision=false attachto=MediumRedCanister moffset=[0,0,66.2]
+
+define LargeRedCanister cylinder scale=[50,50,200] material=Red mass=0.0001
+define LargeRedCanister_bottom cylinder scale=[100,100,20] material=Blue mass=0.0005 attachto=LargeRedCanister moffset=[0,0,-90]
+define LargeRedCanister_top cylinder scale=[100,100,20] material=Green mass=0.0001 attachto=LargeRedCanister moffset=[0,0,90.05]
+define LargeRedCanister_walls cylinder scale=[100.5,100.5,200] material=Red mass=0 collision=false attachto=LargeRedCanister
+define LargeRedCanister_cover cylinder scale=[100,100,0.1] material=Black mass=0 collision=false attachto=LargeRedCanister moffset=[0,0,100.1]
+define LargeRedCanister_label cube scale=[50,50,0.1] material="AprilTag/tag16h5/01" mass=0 collision=false attachto=LargeRedCanister moffset=[0,0,100.2]
+
+define SmallRedCanister cylinder scale=[50,50,90] material=Red mass=0.0001
+define SmallRedCanister_bottom cylinder scale=[100,100,10] material=Blue mass=0.0005 attachto=SmallRedCanister moffset=[0,0,-25]
+define SmallRedCanister_top cylinder scale=[100,100,10] material=Green mass=0.0001 attachto=SmallRedCanister moffset=[0,0,40.05]
+define SmallRedCanister_walls cylinder scale=[100.5,100.5,90] material=Red mass=0 collision=false attachto=SmallRedCanister
+define SmallRedCanister_cover cylinder scale=[100,100,0.1] material=Black mass=0 collision=false attachto=SmallRedCanister moffset=[0,0,45.1]
+define SmallRedCanister_label cube scale=[50,50,0.1] material="AprilTag/tag16h5/02" mass=0 collision=false attachto=SmallRedCanister moffset=[0,0,45.2]
+
+# ================ Green Canisters ================
+define MediumGreenCanister cylinder scale=[50,50,132] material=Green mass=0.0001
+define MediumGreenCanister_bottom cylinder scale=[100,100,20] material=Blue mass=0.0005 attachto=MediumGreenCanister moffset=[0,0,-56]
+define MediumGreenCanister_top cylinder scale=[100,100,20] material=Red mass=0.0001 attachto=MediumGreenCanister moffset=[0,0,56.05]
+define MediumGreenCanister_walls cylinder scale=[100.5,100.5,132] material=Green mass=0 collision=false attachto=MediumGreenCanister
+define MediumGreenCanister_cover cylinder scale=[100,100,0.1] material=Black mass=0 collision=false attachto=MediumGreenCanister moffset=[0,0,66.1]
+define MediumGreenCanister_label cube scale=[50,50,0.1] material="AprilTag/tag16h5/03" mass=0 collision=false attachto=MediumGreenCanister moffset=[0,0,66.2]
+
+define LargeGreenCanister cylinder scale=[50,50,200] material=Green mass=0.0001
+define LargeGreenCanister_bottom cylinder scale=[100,100,20] material=Blue mass=0.0005 attachto=LargeGreenCanister moffset=[0,0,-90]
+define LargeGreenCanister_top cylinder scale=[100,100,20] material=Red mass=0.0001 attachto=LargeGreenCanister moffset=[0,0,90.05]
+define LargeGreenCanister_walls cylinder scale=[100.5,100.5,200] material=Green mass=0 collision=false attachto=LargeGreenCanister
+define LargeGreenCanister_cover cylinder scale=[100,100,0.1] material=Black mass=0 collision=false attachto=LargeGreenCanister moffset=[0,0,100.1]
+define LargeGreenCanister_label cube scale=[50,50,0.1] material="AprilTag/tag16h5/04" mass=0 collision=false attachto=LargeGreenCanister moffset=[0,0,100.2]
+
+define SmallGreenCanister cylinder scale=[50,50,70] material=Green mass=0.0001
+define SmallGreenCanister_bottom cylinder scale=[100,100,10] material=Red mass=0.0005 attachto=SmallGreenCanister moffset=[0,0,-25]
+define SmallGreenCanister_top cylinder scale=[100,100,10] material=Blue mass=0.0001 attachto=SmallGreenCanister moffset=[0,0,30.05]
+define SmallGreenCanister_walls cylinder scale=[100.5,100.5,70] material=Green mass=0 collision=false attachto=SmallGreenCanister
+define SmallGreenCanister_cover cylinder scale=[100,100,0.1] material=Black mass=0 collision=false attachto=SmallGreenCanister moffset=[0,0,35.1]
+define SmallGreenCanister_label cube scale=[50,50,0.1] material="AprilTag/tag16h5/05" mass=0 collision=false attachto=SmallGreenCanister moffset=[0,0,35.2]
+
+# ================ Blue Canisters ================
+define MediumBlueCanister cylinder scale=[50,50,132] material=Blue mass=0.0001
+define MediumBlueCanister_bottom cylinder scale=[100,100,20] material=Green mass=0.0005 attachto=MediumBlueCanister moffset=[0,0,-56]
+define MediumBlueCanister_top cylinder scale=[100,100,20] material=Red mass=0.0001 attachto=MediumBlueCanister moffset=[0,0,56.05]
+define MediumBlueCanister_walls cylinder scale=[100.5,100.5,132] material=Blue mass=0 collision=false attachto=MediumBlueCanister
+define MediumBlueCanister_cover cylinder scale=[100,100,0.1] material=Black mass=0 collision=false attachto=MediumBlueCanister moffset=[0,0,66.1]
+define MediumBlueCanister_label cube scale=[50,50,0.1] material="AprilTag/tag16h5/06" mass=0 collision=false attachto=MediumBlueCanister moffset=[0,0,66.2]
+
+define LargeBlueCanister cylinder scale=[50,50,200] material=Blue mass=0.0001
+define LargeBlueCanister_bottom cylinder scale=[100,100,20] material=Green mass=0.0005 attachto=LargeBlueCanister moffset=[0,0,-90]
+define LargeBlueCanister_top cylinder scale=[100,100,20] material=Red mass=0.0001 attachto=LargeBlueCanister moffset=[0,0,90.05]
+define LargeBlueCanister_walls cylinder scale=[100.5,100.5,200] material=Blue mass=0 collision=false attachto=LargeBlueCanister
+define LargeBlueCanister_cover cylinder scale=[100,100,0.1] material=Black mass=0 collision=false attachto=LargeBlueCanister moffset=[0,0,100.1]
+define LargeBlueCanister_label cube scale=[50,50,0.1] material="AprilTag/tag16h5/07" mass=0 collision=false attachto=LargeBlueCanister moffset=[0,0,100.2]
+
+define SmallBlueCanister cylinder scale=[50,50,90] material=Blue mass=0.0001
+define SmallBlueCanister_bottom cylinder scale=[100,100,10] material=Green mass=0.0005 attachto=SmallBlueCanister moffset=[0,0,-25]
+define SmallBlueCanister_top cylinder scale=[100,100,10] material=Red mass=0.0001 attachto=SmallBlueCanister moffset=[0,0,40.05]
+define SmallBlueCanister_walls cylinder scale=[100.5,100.5,90] material=Blue mass=0 collision=false attachto=SmallBlueCanister
+define SmallBlueCanister_cover cylinder scale=[100,100,0.1] material=Black mass=0 collision=false attachto=SmallBlueCanister moffset=[0,0,45.1]
+define SmallBlueCanister_label cube scale=[50,50,0.1] material="AprilTag/tag16h5/08" mass=0 collision=false attachto=SmallBlueCanister moffset=[0,0,45.2]
+
+
+#================ Instances ================
+
+# This canister would be inside the robot's fingers when
+# it first appears in the Mirage world. 
+#   MediumRedCanister location=[310,-80,66]
+
+light location=[-1000,0,2000] pointat=[1000,0,0]
+
+
+MediumRedCanister location=[750,-80,66]
+LargeGreenCanister location=[1000,500,100]
+SmallBlueCanister location=[1000,-500,45]
+

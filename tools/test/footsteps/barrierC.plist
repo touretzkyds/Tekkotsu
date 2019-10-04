@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><array>
+<dict>
+	<!--.type: Allows polymorphic load/save, must match known class name-->
+	<key>.type</key>       <string>Circle</string>
+	
+	<!--Center point-->
+	<key>Center</key>      <array> <real>550</real> <real>0</real> </array>
+	
+	<!--Dimensions: Width and height-->
+	<key>Radius</key>  <real>175</real>
+</dict>
+<dict>
+	<!--.type: Allows polymorphic load/save, must match known class name-->
+	<key>.type</key>       <string>Circle</string>
+	
+	<!--Center point-->
+	<key>Center</key>      <array> <real>415</real> <real>300</real> </array>
+	
+	<!--Dimensions: Width and height-->
+	<key>Radius</key>  <real>180</real>
+</dict>
+<dict>
+	<!--.type: Allows polymorphic load/save, must match known class name-->
+	<key>.type</key>       <string>Circle</string>
+	
+	<!--Center point-->
+	<key>Center</key>      <array> <real>415</real> <real>-300</real> </array>
+	
+	<!--Dimensions: Width and height-->
+	<key>Radius</key>  <real>180</real>
+</dict>
+</array></plist>

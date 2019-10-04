@@ -1,0 +1,13 @@
+material WallE
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture Wallpaper/Wall-E6.jpg
+      }
+    }
+  }
+}

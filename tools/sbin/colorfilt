@@ -1,0 +1,100 @@
+#!/usr/bin/perl
+# from:
+# colorgcc
+# Author: Jamie Moyers <jmoyers@geeks.com>
+# Started: April 20, 1999
+# Licence: GNU Public License
+
+# Alok Ladsariya
+
+use Term::ANSIColor;
+
+$colors{"src_color"} = color("cyan");
+$colors{"intro_color"} = color("green");
+$colors{"loc_color"} = color("bold yellow");
+$colors{"warning_color"} = color("yellow");
+$colors{"error_color"} = color("bold red");
+
+$line="";
+$nextline="";
+while (<stdin>) {
+  chomp;
+  if (/^   (.*)/) {
+    $nextline.=$1;
+    next;
+  } else {
+    $line=$nextline;
+    $nextline=$_;
+  }
+  $_=$line."\n";
+
+  if (m/^In file included from/) {
+    print($colors{"loc_color"}, $_, color("reset"));
+  } elsif (m/^(.*?):([0-9]+):(.*)$/) {
+    $field1 = $1 || "";
+    $field2 = $2 || "";
+    $field3 = $3 || "";
+
+    if ($field3 =~ m/\s+warning:.*/) {
+      print($colors{"warning_color"}, "$field1:$field2:", color("reset"));
+      srcscan($field3, $colors{"warning_color"});
+    } elsif ($field3 =~ m/instantiated from/) {
+      srcscan($_, $colors{"intro_color"});
+    } else {
+      print($colors{"error_color"}, "$field1:$field2:", color("reset"));
+      srcscan($field3, $colors{"error_color"});
+    }
+    print("\n");
+  } elsif (m/^(.*?):(.+):$/) {
+    srcscan($_, $colors{"intro_color"});
+  } elsif (m/[a-zA-Z0-9]/) {
+    print(color("reset"), $_);
+  }
+}
+$_=$nextline."\n";
+  if (m/^In file included from/) {
+    print($colors{"loc_color"}, $_, color("reset"));
+  } elsif (m/^(.*?):([0-9]+):(.*)$/) {
+    $field1 = $1 || "";
+    $field2 = $2 || "";
+    $field3 = $3 || "";
+
+    if ($field3 =~ m/\s+warning:.*/) {
+      print($colors{"warning_color"}, "$field1:$field2:", color("reset"));
+      srcscan($field3, $colors{"warning_color"});
+    } elsif ($field3 =~ m/instantiated from/) {
+      srcscan($_, $colors{"intro_color"});
+    } else {
+      print($colors{"error_color"}, "$field1:$field2:", color("reset"));
+      srcscan($field3, $colors{"error_color"});
+    }
+    print("\n");
+  } elsif (m/^(.*?):(.+):$/) {
+    srcscan($_, $colors{"intro_color"});
+  } elsif (m/[a-zA-Z0-9]/) {
+    print(color("reset"), $_);
+  }
+
+sub srcscan
+{
+# Usage: srcscan($text, $normalColor)
+#    $text -- the text to colorize
+#    $normalColor -- The escape sequence to use for non-source text.
+
+# Looks for text between ` and ', and colors it src_color.
+
+  my($line, $normalColor) = @_;
+
+  my($srcon) = color("reset") . $colors{"src_color"};
+  my($srcoff) = color("reset") . $normalColor;
+
+  $line = $normalColor . $line;
+
+# This substitute replaces `foo' with `AfooB' where A is the escape
+# sequence that turns on the the desired source color, and B is the
+# escape sequence that returns to $normalColor.
+  $line =~ s/\`(.*?)\'/\`$srcon$1$srcoff\'/g;
+
+  print($line, color("reset"));
+}
+

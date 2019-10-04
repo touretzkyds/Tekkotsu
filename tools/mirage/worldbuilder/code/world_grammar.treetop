@@ -1,0 +1,39 @@
+# Tekkotsu WorldBuilder
+# World parsing expression grammar
+#
+# Robert Lee (rslee / perihare)
+# 2-14-2011
+
+require "shape_grammar"
+require "light_grammar"
+require "environment_grammar"
+require "extras_grammar"
+require "expression_grammar"
+require "logo_grammar"
+
+grammar WorldGrammar
+    include ShapeGrammar
+    include LightGrammar
+    include EnvironmentGrammar
+    include ExtrasGrammar
+    include ExpressionGrammar
+    include LogoGrammar
+
+    rule line
+    shape / light /
+    environment /
+    logo /
+    copy / set / print /
+    define
+    end
+    
+    rule print
+    'print' space value:(expression / defined / string)
+    {
+        def eval(env={})
+            ["print", value.eval(env).to_s]
+        end
+    }
+    end
+
+end

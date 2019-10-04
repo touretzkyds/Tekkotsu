@@ -1,0 +1,36 @@
+Original r, width: 3
+lower.0 = 1
+lower.1 = 2.5
+upper.0 = 4
+upper.1 = 5
+
+Negated r, width: 5
+lower.0 = -4
+lower.1 = 2.5
+upper.0 = 1
+upper.1 = 5
+
+Mixed.0           = 0
+Mixed.1           = 1
+Mixed.2           = 2
+Mixed.3           = This is item 1
+Mixed.4           = item 2: arrays can contain mixed types
+Mixed.5           = 123
+Mixed.6           = true
+map.0^2           = 0
+map.1^2           = 1
+map.2^2           = 4
+map.3^2           = 9
+map.4^2           = 16
+map.tada          = mixed types -- no surprise
+numeric.char-num  = 97
+numeric.char-text = a
+numeric.fooF      = 3.14159
+numeric.fooI      = 42
+test str          = Hello world!
+vector.0          = 0
+vector.1          = 1
+vector.2          = 4
+vector.3          = 9
+vector.4          = 16
+vector.5          = can also handle mixed

@@ -1,0 +1,30 @@
+#!/bin/sh
+
+path=$1
+if [ -z "$path" ] ; then path="."; fi;
+
+bin=./footsteps-CHIARA
+
+if [ -z "$path" -o \! -d "$path" ] ; then
+	echo "$path is not a directory"
+	echo "Usage: $0 fig-dir"
+	exit 1;
+fi;
+
+"$bin" -w walk2.plist -f "$path/stairs.svg" -g 1000 -514 --show-grid --show-work --no-reorient > /tmp/viewbox || exit 1 && cat /tmp/viewbox
+vb=$(sed -n 's/Figure viewBox: \(.*\)/\1/p' < /tmp/viewbox)
+"$bin" -w walk2.plist -f "$path/straight.svg" -g 1000 -514 --show-grid --show-work --view $vb || exit 1
+
+"$bin" -w walk3.plist -f "$path/bottle3.svg" -e bottle3.plist --show-grid --show-steps -s 0 0 -g 800 0 --no-rehab > /tmp/viewbox || exit 1 && cat /tmp/viewbox
+vb=$(sed -n 's/Figure viewBox: \(.*\)/\1/p' < /tmp/viewbox)
+"$bin" -w walk3.plist -f "$path/bottle3b.svg" -e bottle3.plist --show-grid --show-steps -s 0 0 -g 800 0 --view $vb || exit 1
+"$bin" -w walk.plist -f "$path/bottle1.svg" -e bottle1.plist --show-grid --show-steps -s 0 0 -g 800 0 --no-rehab --view $vb || exit 1
+"$bin" -w walk.plist -f "$path/bottleT.svg" -e bottleT.plist --show-grid --show-steps -s 0 0 -g 800 0 --view $vb || exit 1
+
+#showpath=--hide-path --view -200 -850 1500 1700
+showpath=--show-work
+"$bin" -w walk3.plist -f "$path/trap.svg" -e trap.plist --show-grid $showpath || exit 1
+"$bin" -w walk3.plist -f "$path/barrier.svg" -e barrierR.plist --show-grid $showpath --show-steps || exit 1
+"$bin" -w walk3.plist -f "$path/minefield.svg" -e field4.plist --show-grid $showpath --show-steps --view -150 -350 1350 600 || exit 1
+
+echo "HUGE SUCCESS!"

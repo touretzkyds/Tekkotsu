@@ -1,0 +1,31 @@
+Name BaseFrame
+Name RRotor	Origin 0 -20 20		Z 0 -1 0
+Name RElvtr	Origin 0 -20 20		Z -1 0 0
+Name RElbow	Origin 0 -40 20		Z -1 0 0
+Name RHandFrame	Origin 0 -60 20		Min 0 Max 0 Model ReferenceFrame ModelScale .5 .5 .5
+
+Branch BaseFrame
+Name LRotor	Origin 0 20 20		Z 0 -1 0
+Name LElvtr	Origin 0 20 20		Z 1 0 0
+Name LElbow	Origin 0 40 20		Z 1 0 0
+Name LHandFrame	Origin 0 60 20		Min 0 Max 0 Model ReferenceFrame ModelScale .5 .5 .5
+
+Branch BaseFrame
+Name RHip	Origin 0 -10 -20	Z 0 0 1
+Name RThigh	Origin 0 -10 -20	Z 0 -1 0
+Name RKnee	Origin 0 -10 -55	Z 0 -1 0
+Name RFootFrame	Origin 0 -10 -80	Z 0 -1 0 Min 0 Max 0 Model ReferenceFrame ModelScale .5 .5 .5
+
+Branch BaseFrame
+Name LHip	Origin 0 10 -20		Z 0 0 1
+Name LThigh	Origin 0 10 -20		Z 0 -1 0
+Name LKnee	Origin 0 10 -55		Z 0 -1 0
+Name LFootFrame	Origin 0 10 -80		Z 0 -1 0 Min 0 Max 0 Model ReferenceFrame ModelScale .5 .5 .5
+
+Branch BaseFrame
+Name Pan	Origin 0 0 22		Z 0 0 1
+Name Tilt	Origin 0 0 27		Z 0 -1 0
+# adding this frame will "correct" the orientation of the camera
+#		Origin 0 0 27		Z 0 0 1 Min 0 Max 0
+# adding the bit at the end of this will allow you to shift the camera "out" a bit...
+Name CameraFrame Origin 0 0 27		Z 1 0 0 Min 0 Max 0 Model CameraFOV ModelScale .5 .5 .5 #JointType prismatic qOffset 5

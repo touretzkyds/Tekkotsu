@@ -1,0 +1,298 @@
+<?xml version="1.0"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<!--======== Drivers ========-->
+<!--Settings for device drivers-->
+<key>Drivers</key> <dict>
+	
+	<!--======== Logged ========-->
+	<key>Logged</key> <dict>
+		<!--.type: Stores the typename of the class so it can be re-instantiated on load.
+		** Do not edit ** -->
+		<key>.type</key> <string>LoggedData</string>
+	</dict>
+	
+	<!--======== Dynamixel ========-->
+	<key>Dynamixel</key>  <dict>
+		<!--.type: Stores the typename of the class so it can be re-instantiated on load.
+		** Do not edit ** -->
+		<key>.type</key>        <string>Dynamixel</string>
+		
+		<!--CommPort: The name of the comm port where output will be sent-->
+		<key>CommPort</key>     <string>Serial</string>
+		
+		<!--Protocol: Indicates whether to send CM-5 controller commands or direct binary commands
+		(latter can only be used if you have a direct connection to the Dynamixel TTL bus)
+		Value is one of: { BINARY | CM-5 } -->
+		<key>Protocol</key>     <string>CM-5</string>
+		
+		<!--SamplePeriod: The polling interval for servo sensor values, in millseconds
+		Not all servos are polled simultaneously, this is the delay after polling one servo before polling another.-->
+		<key>SamplePeriod</key> <integer>128</integer>
+		
+		<!--======== Servos ========-->
+		<!--Maps servo IDs to Tekkotsu output offsets, use command line new/delete commands to add/remove mappings.-->
+		<key>Servos</key>       <dict>
+			<!--======== 001 ========-->
+			<key>001</key>  <dict>
+				<!--Detected: If true, servo is detected and functioning.  If a servo is reconnected, set back to true to attempt to re-enable communication.-->
+				<key>Detected</key>       <true/>
+				
+				<!--FreeSpinOutput: Tekkotsu output to control the 'continuous rotation mode'. If specified output
+				value is non-zero, lookup from Output is interpreted as rotation speed instead of
+				position.  If Output and FreeSpinOutput are equal, then the servo is permanently in
+				continuous rotation mode.-->
+				<key>FreeSpinOutput</key> <string>UNUSED</string>
+				
+				<!--LED: Tekkotsu offset to pull LED values from; -1 to mark unused-->
+				<key>LED</key>            <string>LED:00000</string>
+				
+				<!--Output: Tekkotsu offset to pull servo positions from; -1 to mark unused-->
+				<key>Output</key>         <string>LFr:rotor</string>
+			</dict>
+			
+			<!--======== 002 ========-->
+			<key>002</key>  <dict>
+				<!--Detected: If true, servo is detected and functioning.  If a servo is reconnected, set back to true to attempt to re-enable communication.-->
+				<key>Detected</key>       <true/>
+				
+				<!--FreeSpinOutput: Tekkotsu output to control the 'continuous rotation mode'. If specified output
+				value is non-zero, lookup from Output is interpreted as rotation speed instead of
+				position.  If Output and FreeSpinOutput are equal, then the servo is permanently in
+				continuous rotation mode.-->
+				<key>FreeSpinOutput</key> <string>UNUSED</string>
+				
+				<!--LED: Tekkotsu offset to pull LED values from; -1 to mark unused-->
+				<key>LED</key>            <string>LED:00001</string>
+				
+				<!--Output: Tekkotsu offset to pull servo positions from; -1 to mark unused-->
+				<key>Output</key>         <string>LFr:sweep</string>
+			</dict>
+			
+			<!--======== 003 ========-->
+			<key>003</key>  <dict>
+				<!--Detected: If true, servo is detected and functioning.  If a servo is reconnected, set back to true to attempt to re-enable communication.-->
+				<key>Detected</key>       <true/>
+				
+				<!--FreeSpinOutput: Tekkotsu output to control the 'continuous rotation mode'. If specified output
+				value is non-zero, lookup from Output is interpreted as rotation speed instead of
+				position.  If Output and FreeSpinOutput are equal, then the servo is permanently in
+				continuous rotation mode.-->
+				<key>FreeSpinOutput</key> <string>UNUSED</string>
+				
+				<!--LED: Tekkotsu offset to pull LED values from; -1 to mark unused-->
+				<key>LED</key>            <string>LED:00002</string>
+				
+				<!--Output: Tekkotsu offset to pull servo positions from; -1 to mark unused-->
+				<key>Output</key>         <string>LFr:elvtr</string>
+			</dict>
+			
+			<!--======== 004 ========-->
+			<key>004</key>  <dict>
+				<!--Detected: If true, servo is detected and functioning.  If a servo is reconnected, set back to true to attempt to re-enable communication.-->
+				<key>Detected</key>       <true/>
+				
+				<!--FreeSpinOutput: Tekkotsu output to control the 'continuous rotation mode'. If specified output
+				value is non-zero, lookup from Output is interpreted as rotation speed instead of
+				position.  If Output and FreeSpinOutput are equal, then the servo is permanently in
+				continuous rotation mode.-->
+				<key>FreeSpinOutput</key> <string>UNUSED</string>
+				
+				<!--LED: Tekkotsu offset to pull LED values from; -1 to mark unused-->
+				<key>LED</key>            <string>LED:00003</string>
+				
+				<!--Output: Tekkotsu offset to pull servo positions from; -1 to mark unused-->
+				<key>Output</key>         <string>LFr:knee</string>
+			</dict>
+			
+			<!--======== 005 ========-->
+			<key>005</key>  <dict>
+				<!--Detected: If true, servo is detected and functioning.  If a servo is reconnected, set back to true to attempt to re-enable communication.-->
+				<key>Detected</key>       <true/>
+				
+				<!--FreeSpinOutput: Tekkotsu output to control the 'continuous rotation mode'. If specified output
+				value is non-zero, lookup from Output is interpreted as rotation speed instead of
+				position.  If Output and FreeSpinOutput are equal, then the servo is permanently in
+				continuous rotation mode.-->
+				<key>FreeSpinOutput</key> <string>UNUSED</string>
+				
+				<!--LED: Tekkotsu offset to pull LED values from; -1 to mark unused-->
+				<key>LED</key>            <string>LED:00004</string>
+				
+				<!--Output: Tekkotsu offset to pull servo positions from; -1 to mark unused-->
+				<key>Output</key>         <string>RFr:rotor</string>
+			</dict>
+			
+			<!--======== 006 ========-->
+			<key>006</key>  <dict>
+				<!--Detected: If true, servo is detected and functioning.  If a servo is reconnected, set back to true to attempt to re-enable communication.-->
+				<key>Detected</key>       <true/>
+				
+				<!--FreeSpinOutput: Tekkotsu output to control the 'continuous rotation mode'. If specified output
+				value is non-zero, lookup from Output is interpreted as rotation speed instead of
+				position.  If Output and FreeSpinOutput are equal, then the servo is permanently in
+				continuous rotation mode.-->
+				<key>FreeSpinOutput</key> <string>UNUSED</string>
+				
+				<!--LED: Tekkotsu offset to pull LED values from; -1 to mark unused-->
+				<key>LED</key>            <string>LED:00005</string>
+				
+				<!--Output: Tekkotsu offset to pull servo positions from; -1 to mark unused-->
+				<key>Output</key>         <string>RFr:sweep</string>
+			</dict>
+			
+			<!--======== 007 ========-->
+			<key>007</key>  <dict>
+				<!--Detected: If true, servo is detected and functioning.  If a servo is reconnected, set back to true to attempt to re-enable communication.-->
+				<key>Detected</key>       <true/>
+				
+				<!--FreeSpinOutput: Tekkotsu output to control the 'continuous rotation mode'. If specified output
+				value is non-zero, lookup from Output is interpreted as rotation speed instead of
+				position.  If Output and FreeSpinOutput are equal, then the servo is permanently in
+				continuous rotation mode.-->
+				<key>FreeSpinOutput</key> <string>UNUSED</string>
+				
+				<!--LED: Tekkotsu offset to pull LED values from; -1 to mark unused-->
+				<key>LED</key>            <string>LED:00006</string>
+				
+				<!--Output: Tekkotsu offset to pull servo positions from; -1 to mark unused-->
+				<key>Output</key>         <string>RFr:elvtr</string>
+			</dict>
+			
+			<!--======== 008 ========-->
+			<key>008</key>  <dict>
+				<!--Detected: If true, servo is detected and functioning.  If a servo is reconnected, set back to true to attempt to re-enable communication.-->
+				<key>Detected</key>       <true/>
+				
+				<!--FreeSpinOutput: Tekkotsu output to control the 'continuous rotation mode'. If specified output
+				value is non-zero, lookup from Output is interpreted as rotation speed instead of
+				position.  If Output and FreeSpinOutput are equal, then the servo is permanently in
+				continuous rotation mode.-->
+				<key>FreeSpinOutput</key> <string>UNUSED</string>
+				
+				<!--LED: Tekkotsu offset to pull LED values from; -1 to mark unused-->
+				<key>LED</key>            <string>LED:00007</string>
+				
+				<!--Output: Tekkotsu offset to pull servo positions from; -1 to mark unused-->
+				<key>Output</key>         <string>RFr:knee</string>
+			</dict>
+		</dict>
+	</dict>
+</dict>
+
+<!--======== Vision ========-->
+<!--Settings for the loading of camera frames-->
+<key>Vision</key> <dict>
+	<key>Sources</key> <array></array>
+	
+	<!--Framerate: The rate at which images should be loaded.  This is passed as a hint to the source, which may be limited to multiples of its capture device frequency.-->
+	<key>Framerate</key> <real>30</real>
+	
+	<!--Frozen: If true, no frames will be sent, except via explicit 'advance' commands; if false, the thread will run and send messages at the requested times automatically-->
+	<key>Frozen</key>    <false/>
+	
+	<!--Heartbeat: If enabled, an empty "heartbeat" message is sent at the appropriate framerate, even if no data is being processed (i.e. frozen, no data loaded, or out of frames); this will cause an update event within the simulator, repeating processing on the previous data.-->
+	<key>Heartbeat</key> <true/>
+	
+	<!--Verbose: Controls how much feedback to give on the console regarding progress
+	  0 - none
+	  1 - report when messages are dropped
+	  2 - also report when a message is sent
+	  3 - also report when heartbeat is sent/dropped, and when loop occurs
+	  4 - also report when each message is preloaded-->
+	<key>Verbose</key>   <integer>0</integer>
+</dict>
+
+<!--InitialRunlevel: Specifies how far startup should proceed before pausing for user interaction.
+This value only affects startup, and setting this value from the simulator command prompt will have no effect.  (Use the 'runlevel' command instead.)-->
+<key>InitialRunlevel</key> <string>RUNNING</string>
+
+<!--InitialTime: The value to initialize the simulator's clock (in milliseconds)-->
+<key>InitialTime</key>     <integer>0</integer>
+
+<!--======== Motion ========-->
+<!--Parameters for motion simulation-->
+<key>Motion</key>          <dict>
+	<!--FeedbackDelay: Delay (in milliseconds) to apply to motion output before feeding back to sensor values (simulates (very roughly) inertia and system response time); 0 indicates instantaneous/perfect joint control, negative values indicate no feedback (only sensor data sets joint positions)-->
+	<key>FeedbackDelay</key>   <integer>0</integer>
+	
+	<!--OverrideSensors: Allows motion feedback to override position values from sensor data loaded from disk.
+	If false, feedback is only provided when no other sensor data is being provided-->
+	<key>OverrideSensors</key> <false/>
+	
+	<!--Verbose: Report whenever motion commands are being processed or joints are updated
+	0 - nothing, 1 - errors, 2 - warnings (e.g. dropped frames), 3 - notification every frame-->
+	<key>Verbose</key>         <integer>1</integer>
+	
+	<!--ZeroPIDFeedback: When set to false, if PIDs are set to zero, then sensor values are used to set joint positions; otherwise joint position sensors would only be used if FeedbackDelay is negative-->
+	<key>ZeroPIDFeedback</key> <false/>
+</dict>
+
+<!--Multiprocess: The processing/threading model to use - true to use real process forks a la Aibo/Aperios, or false to just more threads like a sane person would do-->
+<key>Multiprocess</key>    <false/>
+
+<!--Speed: The speed at which to run the simulation, as a multiple of "real-time".
+For example, '1' is normal, '0.5' is half-speed, '0' is paused.
+Any negative value requests full-speed mode, where the clock is moved as fast as processing (or manual control) allows.-->
+<key>Speed</key>           <real>1</real>
+
+<!--WaitForSensors: If true, wait for initial sensor readings before triggering the startup behavior or starting the motion polling thread.  On some platforms (e.g. Dynamixel based actuators), sensed output values can be used to initialize output positions.  On others, you may be unable to get any feedback, or can only expect feedback if the robot was left running and the executable is reconnecting (e.g. SSC-32).-->
+<key>WaitForSensors</key>  <true/>
+
+<!--======== CommPorts ========-->
+<!--Communication portals for use by device drivers-->
+<key>CommPorts</key>       <dict>
+	<!--======== Serial ========-->
+	<key>Serial</key>  <dict>
+		<!--.type: Stores the typename of the class so it can be re-instantiated on load.
+		** Do not edit ** -->
+		<key>.type</key>    <string>SerialCommPort</string>
+		
+		<!--Baud: Communication frequency (bits per second)-->
+		<key>Baud</key>     <integer>1000000</integer>
+		
+		<!--DataBits: Number of data bits to send at a time (5-8)-->
+		<key>DataBits</key> <integer>8</integer>
+		
+		<!--Mode bitmask to pass to the open() call, defaults to 'w+b': in|out|trunc|binary (see std::ios_base::openmode)-->
+		<key>Mode</key>     <integer>60</integer>
+		
+		<!--Parity bit can be sent for error checking
+		Value is one of: { EVEN | ODD | NONE } -->
+		<key>Parity</key>   <string>NONE</string>
+		
+		<!--Path of file system object being accessed-->
+		<key>Path</key>     <string>/dev/ttyUSB0</string>
+		
+		<!--StopBits: Number of stop bits to send between data bits (1-2)-->
+		<key>StopBits</key> <integer>1</integer>
+		
+		<!--TTYFlags: Additional configuration string to pass to stty
+		(may not work when using non-standard baud rates on OS X)-->
+		<key>TTYFlags</key> <string></string>
+	</dict>
+</dict>
+
+<!--======== Sensors ========-->
+<!--Settings for the loading of sensor values-->
+<key>Sensors</key>         <dict>
+	<!--Framerate: The rate at which images should be loaded.  This is passed as a hint to the source, which may be limited to multiples of its capture device frequency.-->
+	<key>Framerate</key> <real>31.25</real>
+	
+	<!--Frozen: If true, no frames will be sent, except via explicit 'advance' commands; if false, the thread will run and send messages at the requested times automatically-->
+	<key>Frozen</key>    <false/>
+	
+	<!--Heartbeat: If enabled, an empty "heartbeat" message is sent at the appropriate framerate, even if no data is being processed (i.e. frozen, no data loaded, or out of frames); this will cause an update event within the simulator, repeating processing on the previous data.-->
+	<key>Heartbeat</key> <true/>
+	
+	<key>Sources</key>    <array><string>Dynamixel</string></array>
+	
+	<!--Verbose: Controls how much feedback to give on the console regarding progress
+	  0 - none
+	  1 - report when messages are dropped
+	  2 - also report when a message is sent
+	  3 - also report when heartbeat is sent/dropped, and when loop occurs
+	  4 - also report when each message is preloaded-->
+	<key>Verbose</key>   <integer>0</integer>
+</dict>
+</dict></plist>

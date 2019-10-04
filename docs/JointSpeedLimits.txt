@@ -1,0 +1,52 @@
+From: https://openr.aibo.com/openr/eng/perm/regi_faq4.html#03
+
+The limit of angle speed for ERS-210
+
+Primitive Locator         angle speed limit
+                   (degree/frame  1frame=16msec)
+----------------------------------------------------
+/r1/c1-Joint2:j1          1.93
+/r1/c1/c2-Joint2:j2       2.76
+/r1/c1/c2/c3-Joint2:j3    2.76
+/r1/c1/c2/c3/c4-Joint2:j4 4.01
+/r2/c1-Joint2:j1          2.58
+/r2/c1/c2-Joint2:j2       2.29
+/r2/c1/c2/c3-Joint2:j3    2.60
+/r3/c1-Joint2:j1          2.58
+/r3/c1/c2-Joint2:j2       2.29
+/r3/c1/c2/c3-Joint2:j3    2.60
+/r4/c1-Joint2:j1          2.58
+/r4/c1/c2-Joint2:j2       2.29
+/r4/c1/c2/c3-Joint2:j3    2.60
+/r5/c1-Joint2:j1          2.58
+/r5/c1/c2-Joint2:j2       2.29
+/r5/c1/c2/c3-Joint2:j3    2.60
+/r6/c1-Joint2:j1          4.10
+/r6/c2-Joint2:j2          4.10
+----------------------------------------------------
+
+The limit of angle speed for ERS-220
+
+Primitive Locator         angle speed limit
+                   (degree/frame  1frame=16msec)
+----------------------------------------------------
+/r1/c1-Joint2:j1          1.93
+/r1/c1/c2-Joint2:j2       2.76
+/r1/c1/c2/c3-Joint2:j3    2.76
+/r2/c1-Joint2:j1          2.58
+/r2/c1/c2-Joint2:j2       2.29
+/r2/c1/c2/c3-Joint2:j3    2.60
+/r3/c1-Joint2:j1          2.58
+/r3/c1/c2-Joint2:j2       2.29
+/r3/c1/c2/c3-Joint2:j3    2.60
+/r4/c1-Joint2:j1          2.58
+/r4/c1/c2-Joint2:j2       2.29
+/r4/c1/c2/c3-Joint2:j3    2.60
+/r5/c1-Joint2:j1          2.58
+/r5/c1/c2-Joint2:j2       2.29
+/r5/c1/c2/c3-Joint2:j3    2.60
+----------------------------------------------------
+
+NOTE: The motion file (*.mtn) which is created by AIBO Master Studio has
+1 frame = 16msec. But minimum interval of motion of AIBO(ERS-210/220)
+is 8msec. (Time of one frame that AIBO recognizes actually is 8msec) 

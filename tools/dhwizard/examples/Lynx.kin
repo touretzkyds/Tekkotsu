@@ -1,0 +1,131 @@
+<?xml version="1.0"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>0.0°</real>
+	<key>r</key> <real>0.0</real>
+	<key>Min</key> <real>0.0°</real>
+	<key>Max</key> <real>0.0°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>LynxArm/Base</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>BaseFrame</string>
+</dict>
+<array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>47.0</real>
+	<key>α</key> <real>0.0°</real>
+	<key>r</key> <real>0.0</real>
+	<key>Min</key> <real>-180.48170546620932°</real>
+	<key>Max</key> <real>180.48170546620932°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>LynxArm/Turntable</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>Turntable</string>
+</dict>
+<array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>-91.67324722093171°</real>
+	<key>d</key> <real>14.249</real>
+	<key>α</key> <real>90.0000001836389°</real>
+	<key>r</key> <real>0.0</real>
+	<key>Min</key> <real>0.0°</real>
+	<key>Max</key> <real>180.48170546620932°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>LynxArm/Shoulder</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>Shoulder</string>
+</dict>
+<array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>0.0°</real>
+	<key>r</key> <real>100.0</real>
+	<key>Min</key> <real>-180.48170546620932°</real>
+	<key>Max</key> <real>180.48170546620932°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>LynxArm/Forearm</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>Forearm</string>
+</dict>
+<array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>0.0°</real>
+	<key>r</key> <real>120.65</real>
+	<key>Min</key> <real>-180.48170546620932°</real>
+	<key>Max</key> <real>180.48170546620932°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>LynxArm/Wrist</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>Wrist</string>
+</dict>
+<array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>-91.67324722093171°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>90.01166961505233°</real>
+	<key>r</key> <real>0.0</real>
+	<key>Min</key> <real>-180.48170546620932°</real>
+	<key>Max</key> <real>180.48170546620932°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>LynxArm/Palm</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>Palm</string>
+</dict>
+<array>
+<dict>
+	<key>JointType</key> <string>prismatic</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>-100.0</real>
+	<key>α</key> <real>-91.67324722093171°</real>
+	<key>r</key> <real>0.0</real>
+	<key>Min</key> <real>-1718.8733853924698°</real>
+	<key>Max</key> <real>286.4788975654116°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>LynxArm/LeftGripper</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>LeftGripper</string>
+</dict>
+</array>
+<array>
+<dict>
+	<key>JointType</key> <string>prismatic</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>-100.0</real>
+	<key>α</key> <real>91.67324722093171°</real>
+	<key>r</key> <real>0.0</real>
+	<key>Min</key> <real>-286.4788975654116°</real>
+	<key>Max</key> <real>1718.8733853924698°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>LynxArm/RightGripper</string>
+	<key>ModelScale</key> <array><real>1.0</real><real>1.0</real><real>1.0</real></array>
+	<key>Name</key> <string>RightGripper</string>
+</dict>
+</array>
+</array>
+</array>
+</array>
+</array>
+</array>
+</array>
+</plist>

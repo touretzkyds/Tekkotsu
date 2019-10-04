@@ -1,0 +1,40 @@
+#include "Shared/RobotInfo.h"
+
+#if defined(TGT_HAS_ARMS) && defined(TGT_HAS_HEAD)
+
+#include "Behaviors/Nodes/PostureNode.h"
+#include "Behaviors/Transitions/EventTrans.h"
+#include "Motion/MotionPtr.h"
+
+$nodeclass GripperTrackCamera : StateNode {
+
+  $nodeclass ArmMover : PostureNode : doStart {
+    fmat::Column<3> targetCam = fmat::pack(0, 0, 300);
+    fmat::Column<3> targetBase = kine->linkToBase(CameraFrameOffset) * targetCam;
+		fmat::Column<3> noOffset = fmat::pack(0, 0, 0);
+#ifdef TGT_IS_CALLIOPE5
+		unsigned int link = LeftFingerFrameOffset;
+#else
+		unsigned int link = GripperFrameOffset;
+#endif
+    getMC()->solveLinkPosition(targetBase, link, noOffset);
+  }
+
+  virtual void setup() {
+		// We make the posture motion command here and supply it to the
+		// PostureNode via setMC() so that it only has to be registered
+		// with the MotionManager once. Registering and deregistering a
+		// PostureMC inside a tight sensor loop is inefficient and leads
+		// to crashes.
+		MotionManager::MC_ID posturemc = addMotion(MotionPtr<PostureMC>());
+
+    $statemachine{
+  		startnode: ArmMover[setMC(posturemc)] =E(sensorEGID)=> startnode
+    }
+  }
+
+}
+
+REGISTER_BEHAVIOR_MENU(GripperTrackCamera,DEFAULT_TK_MENU"/Kinematics Demos");
+
+#endif

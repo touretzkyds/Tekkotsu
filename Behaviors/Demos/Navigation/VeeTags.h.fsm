@@ -1,0 +1,56 @@
+#include "Behaviors/Demos/Navigation/PilotDemo.h"
+
+// This file is #include'd by both VeeTags.cc and PathPlanVee.cc.fsm
+
+$nodeclass VeeTags : PilotDemo {
+
+  virtual void postStart() {
+    PilotDemo::postStart();
+    particleFilter->displayParticles(100);
+  }
+
+  virtual void buildMap() {
+    cout << "Building map..." << endl;
+    // vee-shaped wall
+    vector<Point> pts;
+    pts.push_back(Point(  0,  866, 0, allocentric));
+    pts.push_back(Point(500,    0, 0, allocentric));
+    pts.push_back(Point(  0, -866, 0, allocentric));
+    
+    float rot = atan2(500, 866);
+    NEW_SHAPE(wall, PolygonData, new PolygonData(worldShS, pts, false));
+
+    NEW_SHAPE(tag0, AprilTagData,
+	      new AprilTagData(worldShS, AprilTags::TagDetection(0), 
+                               Point(92,  704, 177.8), fmat::Quaternion::aboutZ(rot)));
+
+    NEW_SHAPE(tag1, AprilTagData,
+	      new AprilTagData(worldShS, AprilTags::TagDetection(1),
+			       Point(245,  440, 177.8), fmat::Quaternion::aboutZ(rot)));
+
+    NEW_SHAPE(tag2, AprilTagData,
+	      new AprilTagData(worldShS, AprilTags::TagDetection(2),
+			       Point(397,  176, 177.8), fmat::Quaternion::aboutZ(rot)));
+
+    NEW_SHAPE(tag3, AprilTagData,
+	      new AprilTagData(worldShS, AprilTags::TagDetection(3),
+                               Point(397, -176, 177.8), fmat::Quaternion::aboutZ(-rot)));
+
+    NEW_SHAPE(tag4, AprilTagData,
+	      new AprilTagData(worldShS, AprilTags::TagDetection(4),
+                               Point(245, -440, 177.8), fmat::Quaternion::aboutZ(-rot)));
+
+    NEW_SHAPE(tag5, AprilTagData,
+	      new AprilTagData(worldShS, AprilTags::TagDetection(5),
+                               Point( 92, -704, 177.8), fmat::Quaternion::aboutZ(-rot)));
+
+    // Turn off unnecessary obstacle attribute to speed up path planning.
+    tag0->setLandmark(); tag0->setObstacle(false);
+    tag1->setLandmark(); tag1->setObstacle(false);
+    tag2->setLandmark(); tag2->setObstacle(false);
+    tag3->setLandmark(); tag3->setObstacle(false);
+    tag4->setLandmark(); tag4->setObstacle(false);
+    tag5->setLandmark(); tag5->setObstacle(false);
+  }
+
+}

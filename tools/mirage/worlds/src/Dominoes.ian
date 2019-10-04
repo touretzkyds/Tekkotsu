@@ -1,0 +1,73 @@
+# Length, width, and height of a domino made from a FloraCraft Desert Foam brick.
+set length=200
+set width=89
+set height=67
+set ds=20  # domino dot size
+set dp=28  # domino dot spacing
+set linethickness=10
+set linemargin=15  # difference between brick width and line width
+
+# Generic domino template from which you can make any legal domino
+# by deleting the unwanted dots.
+#
+#       L3  L2  L1   ||   R1  R2  R3
+#           L7       ||       R7
+#       L6  L5  L4   ||   R4  R5  R6
+#
+define DominoTemplate cube scale=[length,width,height] material=Black mass=0.2
+define dominoLine cube scale=[linethickness,width-linemargin,1] material=Blue moffset=[0,0,height/2] attachto=DominoTemplate
+define dominoDotL1 sphere scale=[ds,ds,1] material=Pink moffset=[-length/8-0*dp, dp,height/2] attachto=DominoTemplate
+define dominoDotL2 sphere scale=[ds,ds,1] material=Pink moffset=[-length/8-1*dp, dp,height/2] attachto=DominoTemplate
+define dominoDotL3 sphere scale=[ds,ds,1] material=Pink moffset=[-length/8-2*dp, dp,height/2] attachto=DominoTemplate
+define dominoDotL4 sphere scale=[ds,ds,1] material=Pink moffset=[-length/8-0*dp,-dp,height/2] attachto=DominoTemplate
+define dominoDotL5 sphere scale=[ds,ds,1] material=Pink moffset=[-length/8-1*dp,-dp,height/2] attachto=DominoTemplate
+define dominoDotL6 sphere scale=[ds,ds,1] material=Pink moffset=[-length/8-2*dp,-dp,height/2] attachto=DominoTemplate
+define dominoDotL7 sphere scale=[ds,ds,1] material=Pink moffset=[-length/8-1*dp,  0,height/2] attachto=DominoTemplate
+define dominoDotR1 sphere scale=[ds,ds,1] material=Pink moffset=[ length/8+0*dp, dp,height/2] attachto=DominoTemplate
+define dominoDotR2 sphere scale=[ds,ds,1] material=Pink moffset=[ length/8+1*dp, dp,height/2] attachto=DominoTemplate
+define dominoDotR3 sphere scale=[ds,ds,1] material=Pink moffset=[ length/8+2*dp, dp,height/2] attachto=DominoTemplate
+define dominoDotR4 sphere scale=[ds,ds,1] material=Pink moffset=[ length/8+0*dp,-dp,height/2] attachto=DominoTemplate
+define dominoDotR5 sphere scale=[ds,ds,1] material=Pink moffset=[ length/8+1*dp,-dp,height/2] attachto=DominoTemplate
+define dominoDotR6 sphere scale=[ds,ds,1] material=Pink moffset=[ length/8+2*dp,-dp,height/2] attachto=DominoTemplate
+define dominoDotR7 sphere scale=[ds,ds,1] material=Pink moffset=[ length/8+1*dp,  0,height/2] attachto=DominoTemplate
+
+# Domino with 1 and 2 dots
+define Domino_1_2 cube scale=[length,width,height] material=Black mass=0.2
+define dominoLine cube scale=[linethickness,width-linemargin,1] material=Blue moffset=[0,0,height/2] attachto=Domino_1_2
+define dominoDotL7 sphere scale=[ds,ds,1] material=Pink moffset=[-length/8-1*dp,  0,height/2] attachto=Domino_1_2
+define dominoDotR1 sphere scale=[ds,ds,1] material=Pink moffset=[ length/8+0*dp, dp,height/2] attachto=Domino_1_2
+define dominoDotR6 sphere scale=[ds,ds,1] material=Pink moffset=[ length/8+2*dp,-dp,height/2] attachto=Domino_1_2
+
+# Domino with 3 and 4 dots
+define Domino_3_4 cube scale=[length,width,height] material=Black mass=0.2
+define dominoLine cube scale=[linethickness,width-linemargin,1] material=Blue moffset=[0,0,height/2] attachto=Domino_3_4
+define dominoDotL3 sphere scale=[ds,ds,1] material=Pink moffset=[-length/8-2*dp, dp,height/2] attachto=Domino_3_4
+define dominoDotL4 sphere scale=[ds,ds,1] material=Pink moffset=[-length/8-0*dp,-dp,height/2] attachto=Domino_3_4
+define dominoDotL7 sphere scale=[ds,ds,1] material=Pink moffset=[-length/8-1*dp,  0,height/2] attachto=Domino_3_4
+define dominoDotR1 sphere scale=[ds,ds,1] material=Pink moffset=[ length/8+0*dp, dp,height/2] attachto=Domino_3_4
+define dominoDotR3 sphere scale=[ds,ds,1] material=Pink moffset=[ length/8+2*dp, dp,height/2] attachto=Domino_3_4
+define dominoDotR4 sphere scale=[ds,ds,1] material=Pink moffset=[ length/8+0*dp,-dp,height/2] attachto=Domino_3_4
+define dominoDotR6 sphere scale=[ds,ds,1] material=Pink moffset=[ length/8+2*dp,-dp,height/2] attachto=Domino_3_4
+
+# Domino with 5 and 6 dots
+define Domino_5_6 cube scale=[length,width,height] material=Black mass=0.2
+define dominoLine cube scale=[linethickness,width-linemargin,1] material=Blue moffset=[0,0,height/2] attachto=Domino_5_6
+define dominoDotL1 sphere scale=[ds,ds,1] material=Pink moffset=[-length/8-0*dp, dp,height/2] attachto=Domino_5_6
+define dominoDotL3 sphere scale=[ds,ds,1] material=Pink moffset=[-length/8-2*dp, dp,height/2] attachto=Domino_5_6
+define dominoDotL4 sphere scale=[ds,ds,1] material=Pink moffset=[-length/8-0*dp,-dp,height/2] attachto=Domino_5_6
+define dominoDotL6 sphere scale=[ds,ds,1] material=Pink moffset=[-length/8-2*dp,-dp,height/2] attachto=Domino_5_6
+define dominoDotL7 sphere scale=[ds,ds,1] material=Pink moffset=[-length/8-1*dp,  0,height/2] attachto=Domino_5_6
+define dominoDotR1 sphere scale=[ds,ds,1] material=Pink moffset=[ length/8+0*dp, dp,height/2] attachto=Domino_5_6
+define dominoDotR2 sphere scale=[ds,ds,1] material=Pink moffset=[ length/8+1*dp, dp,height/2] attachto=Domino_5_6
+define dominoDotR3 sphere scale=[ds,ds,1] material=Pink moffset=[ length/8+2*dp, dp,height/2] attachto=Domino_5_6
+define dominoDotR4 sphere scale=[ds,ds,1] material=Pink moffset=[ length/8+0*dp,-dp,height/2] attachto=Domino_5_6
+define dominoDotR5 sphere scale=[ds,ds,1] material=Pink moffset=[ length/8+1*dp,-dp,height/2] attachto=Domino_5_6
+define dominoDotR6 sphere scale=[ds,ds,1] material=Pink moffset=[ length/8+2*dp,-dp,height/2] attachto=Domino_5_6
+
+# Make three dominoes in the world
+
+set angle_1 = deg2rad(315)
+
+Domino_1_2 location=[600,140,height/2]
+Domino_3_4 location=[600,0,height/2]
+Domino_5_6 location=[600,-210,height/2] orientation=rotz(angle_1)

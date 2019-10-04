@@ -1,0 +1,44 @@
+#!/bin/sh
+
+# Takes first argument as compilation status (0 means successful)
+
+if [ -z "${TMPDIR}" ] ; then
+	TMPDIR=/tmp;
+fi
+LOCKFILE=${TMPDIR}/TekkotsuBuildPagerLock-${USER}
+
+ARG="$1"
+if [ -z "$ARG" ] ; then
+	ARG="0"
+fi
+# if only warnings, just pass it through (no paging)
+if [ "$ARG" -eq 0 ] ; then
+	# we don't need to lock, but fall through to respect it if it's already there
+	if [ \! -f ${LOCKFILE} ] ; then
+		cat;
+		exit 0;
+	fi;
+fi
+
+# We have an error, page it so the first lines don't scroll off the top
+
+# The raison d'être, use a lock file to serialize access to the terminal
+# Parallel pagers screw up terminal settings requiring 'reset'
+
+# Mostly just to get the "--more--" prompt at the bottom
+export LESS_IS_MORE=1
+
+# 'lockfile' is not on Ubuntu by default, 'flock' is not on OS X by default...
+# Detect availability on the fly:
+if which flock > /dev/null 2>&1 ; then
+	# this leaves the lockfile behind, should not be deleted
+	flock ${LOCKFILE} -c 'less -fREX'
+elif which lockfile > /dev/null 2>&1 ; then
+	# remove the lock file automatically on exit regardless of cause
+	trap 'rm -f ${LOCKFILE}' 0
+	lockfile -1 ${LOCKFILE}
+	less -fREX
+else
+	echo "$0: Could not find 'lockfile' or 'flock' utilities, paging disabled"
+	cat;
+fi

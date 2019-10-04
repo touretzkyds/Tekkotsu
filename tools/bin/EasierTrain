@@ -1,0 +1,26 @@
+#!/bin/sh
+
+if [ -z "$1" ]; then
+ echo "Usage: `basename $0` image_directory"
+ exit 1;
+fi;
+
+dir="`dirname \"$0\"`"
+
+easiertrain_dir="`dirname \"$dir\"`/easiertrain"
+
+if [ ! -d "$easiertrain_dir" ]; then
+  echo "Can't find easiertrain directory: install it at $easiertrain_dir"
+  exit 1;
+fi;
+
+easiertrain="$easiertrain_dir/EasierTrain.py"
+
+if [ ! -r "$easiertrain" ]; then
+  echo "Missing EasierTrain code at $easiertrain"
+  exit 1;
+fi;
+
+echo Launching the EasierTrain tool from $easiertrain
+
+python $easiertrain $* &

@@ -1,0 +1,73 @@
+# Tekkotsu WorldBuilder
+# Vector parsing expression grammar
+#
+# Robert Lee (rslee / perihare)
+# 2-14-2011
+
+require "parsevector"
+
+require "expression_grammar"
+
+grammar VectorGrammar 
+    include ExpressionGrammar
+
+    rule vector
+    ( simple_vector / rotx / roty / rotz)
+    end
+
+    rule simple_vector
+    '[' space x:expression ',' space y:expression ',' space z:expression ']'
+    {
+        def eval(env={})
+            ParseVector.new(x.eval(env), y.eval(env), z.eval(env))
+        end
+    }
+    end
+
+# TODO: this is repetitive; modularize the three rotations
+    rule rotx
+    'rotx' angle:expression
+    {
+        def eval(env={})
+            # Evaluate the angle expression
+            theta = angle.eval(env)
+            if theta.abs <= Math::PI then
+                return ParseVector.new(Math.sin(theta/2), 0, 0)
+            else
+                return ParseVector.new(-Math.sin(theta/2), 0, 0)
+            end
+        end
+    }
+    end
+
+    rule roty
+    'roty' angle:expression
+    {
+        def eval(env={})
+            # Evaluate the angle expression
+            theta = angle.eval(env)
+            if theta.abs <= Math::PI then
+                return ParseVector.new(0, Math.sin(theta/2), 0)
+            else
+                return ParseVector.new(0, -Math.sin(theta/2), 0)
+            end
+        end
+    }
+    end
+
+    rule rotz
+    'rotz' angle:expression
+    {
+        def eval(env={})
+            # Evaluate the angle expression
+            theta = angle.eval(env)
+            if theta.abs <= Math::PI then
+                return ParseVector.new(0, 0, Math.sin(theta/2))
+            else
+                return ParseVector.new(0, 0, -Math.sin(theta/2))
+            end
+        end
+    }
+    end
+
+end

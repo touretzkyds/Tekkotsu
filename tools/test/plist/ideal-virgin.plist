@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<!--======== Mixed ========-->
+<!--A collection of mixed types of specified length-->
+<key>Mixed</key>    <array>
+	<integer>0</integer>
+	<integer>1</integer>
+	<integer>2</integer>
+	<string>This is item 1</string>
+	<string>item 2: arrays can contain mixed types</string>
+	<!--5: like this int-->
+	<real>123</real>
+	<!--6: or this bool-->
+	<true/>
+</array>
+
+<!--======== map ========-->
+<!--The squares, from 0 to 5, but with keys-->
+<key>map</key>      <dict>
+	<key>0^2</key>  <integer>0</integer>
+	<key>1^2</key>  <integer>1</integer>
+	<key>2^2</key>  <integer>4</integer>
+	<key>3^2</key>  <integer>9</integer>
+	<key>4^2</key>  <integer>16</integer>
+	<key>tada</key> <string>mixed types -- no surprise</string>
+</dict>
+
+<!--======== numeric ========-->
+<!--numeric contains some numeric values
+	One is a float
+	The other is an int
+	...and a char as text for good measure-->
+<key>numeric</key>  <dict>
+	<key>char-num</key>  <integer>97</integer>
+	<key>char-text</key> <string>a</string>
+	<key>fooF</key>      <real>3.14159</real>
+	
+	<!--fooI: This is an integer value, the other is a float-->
+	<key>fooI</key>      <integer>42</integer>
+</dict>
+
+<!--test str: Seen this one before?-->
+<key>test str</key> <string>Hello world!</string>
+
+<!--======== vector ========-->
+<!--The squares, from 0 to 5-->
+<key>vector</key>   <array>
+	<integer>0</integer>
+	<integer>1</integer>
+	<integer>4</integer>
+	<integer>9</integer>
+	<integer>16</integer>
+	<string>can also handle mixed</string>
+</array>
+</dict></plist>

@@ -1,0 +1,13 @@
+define shortHorizontalWall cube material=White scale=[1,770,1000]
+
+define blueMarkerHalf cube material=Blue scale=[2,101.6,50.8]
+define greenMarkerHalf cube material=Green scale=[2,101.6,50.8]
+
+light location=[5,1545,10000]
+
+shortHorizontalWall  location=[1000,0,0]
+
+greenMarkerHalf  location=[998,0,152.4]
+blueMarkerHalf  location=[998,0,203.2]
+
+

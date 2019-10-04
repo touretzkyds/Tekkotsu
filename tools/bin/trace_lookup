@@ -1,0 +1,30 @@
+#!/bin/sh
+
+if [ -z "$OPENRSDK_ROOT" ] ; then
+	OPENRSDK_ROOT=/usr/local/OPEN_R_SDK;
+fi;
+
+BUILD=build;
+
+obj=MMCombo.nosnap.elf;
+if [ $# -gt 0 ] ; then
+	obj=$1.nosnap.elf
+fi;
+
+objfile=$BUILD/PLATFORM_APERIOS/TGT_ERS7/aperios/$obj
+
+gp=0x`$OPENRSDK_ROOT/bin/mipsel-linux-readelf -s $objfile | grep ' _gp$' | sed 's/.*: \([0-9a-fA-F]*\).*/\1/'`
+
+echo "Parsing $objfile: gp is $gp"
+while read -a words ; do
+	i=0;
+	while [ $i -lt ${#words[*]} ] ; do
+		addr=`echo ${words[i]} | grep '^[0-9A-Fa-fx]*$'`
+		if [ -n "$addr" ] ; then
+			laddr=`printf "%#x" $((gp-addr))`
+			$OPENRSDK_ROOT/bin/mipsel-linux-addr2line -C -f -e $objfile $laddr | ( read fn; read fl; echo "$fn" "$fl"; )
+		fi;
+		i=$((i+1))
+	done
+done
+

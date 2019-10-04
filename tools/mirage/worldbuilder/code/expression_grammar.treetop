@@ -1,0 +1,63 @@
+# Tekkotsu WorldBuilder
+# Arithmetic parsing expression grammar
+#
+# Robert Lee (rslee / perihare)
+# 3-7-2011
+#
+# Initially based on the Treetop example code:
+# https://github.com/nathansobo/treetop
+# Implements Dijkstra's shunting yard algorithm
+# to convert infix expressions into RPN, based on:
+# http://austintaylor.org/blog/2010/07/25/treetop-operator-precedence/
+
+require "grammar_support"
+
+require "string_grammar"
+
+grammar ExpressionGrammar
+    include StringGrammar
+    
+    rule expression
+    (token:(number / variable / other_token) space)+
+    {
+        def eval(env={})
+            yard = []
+            elements.each do |e|
+                yard.push(e.token.eval(env))
+            end
+            return ExpressionGrammar.shunting_yard(yard)
+        end
+    }
+    end
+
+    rule number
+    [0-9] [0-9]* '.'? [0-9]*
+    {
+        def eval(env={})
+            return text_value.to_f
+        end
+    }
+    end
+
+    rule variable
+    name:string_noquote &{|s| $context.key? s[0].text_value}
+    {
+        def eval(env={})
+            return $context[name.eval(env)]
+        end
+    }
+    end
+    
+    rule other_token
+    ( '(' / ')' # parens
+     / '+' / '-' / '*' / '/' / '%' / '^' # binary operators
+     / 'sin' / 'cos' / 'tan' / 'sqrt' / 'abs' / 'deg2rad' # 'function' calls
+     / '==' / '<' / '>' ) # comparison operators
+    {
+        def eval(env={})
+            return text_value
+        end
+    }
+    end
+
+end

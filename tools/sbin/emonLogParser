@@ -1,0 +1,192 @@
+#!/usr/bin/perl -w
+######################################################################
+# emonLogParser: Shows information about the CPU exception.
+#
+#    Permission to use, copy, modify, and redistribute this software
+#    for non-commercial use is hereby granted.
+#
+#    This software is provided "as is" without warranty of any kind,
+#    either expressed or implied, including but not limited to the
+#    implied warranties of fitness for a particular purpose.
+#
+# Installation:
+#
+#    If your OPEN-R SDK installation is not /usr/local/OPEN_R_SDK,
+#    set the OPENRSDK_ROOT environment variable accordingly
+#
+# Usage:
+#
+#    emonLogParser EMON_LOG
+#
+#       Shows the name of the object that caused the CPU exception.
+#
+#         EMON_LOG: The path of the file named EMON.LOG created when
+#                   the CPU exception ocurred.
+#
+#    emonLogParser EMON_LOG NOSNAP_ELF
+#
+#       Shows the symbol corresponding to the value of epc.  If
+#       epc==badvaddr, the value of ra is used instead.
+#
+#         EMON_LOG: The path of the file named EMON.LOG created when
+#                   the CPU exception ocurred.
+#
+#         NOSNAP_ELF: The path of the file with the suffix
+#                     ".nosnap.elf" created when the object that
+#                     caused the CPU exception was built.
+#
+#    emonLogParser EMON_LOG NOSNAP_ELF ADDR
+#
+#       Shows the symbol corresponding to ADDR.
+#
+#         EMON_LOG: The path of the file named EMON.LOG created when
+#                   the CPU exception ocurred.
+#
+#         NOSNAP_ELF: The path of the file with the suffix
+#                     ".nosnap.elf" created when the object that
+#                     caused the CPU exception was built.
+#
+#         ADDR: The target address.  e.g. 0x1234ab00
+#
+
+use strict;
+
+######################################################################
+# forward decls
+#
+sub run($);
+sub readHex($$);
+sub usage();
+
+######################################################################
+# main
+#
+my $sHexRe = "([0-9a-zA-Z]+)";
+my $lHexRe = "0x$sHexRe";
+
+my $OPENRSDK_ROOT="/usr/local/OPEN_R_SDK";
+if($ENV{'OPENRSDK_ROOT'}) {
+	$OPENRSDK_ROOT=$ENV{'OPENRSDK_ROOT'};
+}
+
+if (@ARGV < 1 || @ARGV > 3) {
+    usage();
+    exit(1);
+}
+my ($emonLogFile, $nosnapFile, $target) = @ARGV;
+
+open(EMONLOG, $emonLogFile)
+    || die "ERROR: can't open $emonLogFile: $!\n";
+my $emonLog = join('', <EMONLOG>);
+close(EMONLOG);
+
+my $context = readHex($emonLog, "\n context: ");
+
+print "context:\t$context\n";
+
+if ($emonLog !~ /\n(\S+)\s*0x$context $lHexRe $lHexRe /) {
+    die "ERROR: can't find the context: $context\n";
+}
+my $objName = $1;
+print "object:\t\t$objName\n";
+
+if (!defined($nosnapFile)) {
+    exit(0);
+}
+
+my $badvaddr= readHex($emonLog, "badvaddr: \\\$8: ");
+print "badvaddr:\t$badvaddr\n";
+
+my $epc = readHex($emonLog, "epc:\\\$14: ");
+print "epc:\t\t$epc\n";
+
+my $ra= readHex($emonLog, "ra:r31: ");
+print "ra:\t\t$ra\n";
+
+if (defined($target)) {
+    $target =~ s/^0x//;
+    print "target address:\t$target (command line argument)\n";
+}
+elsif ($epc eq $badvaddr) {
+    $target = $ra;
+    print "target address:\t$target (ra)\n";
+}
+else {
+    $target = $epc;
+    print "target address:\t$target (epc)\n";
+}
+
+my $gpReg = readHex($emonLog, "gp:r28: ");
+print "gp:\t\t$gpReg\n";
+
+my $gpGrep = run("$OPENRSDK_ROOT/bin/mipsel-linux-readelf -s $nosnapFile | grep '_gp\$'");
+if ($gpGrep !~ /^\s*\S+:\s*$sHexRe\s+.*_gp/) {
+    die "INTERNAL ERROR: unexpected \$gpGrep: $gpGrep\n";
+}
+my $gpSym = $1;
+print "_gp:\t\t$1\n";
+
+my $staticAddr = hex($target) - hex($gpReg) + hex($gpSym);
+printf("static addr:\t%08x\n", $staticAddr);
+
+my $command = "$OPENRSDK_ROOT/bin/mipsel-linux-nm -C $nosnapFile | sort |";
+open(SYMS, $command)
+    || die "ERROR: can't open pipe: $command: $!\n";
+
+my $prev;
+while (<SYMS>) {
+    if (/^([0-9a-f]+)/) {
+        my $current = hex("0x$1");
+        if ($staticAddr < $current) {
+            print "symbol:\t\t$prev";
+            last;
+        }
+    }
+    $prev = $_;
+}
+#close(SYMS)
+#    || die "ERROR: can't close pipe: $command: $!\n";
+
+if($target eq $epc) {
+	my $staticAddr = hex($ra) - hex($gpReg) + hex($gpSym);
+	open(SYMS, $command)
+    || die "ERROR: can't open pipe: $command: $!\n";
+
+	while (<SYMS>) {
+    if (/^([0-9a-f]+)/) {
+			my $current = hex("0x$1");
+			if ($staticAddr < $current) {
+				print "ra symbol:\t$prev";
+				exit;
+			}
+    }
+    $prev = $_;
+	}
+	close(SYMS)
+    || die "ERROR: can't close pipe: $command: $!\n";
+}
+
+
+######################################################################
+# subs
+#
+sub usage() {
+    print STDERR "usage: $0 EMON_LOG [NOSNAP_ELF_FILE [ADDR]]\n";
+}
+
+sub readHex($$) {
+    my ($str, $re) = @_;
+    if ($emonLog !~ /$re$lHexRe/) {
+        die "INTERNAL ERROR: readHex failed: $re\n";
+    }
+    $1;
+}
+
+sub run($) {
+    my ($command) = @_;
+    my $ans = `$command`;
+    if ($?) {
+        die "ERROR: command failed: $command\n";
+    }
+    $ans;
+}

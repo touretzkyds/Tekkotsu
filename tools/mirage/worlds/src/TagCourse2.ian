@@ -1,0 +1,98 @@
+# TagCourse2 world: see wiki.Tekkotsu.org
+# Author: Anggie Ramirez, based on TagCourse.ian by David Touretzky
+
+# environment settings
+background material=CloudySky model=Dome
+light location=[1000,1000,2000] pointat=[1000,0,0]
+light location=[-1000,0,2000] pointat=[1000,0,0]
+
+# box parameters
+set boxWidth = 16 * 25.4
+set boxDepth = 4 * 25.4
+set boxHeight = 12 * 25.4
+define Box cube  scale=[boxWidth, boxDepth, boxHeight]
+define RedBox Box material=RustySteel
+define GreenBox Box material=TarnishedBronze
+
+# tag parameters
+set tagSize = 7 * 25.4            # tag width and height
+set tagSep = 10
+set leftTagN = tagSize/2 + tagSep
+set rightTagN = -tagSize/2 - tagSep
+set leftTagS = -tagSize/2 - tagSep
+set rightTagS = tagSize/2 + tagSep
+set leftTagE = tagSize/2 + tagSep
+set rightTagE = -tagSize/2 - tagSep
+set leftTagW = -tagSize/2 - tagSep
+set rightTagW = tagSize/2 + tagSep
+set tagZ = 7 * 25.4               # height above ground of tag center (millimeters)
+define Tag cube scale=[tagSize,1,tagSize]
+
+# robot parameters
+set robotRadius = 6 * 25.4            # the Create has a 12 inch diameter (so 6 inch radius)
+set robotBuffer = 4 * 25.4            # minimum allowable distance between edge of robot and a box
+set totalOffset = robotRadius + robotBuffer + boxDepth/2
+set tagOffset = robotRadius + robotBuffer - 5
+
+# Box 1
+set pointX = 1000
+set pointY = 0
+set angle = deg2rad(90)
+RedBox location=[pointX+totalOffset, pointY, boxHeight/2] orientation=rotz(angle)
+Tag location=[pointX+tagOffset,  pointY+leftTagN, tagZ] orientation=rotz(angle) material="AprilTag/tag16h5/05"
+Tag location=[pointX+tagOffset, pointY+rightTagN, tagZ] orientation=rotz(angle) material="AprilTag/tag16h5/02"
+
+# Box 2
+set pointX = -1000
+set pointY = 2500
+set angle = deg2rad(0)
+GreenBox location=[pointX, pointY+totalOffset, boxHeight/2] orientation=rotz(angle)
+Tag location=[pointX+leftTagW,  pointY+tagOffset, tagZ] orientation=rotz(angle) material="AprilTag/tag16h5/01"
+Tag location=[pointX+rightTagW, pointY+tagOffset, tagZ] orientation=rotz(angle) material="AprilTag/tag16h5/03"
+
+# Box 3
+set pointX = 200
+set pointY = 2000
+set angle = deg2rad(90)
+RedBox location=[pointX+totalOffset, pointY, boxHeight/2] orientation=rotz(angle)
+Tag location=[pointX+tagOffset,  pointY+leftTagN, tagZ] orientation=rotz(angle) material="AprilTag/tag16h5/00"
+Tag location=[pointX+tagOffset, pointY+rightTagN, tagZ] orientation=rotz(angle) material="AprilTag/tag16h5/03"
+
+# Box 4
+set pointX = 0
+set pointY = 1000
+set angle = deg2rad(0)
+GreenBox location=[pointX, pointY-totalOffset, boxHeight/2] orientation=rotz(angle)
+Tag location=[pointX+leftTagE,  pointY-tagOffset, tagZ] orientation=rotz(angle) material="AprilTag/tag16h5/03"
+Tag location=[pointX+rightTagE, pointY-tagOffset, tagZ] orientation=rotz(angle) material="AprilTag/tag16h5/01"
+
+# Box 5
+set pointX = -2500
+set pointY = 2000
+set angle = deg2rad(90)
+RedBox location=[pointX-totalOffset, pointY, boxHeight/2] orientation=rotz(angle)
+Tag location=[pointX-tagOffset,  pointY-leftTagS, tagZ] orientation=rotz(angle) material="AprilTag/tag16h5/04"
+Tag location=[pointX-tagOffset, pointY-rightTagS, tagZ] orientation=rotz(angle) material="AprilTag/tag16h5/02"
+
+# Start marker
+sphere location=[0,0,0] scale=[100, 100, 0.2] material=Green collision=false
+
+# End marker
+sphere location=[-2000,2000,0] scale=[100, 100, 0.2] material=Red collision=false
+
+# Poster and Walls
+set wallThickness = 100
+set wallHeight = 200
+
+set posterY = 1000-totalOffset
+cube material=Black scale=[1000,wallThickness,720] location=[1000,posterY,360]
+cube scale=[707,1,535] location=[1000,posterY-wallThickness/2-1,707/2] orientation=roty(deg2rad(90)) material=WallE
+cube scale=[707,1,535] location=[1000,posterY+wallThickness/2+1,707/2] orientation=roty(deg2rad(90)) material=WallE
+
+cube material=Blue scale=[wallThickness,1200,wallHeight] location=[1500,50,wallHeight/2]
+cube material=Blue scale=[5000,wallThickness,wallHeight] location=[-1000,-500,wallHeight/2]
+cube material=Blue scale=[wallThickness,4500,wallHeight] location=[-3500,1750,wallHeight/2]
+cube material=Blue scale=[4500,wallThickness,wallHeight] location=[-1250,4000,wallHeight/2]
+cube material=Blue scale=[wallThickness,3300,wallHeight] location=[1000,2400,wallHeight/2]
+
+# End of TagCourse world

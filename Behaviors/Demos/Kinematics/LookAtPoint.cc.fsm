@@ -1,0 +1,57 @@
+#include "Shared/RobotInfo.h"
+#ifdef TGT_HAS_HEAD
+
+#include "Behaviors/StateMachine.h"
+#include "DualCoding/Point.h"
+#include "Events/TextMsgEvent.h"
+#include "Behaviors/Transitions/CompletionTrans.h"
+
+
+using namespace std;
+using namespace DualCoding;
+
+//! Moves the head to look at a user-specified gaze point 
+$nodeclass LookAtPoint : VisualRoutinesStateNode {
+  $provide Point target;
+	
+  $nodeclass Look() : HeadPointerNode : doStart{
+    $reference LookAtPoint::target;
+    getMC()->lookAtPoint(target.coordX(), target.coordY(), target.coordZ());
+  }
+	
+  $nodeclass ParseString : StateNode : doStart {
+    $reference LookAtPoint::target;
+    const TextMsgEvent* ev = dynamic_cast<const TextMsgEvent*>(event);
+    if ( ev != NULL ) {
+      string str = ev->getText();
+      float x, y, z;
+      z = 0;
+      int numread=sscanf(str.c_str(),"LookAtPoint %f %f %f",&x,&y,&z);
+      if ( numread < 2 ) {  // x and y are required; z coordinate is optional
+	postStateFailure();
+	return;
+      } 
+      target = Point(x,y,z,egocentric);
+      cout << "Point To look at: " << target << endl; 
+      postStateCompletion();
+    }
+  }
+			
+  $nodeclass Instructions : StateNode : doStart {
+    std::cout << "Usage:   !msg LookAtPoint x y z" << std::endl;
+  }
+		
+  $setupmachine{
+    startnode: Instructions =N=> wait
+
+    wait: StateNode =TM=> parse
+
+    parse: ParseString 
+    parse =C=> Look =C=> SpeechNode("Please input another point to look at.") =C=> wait
+    parse =F=> SpeechNode("Incorrect input format.") =N=> startnode
+  }
+
+}
+REGISTER_BEHAVIOR_MENU(LookAtPoint,DEFAULT_TK_MENU"/Kinematics Demos");
+
+#endif // check for TGT_HAS_HEAD

@@ -1,0 +1,43 @@
+#include "Behaviors/StateMachine.h"
+
+$nodeclass AprilTest : VisualRoutinesStateNode {
+
+  $nodeclass Look : MapBuilderNode(MapBuilderRequest::worldMap) : constructor {
+    cout << "Point the camera at an April Tag before running this demo." << endl;
+    cout << "Type \"msg <Enter>\" to take another image and run again." << endl;
+    cout << "Assumed marker height is " << MapBuilderRequest::defaultMarkerHeight
+	 << " mm " << endl;
+    mapreq.setAprilTagFamily();  // Use the default tag family
+  }
+
+  $nodeclass Report : SpeechNode : doStart {
+    NEW_SHAPEVEC(localTags, AprilTagData, select_type<AprilTagData>(localShS));
+    // Put "good" before "April" to prevent MARY from speaking "1" as "first"
+    textstream << "I saw " << localTags.size() << " good april tag"
+	       << ( localTags.size() == 1 ? "" : "s") << ".";
+    SHAPEVEC_ITERATE(localTags, AprilTagData, t) {
+      textstream << "\nTag " << t->getTagID()
+		 << " distance " << int(t->getCentroid().xyNorm()) << " millimeters.";
+    } END_ITERATE;
+
+    NEW_SHAPEVEC(cameraTags, AprilTagData, select_type<AprilTagData>(camShS));
+    if ( cameraTags.size() > localTags.size() ) {
+      textstream << "\nI saw " << cameraTags.size() << " good tag"
+		 << ( cameraTags.size() == 1 ? "" : "s") << " in camera space.";	
+      SHAPEVEC_ITERATE(cameraTags, AprilTagData, t) {
+	textstream << "\nTag " << t->getTagID();
+	if ( t->getCentroid().coordZ() < 10000 )
+	  textstream << " is projectable.";
+	else
+	  textstream << " is above the horizon.";
+      } END_ITERATE;
+    }
+  }
+
+  $setupmachine{
+    look: Look =MAP=> Report =TM=> look
+  }
+
+}
+
+REGISTER_BEHAVIOR_MENU(AprilTest,DEFAULT_TK_MENU"/Vision Demos");

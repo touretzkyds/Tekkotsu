@@ -1,0 +1,21 @@
+EasyTrain -- color image segmentation training program for CMVision.
+
+To compile EasyTrain, do:
+  make
+or:
+  javac *.java
+
+
+To try out EasyTrain after compilation, do:
+
+  java EasyTrain -isYUV *.png
+
+Some test images are provided along with the source.
+
+========================================================
+
+Credits: EasyTrain was created by Ethan Tira-Thompson and Eric
+Durback, base on earlier work by Matt Carson and Alok Ladsariya, with
+guidance from David Touretzky, all at Carnegie Mellon, and using
+design ideas from yet another program (TileTrain) by Rob Salkin and
+Shawn Turner at SUNY Albany.

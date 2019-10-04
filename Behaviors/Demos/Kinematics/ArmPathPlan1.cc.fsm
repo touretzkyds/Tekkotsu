@@ -1,0 +1,160 @@
+#include "Shared/RobotInfo.h"
+#if defined(TGT_HAS_ARMS) && defined(TGT_HAS_HEAD)
+
+#include "Behaviors/StateMachine.h"
+#include "DualCoding/DualCoding.h"
+#include "Planners/Manipulation/ShapeSpacePlanner2DR.h"
+#include "Sound/SoundManager.h"
+#include "local/DeviceDrivers/MirageComm.h"
+
+using namespace std;
+using namespace DualCoding;
+
+class ArmPathPlan1 : public VisualRoutinesStateNode {
+public:
+	
+	class LookDown : public HeadPointerNode {
+	public:
+		LookDown(const std::string& nodename) : HeadPointerNode(nodename) {}
+		
+		virtual void doStart() {
+			getMC()->setJoints(0, -0.167f, -1.2f);
+		}
+	};
+	
+	class FindObstacles : public MapBuilderNode {
+	public:
+		FindObstacles(const std::string& nodename) : MapBuilderNode(nodename,MapBuilderRequest::localMap) {}
+		
+		virtual void doStart() {
+			mapreq.addObjectColor(ellipseDataType, "pink");
+			mapreq.addObjectColor(ellipseDataType, "blue");
+			mapreq.addObjectColor(ellipseDataType, "green");
+		}
+	};
+	
+	class Simulate : public StateNode {
+		ionetstream net;
+	public:
+		Simulate(const std::string& nodename) : StateNode(nodename), net() {}
+		
+		virtual void doStart() {
+			// create some obstacles at known locations for accurate testing
+			localShS.clear();
+			float radius = 50;
+			NEW_SHAPE(ob1, EllipseData, new EllipseData(localShS,DualCoding::Point(300,100),radius,radius));
+			//NEW_SHAPE(ob2, EllipseData, new EllipseData(localShS,DualCoding::Point(225,-200),radius,radius));
+			
+			// display these in mirage...
+			MirageComm comm(net);
+			std::vector<DualCoding::Shape<EllipseData> > obs = select_type<EllipseData>(localShS);
+			for(size_t i=0; i<obs.size(); ++i) {
+				float x = obs[i]->getCentroid().coordX(), y = obs[i]->getCentroid().coordY();
+				float r = obs[i]->getSemimajor();
+				
+				std::stringstream ss;
+				ss << "ArmPathPlanObstacles" << i;
+				comm.setName(ss.str());
+				KinematicJoint * kj = new KinematicJoint;
+				comm.setKinematics(kj);
+				kj->mass=1;
+				kj->collisionModel = "Cylinder";
+				kj->collisionModelScale[0] = kj->collisionModelScale[1] = kj->collisionModelScale[2] = r*2;
+				comm.setPosition(x,y,r);
+			}
+		}
+	};
+	
+	class ExecutePath : public DynamicMotionSequenceNode {
+	public:
+		ExecutePath(const std::string& nodename) : DynamicMotionSequenceNode(nodename) {}
+		
+		virtual void doStart() {
+			vector<PlannerObstacle2D*> obstacles;
+			NEW_SHAPEVEC(ellipses, EllipseData, select_type<EllipseData>(localShS))
+			SHAPEVEC_ITERATE(ellipses, EllipseData, e)
+			EllipticalObstacle * ob = new EllipticalObstacle();
+			ob->center = fmat::pack(e->getCentroid().coordX(), e->getCentroid().coordY());
+			ob->semimajor = e->getSemimajor() * 1.1f; // add 10% margin around obstacles
+			ob->semiminor = e->getSemiminor() * 1.1f; // add 10% margin around obstacles
+			obstacles.push_back(ob);
+			END_ITERATE;
+			
+			GET_SHAPE(worldBounds, PolygonData, VRmixin::worldShS);
+			ShapeSpacePlanner2DR<NumArmJoints> planner(VRmixin::worldShS, worldBounds, 10, GripperFrameOffset, NULL);
+			
+			ShapeSpacePlanner2DR<NumArmJoints>::NodeValue_t startSt, endSt;
+			for (unsigned int i = 0; i < NumArmJoints; i++)
+				startSt[i] = state->outputs[ArmOffset + i];
+			
+			endSt[0] = startSt[0] > 0 ? -1.2f : 1.4f;
+			for (unsigned int i = 1; i < NumArmJoints; i++)
+				endSt[i] = 0;
+			
+			const KinematicJoint* gripper = kine->getKinematicJoint(GripperFrameOffset);
+			fmat::Column<3> where = gripper->getWorldPosition();
+			NEW_SHAPE(tgt, PointData, new PointData(localShS, DualCoding::Point(where[0], where[1], where[2])));
+			
+			std::vector<ShapeSpacePlanner2DR<NumArmJoints>::NodeValue_t> pathResult;
+			ShapeSpacePlanner2DR<NumArmJoints>::NodeValue_t value;
+			fmat::Transform t;
+			DualCoding::Point c = VRmixin::theAgent->getCentroid();
+			t.translation()[0] = c.coordX();
+			t.translation()[1] = c.coordY();
+			t.rotation() = fmat::Matrix<3,3>(fmat::rotation2D(VRmixin::theAgent->getOrientation()));
+			if ( planner.planPath(startSt, endSt, value, t, 40000, &pathResult, NULL, NULL).code != GenericRRTBase::SUCCESS) {
+				postStateSignal<bool>(0);
+				return;
+			}
+			
+			getMC()->clear();
+			generatePostures(pathResult);
+			getMC()->play();
+		}
+		
+		void generatePostures(const std::vector<ShapeSpacePlanner2DR<NumArmJoints>::NodeValue_t>& pathResult) {
+			cout << "Making postures..." << endl;
+			getMC()->setTime(1000);
+			for(unsigned int i = 0; i < pathResult.size(); i++) {
+				cout << "Step " << i << "   ";
+				for(unsigned int j = 0; j < NumArmJoints; j++) {
+					cout << "  " << j << ": " << pathResult[i][j];
+					getMC()->setOutputCmd(ArmOffset+j, (float)pathResult[i][j]);
+				}
+				cout << endl;
+				getMC()->advanceTime(200);
+			}
+		}
+	};
+	
+	
+	ArmPathPlan1() : VisualRoutinesStateNode("ArmPathPlan1") {}
+	
+	virtual void doStart() {
+		std::cout << "Place an obstacle in front of the arm and press the green button or send a 'go' text message to tell it to move." << std::endl;
+	}
+	
+	virtual void setup() {
+#statemachine
+	startnode: LookDown() =C=>
+	loop: SpeechNode("ready") =TM("go")=>
+	obs: FindObstacles() =MAP=>
+	exec: ExecutePath() =C=> loop
+		
+		loop =TM("sim")=> Simulate() =N=> exec
+		
+		exec =S<bool>=> SpeechNode("No path found.") =T(2500)=> loop
+#endstatemachine
+		
+#ifdef TGT_HAS_BUTTONS
+		// because stateparser can't handle ifdef's within statemachine...
+		// manual expansion of loop =B(GreenButOffset)=> obs
+		loop->addTransition(new EventTrans(obs,EventBase::buttonEGID,RobotInfo::GreenButOffset,EventBase::activateETID));
+#endif
+	}
+	
+};
+
+REGISTER_BEHAVIOR_MENU(ArmPathPlan1,DEFAULT_TK_MENU"/Kinematics Demos");
+
+#endif

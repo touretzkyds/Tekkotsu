@@ -1,0 +1,212 @@
+\documentclass[10pt]{article}
+\usepackage{amssymb}
+\usepackage{ifthen}
+\usepackage{multicol}
+\usepackage{url}
+\ifx\pdfoutput\undefined
+\usepackage[hypertex]{hyperref}
+%\usepackage[ps2pdf,bookmarks=true]{hyperref}
+\else
+\usepackage[pdftex,hypertexnames=false]{hyperref}
+\fi
+\ifx\pdfoutput\undefined
+\usepackage{graphicx}
+\else
+\usepackage[pdftex]{graphicx}
+\fi
+
+\usepackage{pslatex}
+
+\hypersetup{
+  pdfauthor   = {Ethan Tira-Thompson},
+  pdftitle    = {Tekkotsu Quick Reference}
+}
+%  pdfkeywords = {},
+%  pdfsubject  = {Seminar Title, SS/WS 20xx RWTH Aachen University},
+%  pdfcreator  = {LaTeX with hyperref package},
+%  pdfproducer = {dvips + ps2pdf}
+
+\topmargin -.5in
+\oddsidemargin -.25in
+\evensidemargin -.25in
+\textwidth 7in
+\textheight 10in
+\headsep 0pt
+\headheight 0pt
+\topskip 0pt
+\footskip .25in
+
+\pagestyle{empty}
+\parskip 7.2pt
+%\renewcommand{\baselinestretch}{1.5}
+\parindent 0pt
+\setlength{\fboxsep}{8pt}
+\setlength{\columnsep}{.25in}
+
+%\setlength{\floatsep}{0in}
+%\setlength{\textfloatsep}{0in}
+%\setlength{\intextsep}{0in}
+%\setlength{\dbltextfloatsep}{0in}
+%\setlength{\dblfloatsep}{0in}
+%\setlength{\abovedisplayskip}{0in}
+%\setlength{\topsep}{0in}
+\setlength{\partopsep}{-.2in}
+%\setlength{\parskip}{0in}
+
+%\renewcommand{\ttdefault}{cmtt}
+
+\input{ModelSpecific}
+
+\renewcommand{\labelitemi}{{\tiny $\blacklozenge$}}
+\newlength{\QRsubindent}
+
+\newenvironment{keylist}
+	{\begin{list}{}{
+		\flushleft
+		\providecommand{\keyliststyle}{\tt}
+		\renewcommand{\makelabel}[1]{\labelitemi\ {\keyliststyle ##1} - }
+		\setlength{\QRsubindent}{6pt}
+		\setlength{\itemsep}{2pt}
+		\setlength{\parsep}{0pt}
+		\setlength{\labelsep}{0pt}
+		\setlength{\leftmargin}{12pt}
+		\setlength{\labelwidth}{9pt}
+		\setlength{\parindent}{0pt}
+		\setlength{\listparindent}{0pt}}}
+	{\end{list}}
+
+\newenvironment{keyenum}
+	{\begin{list}{}{
+		\flushleft
+		\providecommand{\keyliststyle}{\tt}
+		\renewcommand{\makelabel}[1]{\labelitemi\ {\keyliststyle ##1} - }
+		\setlength{\QRsubindent}{6pt}
+		\setlength{\itemsep}{2pt}
+		\setlength{\parsep}{0pt}
+		\setlength{\labelsep}{0pt}
+		\setlength{\leftmargin}{12pt}
+		\setlength{\labelwidth}{9pt}
+		\setlength{\parindent}{0pt}
+		\setlength{\listparindent}{0pt}}}
+	{\end{list}}
+
+\newenvironment{QRitemize}
+	{\begin{list}{}{
+		\flushleft
+		\providecommand{\itemstyle}{\tt}
+		\renewcommand{\makelabel}[1]{\labelitemi\ {\itemstyle ##1}}
+		\setlength{\QRsubindent}{6pt}
+		\setlength{\itemsep}{2pt}
+		\setlength{\parsep}{0pt}
+		\setlength{\labelsep}{0pt}
+		\setlength{\leftmargin}{12pt}
+		\setlength{\labelwidth}{9pt}
+		\setlength{\parindent}{0pt}
+		\setlength{\listparindent}{0pt}}}
+	{\end{list}}
+
+\makeatletter
+\renewcommand{\section}[1]{\@startsection%
+	{section}{1}{-10pt}{6pt}{0pt}{\Large\bf\hspace{6pt}\rule[.2\lineheight]{24pt}{2pt}\hspace{-30pt}}%
+	{\hspace{28pt}#1}%
+}
+\renewcommand{\subsection}[1]{\@startsection{subsection}{2}{0pt}{3pt}{0.01pt}{\large\bf}{#1}}
+\renewcommand{\subsubsection}[1]{\@startsection{subsubsection}{3}{0pt}{0pt}{0.01pt}{\bf}{#1}}
+\makeatother
+
+\newenvironment{QRsection}[1]
+	{\section{#1}\hspace{6pt}\rule[.2\lineheight]{72pt}{2pt}}
+	{}
+
+\newenvironment{QRsubsection}[1]
+	{\subsection{#1}}
+	{}
+
+\title{Tekkotsu Quick Reference}
+\date{\model, Tekkotsu \release}
+\author{Ethan Tira-Thompson}
+
+\renewcommand{\maketitle}{\begin{center}%
+\large{\huge Tekkotsu Quick Reference} \vspace{6pt} \\%
+\model, Tekkotsu \release \vspace{6pt} \\%
+Ethan Tira-Thompson \vspace{12pt}%
+\end{center}
+}
+
+\begin{document}         
+% Start your text
+
+
+\raggedcolumns
+\begin{multicols}{2}[\maketitle]
+\raggedcolumns
+
+
+\begin{QRsection}{Vision Pipeline}
+
+The vision system is organized into pipeline stages.  Each stage uses the event system to notify following stages when new results are available.  This provides behaviors access to all intermediary results and allows branches in the pipeline to avoid recomputation.  Also, results are lazily evaluated, so only minimal computations are performed.
+
+Each stage provides the current image at a number of resolution {\em layers}, and most stages provide several different {\em channels} of related information.  (e.g. the raw camera generator has several color channels, and the segmented color generator can apply a different threshold settings per channel.)
+
+\begin{QRsubsection}{Included Stages}
+\begin{center}
+\includegraphics*[width=3in]{vision}
+\end{center}
+
+Generator IDs:
+\begin{keyenum}\small
+\item[visRawCamera\{EGID,SID\}] original camera frame
+\item[visInterleave\{EGID,SID\}] reorders memory layout to interleave by pixel
+\item[visJPEGEGID] two different sources:
+\begin{keylist}
+\item[visGrayscaleJPEGSID] color channels individually compressed
+\item[visColorJPEGSID] combines color channels into a single compressed channel 
+\end{keylist}
+\item[visSegment\{EGID,SID\}] produces color segmented images
+\item[visRLE\{EGID,SID\}] Run-Length encoded images
+\item[visRegion\{EGID,SID\}] Gathers region statistics
+\item[BallDetectionGenerator] A very general detector, finds largest blob which meets simple size and density criteria.
+\end{keyenum}
+\end{QRsubsection}
+
+\begin{QRsubsection}{Image Channels}
+The `raw' stages provide 6 channels for each image, defined in {\tt RawCameraGenerator}:
+\begin{keylist}\small
+\item[CHAN\_Y] Y (intensity) channel
+\item[CHAN\_U] Cr (approx. pink-red-yellow) channel
+\item[CHAN\_V] Cb (approx. blue-green-yellow) channel
+\item[CHAN\_Y\_DY] vertical derivative of Y channel (aka `LH')
+\item[CHAN\_Y\_DX] horizontal derivative of Y channel (aka `HL')
+\item[CHAN\_Y\_DXDY] vert. and horiz. derivatives of Y channel (aka `HH')
+\end{keylist}
+
+The Color JPEG stage provides a single channel, containing a color JPEG image.
+
+The `segmented' stages provide a separate channel for each of the threshold files specified in {\tt tekkotsu.cfg}.
+\end{QRsubsection}
+
+\begin{QRsubsection}{Resolution Layers}
+\begin{keylist}\small
+\item[doubleLayer]    416 x 320 (involves computation recombining the Y derivatives -- but only simple upsampling for the color channels)
+\item[fullLayer]     208 x 160 (*)
+\item[halfLayer]     104 x 80 (*)
+\item[quarterLayer]  52 x 40 (*)
+\item[eighthLayer]    26 x 20
+\item[sixteenthLayer] 13 x 10
+\end{keylist}
+* these layers are directly provided by the hardware.  Smaller layers are provided by adjusting the increment parameter.
+\end{QRsubsection}
+
+\begin{QRsubsection}{Extending the Pipeline}
+{\tt Shared/ProjectInterface.h} specifies constants for global access to each of the pipeline stages.  Your project's {\tt StartupBehavior\_SetupVision.cc} defines the values used for each of the stages, allowing you to add new stages or replace those provided by the framework.
+\end{QRsubsection}
+
+\begin{QRsubsection}{Image Access}
+Each stage sends {\tt FilterBankEvent}s when new results are available.  From this event, or directly on a pipeline stage, {\tt getImage(}{\em layer}{\tt ,}{\em channel}{\tt )} returns a pointer to the base of the image.  {\tt getWidth(}{\em layer}{\tt )}, {\tt getHeight(}{\em layer}{\tt )} return the layer's dimensions.  {\tt getStride(}{\em layer}{\tt )} will return the vertical increment, {\tt getIncrement(}{\em layer}{\tt )} returns the horizontal increment.  (Different stages may store pixels in different types of interleaving)
+\end{QRsubsection}
+\end{QRsection}
+
+\end{multicols}
+
+% Stop your text
+\end{document}

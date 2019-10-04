@@ -1,0 +1,232 @@
+#!/usr/bin/ruby
+
+# Tekkotsu WorldBuilder
+# Main driver script
+#
+# Robert Lee (rslee / perihare)
+# 2-14-2011
+
+# greasy hack for 1.8 vs. 1.9 compatibility to avoid require_relative
+$:.push('.')
+
+# Project dependencies
+require 'rubygems'
+require 'plist'
+require 'polyglot'
+require 'treetop'
+
+# Logo support
+require 'logo'
+
+# Globals
+require 'global'
+
+# Class definitions
+require 'shape'
+require 'light'
+require 'parsevector'
+require 'background'
+require 'shadows'
+require 'physics'
+
+# Expression grammars
+require 'world_grammar'
+
+def main
+    if ARGV[0].nil?
+        puts "Syntax: ./worldbuilder <infile> [<outfile>]"
+        exit
+    end
+
+    # If we're copying the input filename for the output filename,
+    # remove its old file extension if one exists.
+    if ARGV[1].nil?
+        infile_index = ARGV[0].rindex('.')
+        if infile_index.nil?
+            outfile = "#{ARGV[0]}.mirage"
+        else
+            outfile = "#{ARGV[0][0..infile_index-1]}.mirage"
+        end
+    else
+        outfile = ARGV[1]
+    end
+   
+    if not File.exist? ARGV[0]
+        abort("File " + ARGV[0] + " not found")
+    end
+
+    fp = File.new(ARGV[0], "r")
+    lines = fp.readlines
+    fp.close
+
+    parselines lines
+    createMap
+    puts "WorldBuilder parsed #{$linecount} lines."
+
+    File.open(outfile, 'w') {|f| f.write(Plist::Emit.dump($map)) }
+    puts "Wrote Mirage world to #{outfile}"
+end
+
+def parselines lines
+    parser = WorldGrammarParser.new
+    # XXX: Implementing if..then and goto(line) would be really cool...
+    lines.each do |line|
+        # Keep track of line count
+        $linecount = $linecount + 1
+        # Truncate comments (anything after a #)
+        line.chomp!
+        unless line.index('#').nil? then
+            line = line.slice(0, line.index('#') - 1)
+        end
+        # Skip blank lines, or lines that are blank after comment is made
+        line.chop! while !line.nil? && ( line[-1,1] == ' ' || line[-1] == 9 )
+        next if line.nil? || line.length==0
+        # XXX: Currently, all keywords in the language must be lowercase,
+        #      because we need to preserve case in shape parameters like
+        #      Material (e.g. "blue" != "Blue") but Treetop doesn't support
+        #      case insensitive matching.
+
+        result = parser.parse(line.chomp)
+        if result.nil? then
+            puts "Parse failure on line #{$linecount}: #{line}\n"
+            puts parser.failure_reason
+            abort("Parse failure, exiting.")
+        else
+            result = result.eval($context)
+            command = result[0]
+            value = result[1]
+            case command
+            # Lights
+            when 'light' then
+                $lights.push value
+            # Environment variables
+            when 'background' then
+                $background = Background.new if $background.nil?
+                value.each { |k, v| $background.set_attr(k, v) }
+            when 'shadows' then
+                $shadows = Shadows.new if $shadows.nil?
+                value.each { |k, v| $shadows.set_attr(k, v) }
+            when 'physics' then
+                $physics = Physics.new if $physics.nil?
+                value.each { |k, v| $physics.set_attr(k, v) }
+            when 'observer' then
+                $observer = Hash.new if $observer.nil?
+                value.each { |k, v| 
+                    k = k.capitalize;
+                    k = "PointAt" if k == "Pointat";
+                    $observer[k] = v.to_array
+                }
+            when 'ambient' then
+                $map['AmbientLight'] = value.to_s
+            when 'inertia' then
+                $map['InertiaDisplayScale'] = value
+            when 'mass' then
+                $map['MassDisplayScale'] = value
+            when 'render' then
+                $map['RenderFPS'] = value
+            when 'timescale' then
+                $map['TimeScale'] = value
+            # Logo scripting support
+            when 'logo' then
+                parse_logo value
+            # Binding numbers to names
+            when 'set' then
+                value.each { |e| $context = $context.merge e.eval($context) }
+            # Binding shapes to names
+            when 'define1' then    # define foo cube ...
+                name = value['name']
+                new_shape = value['shape']
+                new_shape.name = name
+                #puts "Define1 name=" + name + " attachto=" + (new_shape.attachto||'')
+                $defines[name] = new_shape
+                $definedNames.push(name)
+                new_shape.doattach
+            when 'define2' then    # define bar foo ...
+                old_shape = $defines[value['old_shape']]
+                if old_shape.nil?
+                    puts "Error in define " + value['name'] + ": no shape named '" + value['old_shape'] +"'"
+                else
+		    new_shape = old_shape.clone
+		    new_shape.name = value['name']
+                    new_shape.parent = value['old_shape']
+		    value['parameters'].each { |h| h.each { |k, v| new_shape.set_attr( k, v )} }
+		    # puts "Define2 name=" + new_shape.name + " parent=" + new_shape.parent + " attachto=" + (new_shape.attachto||'')
+		    $defines[new_shape.name] = new_shape
+                    $definedNames.push new_shape.name
+		    new_shape.doattach
+                end
+            when 'defined' then  # Instantiating a defined shape, e.g., foo location=[...]
+                old_shape = $defines[value['old_shape']]
+                new_shape = old_shape.clone
+                new_shape.parent = old_shape.name
+                value['parameters'].each { |h| h.each { |k, v| new_shape.set_attr( k, v )} }
+                if ! new_shape.attachto.nil?
+                    puts "Can't instantiate %s on line %s because it's attached to %s." %
+                        [new_shape.name, new_shape.lineno, new_shape.attachto]
+                    raise "Can't generate shape."
+                end
+                puts "Instance of %s at line %d has no location specified." % [old_shape.name, new_shape.lineno] if new_shape.location.nil?
+                new_shape.genname
+                $defines[new_shape.name] = new_shape
+                $definedNames.push new_shape.name
+                $shapes.push new_shape
+            # Primitive shapes, e.g, cube
+            when 'shape' then
+                value.genname
+                if ! value.attachto.nil?
+                    puts "Error in %s on line %s: can't use attachto with instances.  Use define instead." % [value.name, value.lineno]
+                    raise "Can't generate shape."
+                end
+                $shapes.push value
+            # Copying preexisting shapes
+            when 'copy' then
+                group = value['group']
+                offset = value['offset']
+                flags = value['flags']
+                flipx = flags.include? "flipx"
+                flipy = flags.include? "flipy"
+                keepgroup = flags.include? "keepgroup"
+
+                # Collect all the shapes which are in our group
+                group_shapes = []
+                $shapes.each {|shape| group_shapes.push(shape) if shape.group.include? group }
+                if group_shapes.empty?
+                    puts "Error in copy command: there are no shapes in group '" + group + "'"
+                end
+                # Map the operations we wanted over the grouped shapes
+                group_shapes.each do |shape|
+                    clone = shape.clone
+                    clone.flipx if flipx
+                    clone.flipy if flipy
+                    clone.location.offset offset
+                    unless keepgroup
+                        clone.group.delete_if {|x| x == group}
+                    end
+                    $shapes.push clone
+                end
+            when "print" then
+                puts value
+            else
+                puts "Implementation error:"
+                puts "The file parsed correctly, but the keyword wasn't recognized."
+            end
+        end
+    end
+end
+
+def createMap
+    $map["Observer"] = $observer unless $observer.nil?
+    $map["Background"] = $background.to_map unless $background.nil?
+    $map["Shadows"] = $shadows.to_map unless $shadows.nil?
+    $map["Physics"] = $physics.to_map unless $physics.nil?
+
+    $map["Objects"] = Hash.new unless $shapes.empty?
+    $shapes.each {|shape|
+        $map["Objects"][shape.name] = shape.to_map
+    }
+
+    $map["Lights"] = Hash.new unless $lights.empty?
+    $lights.each {|light| $map["Lights"][light.name] = light.to_map }
+end
+
+main

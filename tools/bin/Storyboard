@@ -1,0 +1,30 @@
+#!/bin/bash
+
+if [ -z "$DISPLAY" ]; then
+    echo "Storyboard: No \$DISPLAY set, so cannot create any windows."
+    echo "If this is a remote connection, use ssh -X to forward display information."
+    exit 1
+fi;
+
+
+dir="`dirname \"$0\"`"
+cd "${dir}/.."
+
+storyboard_dir="`pwd`/storyboard-executable"
+
+if [ ! -d "$storyboard_dir" ]; then
+  echo "Can't find storyboard executable directory: install or create a symlink at $storyboard_dir"
+  exit 1;
+fi;
+
+cd "${storyboard_dir}"
+storyboard="./Storyboard"
+
+if [ ! -r "$storyboard" ]; then
+  echo "Missing storyboard executable image at $storyboard"
+  exit 1;
+fi;
+
+echo Launching Tekkotsu storyboard from $storyboard_dir/Storyboard
+
+$storyboard -data ~/storyboard-workspace $* &

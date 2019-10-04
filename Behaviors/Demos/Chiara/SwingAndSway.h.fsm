@@ -1,0 +1,74 @@
+//-*-c++-*-
+#ifndef INCLUDED_SwingAndSway_h_
+#define INCLUDED_SwingAndSway_h_
+
+#include "Behaviors/StateMachine.h"
+#include "Motion/MotionManager.h"
+#include "Motion/MotionPtr.h"
+#include "Motion/XWalkMC.h"
+
+using namespace DualCoding;
+
+class SwingAndSway : public StateNode {
+
+	// these are static so that inner classes can share them
+	static MotionPtr<XWalkMC> walker;
+	static MotionPtr<HeadPointerMC> headpointer;
+	
+  #shortnodeclass ArmAhead : ArmNode : doStart
+      getMC()->moveToPoint(200, 0, 41);
+
+  #shortnodeclass Rock(float const offset, Point const point) : StateNode : doStart
+      walker->offsetX = offset;
+      headpointer->lookAtPoint(point.coordX(), point.coordY(), point.coordZ());
+
+  #shortnodeclass Sway(float const offset) : StateNode : doStart
+      walker->offsetY = offset;
+
+  #shortnodeclass Twist(float const angle) : StateNode : doStart
+      walker->offsetA = angle;
+
+  #shortnodeclass LegsUp(float const groundOffset=60) : StateNode : doStart
+      walker->groundPlane[3] = groundOffset;
+
+  #shortnodeclass Finish : StateNode : doStart
+      getParent()->stop();
+
+	virtual void doStart() {
+		addMotion(walker);
+		addMotion(headpointer);
+		headpointer->setMaxSpeed(0, 0.5f);
+		headpointer->setMaxSpeed(1, 0.5f);
+	}
+    
+	virtual void setup() {
+		#statemachine
+		startnode: SpeechNode($,"Swing and sway demo") =T(5000)=> ArmAhead =C=> rock
+
+		rock:
+		SpeechNode($,"Rock forward and back") =T(1000)=>
+			Rock($,25,Point(1000,0,1000)) =T(3000)=> Rock($,-25,Point(1000,0,-1000)) =T(3000)=> 
+				Rock($,0,Point(1000,0,0)) =T(3000)=> sway
+
+		sway:
+		SpeechNode($,"Sway side to side") =T(1000)=>
+			Sway($,25) =T(3000)=> Sway($,-25) =T(3000)=> Sway($,0) =T(3000)=> twist
+
+		twist:
+		SpeechNode($,"Twist left and right") =T(1000)=>
+			Twist($,0.2f) =T(3000)=> Twist($,-0.2f) =T(3000)=> Twist($,0) =T(3000)=> rest
+
+		rest:
+		SpeechNode($,"Resting now") =T(1000)=>
+			LegsUp =T(2000)=> Finish
+		#endstatemachine
+	}
+
+	virtual void doStop() {
+		// normally these aren't needed, but since we are using static MotionPtrs, have to explicitly clear them or get warnings at exit
+		walker.clear();
+		headpointer.clear();
+	}
+};
+
+#endif

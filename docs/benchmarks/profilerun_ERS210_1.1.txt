@@ -1,0 +1,57 @@
+Note: The profile reporting code for this version contained a bug -
+  the inter-call times shown here are in seconds, not milliseconds as
+  they should be.  Frames per second (fps) are accurate however.
+
+~~~ Main: ~~~
+Profiling information since: 17.301167 to 495.839409
+ReadySendJoints():
+        3726 calls
+        0.722413 ms avg
+        0.802808 ms exp.avg
+        0.000857 ms avg child time (0.100000%)
+        0.128156 ms avg inter (7.803001 fps)
+        0.125371 ms exp.avg (7.976327 fps)
+        Exec: 0 0 2872 523 331 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+        Inter: 0 1 0 0 1 0 0 0 0 5 2415 1302 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 
+GotSensorFrame():
+        8735 calls
+        1.551887 ms avg
+        1.462967 ms exp.avg
+        0.000000 ms avg child time (0.000000%)
+        0.054650 ms avg inter (18.298104 fps)
+        0.052053 ms exp.avg (19.211151 fps)
+        Exec: 0 0 0 6822 1891 21 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+        Inter: 0 0 0 0 0 0 0 0 8573 159 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 
+GotImage():
+        8734 calls
+        51.790476 ms avg
+        49.796364 ms exp.avg
+        0.000000 ms avg child time (0.000000%)
+        0.054652 ms avg inter (18.297544 fps)
+        0.052244 ms exp.avg (19.140902 fps)
+        Exec: 0 0 0 0 0 0 0 0 8703 30 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+        Inter: 0 0 0 0 0 0 0 0 8558 173 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 
+PowerEvent():
+        56 calls
+        20.299661 ms avg
+        1.066365 ms exp.avg
+        0.000000 ms avg child time (0.000000%)
+        8.136935 ms avg inter (0.122896 fps)
+        13.367851 ms exp.avg (0.074806 fps)
+        Exec: 0 0 10 40 5 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 
+        Inter: 0 0 0 0 0 0 0 0 0 0 0 0 0 7 0 0 0 0 0 0 4 19 0 0 1 1 0 2 0 4 0 17 
+Bucket distribution (in ms):
+        0<0.00802, <0.133, <0.686, <2.2, <5.43, <11.4, <21.2, <36.4, <58.7, <90, <132, <188, <260, <352, <465, <604, <772, <973, <1.21e+03, <1.49e+03, <1.82e+03, <2.19e+03, <2.63e+03, <3.12e+03, <3.68e+03, <4.31e+03, <5.03e+03, <5.82e+03, <6.71e+03, <7.7e+03, <8.79e+03, <1e+04, 
+~~~ Motion: ~~~
+Profiling information since: 17.301414 to 495.850605
+ReadySendJoints():
+        14877 calls
+        5.436691 ms avg
+        5.076209 ms exp.avg
+        0.000000 ms avg child time (0.000000%)
+        0.032078 ms avg inter (31.173762 fps)
+        0.031940 ms exp.avg (31.308794 fps)
+        Exec: 0 0 0 1 10604 4234 9 4 2 4 19 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+        Inter: 0 0 0 0 0 2 1 14842 4 7 20 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Bucket distribution (in ms):
+        0<0.00802, <0.133, <0.686, <2.2, <5.43, <11.4, <21.2, <36.4, <58.7, <90, <132, <188, <260, <352, <465, <604, <772, <973, <1.21e+03, <1.49e+03, <1.82e+03, <2.19e+03, <2.63e+03, <3.12e+03, <3.68e+03, <4.31e+03, <5.03e+03, <5.82e+03, <6.71e+03, <7.7e+03, <8.79e+03, <1e+04, 

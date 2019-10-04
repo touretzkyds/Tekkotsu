@@ -1,0 +1,49 @@
+# VeeTags world: see wiki.Tekkotsu.org
+# Author: David S. Touretzky, Carnegie Mellon University
+
+# environment settings
+background material=CloudySky model=Dome
+light location=[1000,1000,2000] pointat=[1000,0,0]
+light location=[-1000,0,2000] pointat=[1000,0,0]
+
+# wall parameters
+set wallThickness = 50
+set wallLength = 1000
+set wallHeight = 18 * 25.4
+set wallAngle = deg2rad(120)     # angle between the two walls (radians)
+set wallXOffset = 0              # offset of wall edge from the origin
+set wallCenterX = wallXOffset + wallLength/2 * cos(wallAngle/2)
+set wallCenterY = wallLength/2 * sin(wallAngle/2)
+set wallOrient = (pi-wallAngle)/2
+
+# draw the walls
+define Wall cube scale=[wallThickness, wallLength-wallThickness/2-1, wallHeight] mass=90000
+Wall material=RustySteel location=[wallCenterX, wallCenterY, wallHeight/2] orientation=rotz(wallOrient)
+Wall material=TarnishedBronze location=[wallCenterX, -wallCenterY, wallHeight/2] orientation=rotz(-wallOrient)
+
+# tag parameters
+set tagSize = 6 * 25.4            # tag width and height
+set tagZ = 7 * 25.4               # height above ground of tag center (millimeters)
+set tagWallOffset = 5             # offset of tags from wall surface
+set tagEdgeOffset = 8 * 25.4      # distance of first tag from inner edge of wall
+set tagNextOffset = 12 * 25.4     # distance between tag centers
+set tagX = (wallLength-tagEdgeOffset) * cos(wallAngle/2) - (wallThickness/2 + tagWallOffset) * sin(wallAngle/2)
+set tagY = tagEdgeOffset * sin(wallAngle/2) + (-wallThickness/2 - tagWallOffset) * cos(wallAngle/2)
+
+# draw the tags in pairs, from innermost to outermost
+define Tag cube scale=[1,tagSize,tagSize]
+
+Tag location=[tagX, tagY,tagZ] material="AprilTag/tag16h5/02" orientation=rotz(wallOrient)
+Tag location=[tagX,-tagY,tagZ] material="AprilTag/tag16h5/03" orientation=rotz(-wallOrient)
+
+set tagX = tagX - tagNextOffset * cos(wallAngle/2)
+set tagY = tagY + tagNextOffset * sin(wallAngle/2)
+Tag location=[tagX, tagY,tagZ] material="AprilTag/tag16h5/01" orientation=rotz(wallOrient)
+Tag location=[tagX,-tagY,tagZ] material="AprilTag/tag16h5/04" orientation=rotz(-wallOrient)
+
+set tagX = tagX - tagNextOffset * cos(wallAngle/2)
+set tagY = tagY + tagNextOffset * sin(wallAngle/2)
+Tag location=[tagX, tagY,tagZ] material="AprilTag/tag16h5/00" orientation=rotz(wallOrient)
+Tag location=[tagX,-tagY,tagZ] material="AprilTag/tag16h5/05" orientation=rotz(-wallOrient)
+
+# end of VeeTags world

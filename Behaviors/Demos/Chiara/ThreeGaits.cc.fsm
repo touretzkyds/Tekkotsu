@@ -1,0 +1,53 @@
+#include "Shared/RobotInfo.h"
+#ifdef TGT_CHIARA
+
+#include "Behaviors/StateMachine.h"
+#include "Motion/MotionPtr.h"
+
+using namespace std;
+
+//! Demonstrates one, two, and three-legged walking gaits
+$nodeclass ThreeGaits :  StateNode {
+  virtual void setup() {
+    MotionPtr<WalkMC> walker;
+    MotionManager::MC_ID walkID = addMotion(walker);
+      
+		const float PI_2 = (float)M_PI/2;
+      
+    $statemachine{
+      startnode:  SpeechNode($, "Chiara walk demo.") =T(3000)=>
+
+      SpeechNode($, "This is a ripple gait.  I move one leg at a time.") =N=>
+			WalkNode($, "xwalk.plist")[setMC(walkID)] =T(6000)=>
+      WalkNode($, 400, 0, 0, 0, WalkNode::DISP)[setMC(walkID)] =C=>
+			WalkNode($, 0, 0, -PI_2, 3, WalkNode::DISP)[setMC(walkID)] =C=>
+			WalkNode($, 0, -400, 0, 0, WalkNode::DISP)[setMC(walkID)] =C=>
+			WalkNode($, 0, 0, PI_2, 3, WalkNode::DISP)[setMC(walkID)] =C=>
+
+      SpeechNode($, "Now I will switch to a new gait and move two legs at a time.") =T(8000)=>
+			WalkNode($, "xwalk2.plist")[setMC(walkID)] =T(5000)=>
+			WalkNode($, 400, 0, 0, 0, WalkNode::DISP)[setMC(walkID)] =C=>
+			WalkNode($, 0, 0, -PI_2, 5, WalkNode::DISP)[setMC(walkID)] =C=>
+			WalkNode($, 0, -400, 0, 0, WalkNode::DISP)[setMC(walkID)] =C=>
+			WalkNode($, 0, 0, PI_2, 5, WalkNode::DISP)[setMC(walkID)] =C=>
+
+      SpeechNode($, "The tripod gait moves three legs at a time.") =T(8000)=>
+			WalkNode($, "xwalk3.plist")[setMC(walkID)] =T(5000)=>
+			WalkNode($, 400, 0, 0, 0, WalkNode::DISP)[setMC(walkID)] =C=>
+			WalkNode($, 0, 0, -PI_2, 5, WalkNode::DISP)[setMC(walkID)] =C=>
+			WalkNode($, 0, -400, 0, 0, WalkNode::DISP)[setMC(walkID)] =C=>
+			WalkNode($, 0, 0, PI_2, 5, WalkNode::DISP)[setMC(walkID)] =C=>
+
+      SpeechNode($,"Done")
+    }
+  }
+	
+  static std::string getClassDescription() {
+    return "One, two, and three-legged walking gaits";
+  }
+	
+};
+
+REGISTER_BEHAVIOR_MENU(ThreeGaits,DEFAULT_TK_MENU"/Chiara Demos");
+
+#endif

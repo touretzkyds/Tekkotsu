@@ -1,0 +1,24 @@
+ThreadedMessageQueue::stopCallback() test:
+Thread 0 sent @VAR
+Thread 1 sent @VAR
+Thread 2 sent @VAR
+Sent in @VAR
+Messages sent: 6000
+Messages received: @VAR
+
+ThreadedMessageQueue::finishCallback test:
+Thread 0 sent @VAR
+Thread 1 sent @VAR
+Thread 2 sent @VAR
+Sent in @VAR
+Messages sent: 6000
+Messages received: @VAR
+
+ThreadedMessageQueue::finishQueue() test:
+Thread 0 sent @VAR
+Thread 1 sent @VAR
+Thread 2 sent @VAR
+Sent in @VAR
+Messages sent: 6000
+Messages received: 6000
+

@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+	<!--numeric contains two numeric values,
+	with a comment split
+	over several lines-->
+    <key>numeric</key>
+    <dict>
+      <key>fooF</key>
+      <real>1.5</real>
+	
+	<!--fooI: This is an integer value, the other is a float-->
+	<key>fooI</key>
+      <integer>16</integer>
+	<key>char-num</key>  <integer>97</integer>
+	<key>char-text</key> <string>a</string>
+</dict>
+
+<!--This is a common string-->
+    <key>test str</key>
+    <string>Hello World, again!</string>
+
+<!--======== Mixed ========-->
+<!--A collection of mixed types of specified length-->
+<key>Mixed</key>    <array>
+	<integer>0</integer>
+	<integer>1</integer>
+	<integer>2</integer>
+	<string>This is item 1</string>
+	<string>item 2: arrays can contain mixed types</string>
+	<!--5: like this int-->
+	<real>123</real>
+	<!--6: or this bool-->
+	<true/>
+</array>
+
+<!--======== map ========-->
+<!--The squares, from 0 to 5, but with keys-->
+<key>map</key>      <dict>
+	<key>0^2</key>  <integer>0</integer>
+	<key>1^2</key>  <integer>1</integer>
+	<key>2^2</key>  <integer>4</integer>
+	<key>3^2</key>  <integer>9</integer>
+	<key>4^2</key>  <integer>16</integer>
+	<key>tada</key> <string>mixed types -- no surprise</string>
+</dict>
+
+<!--======== vector ========-->
+<!--The squares, from 0 to 5-->
+<key>vector</key>   <array>
+	<integer>0</integer>
+	<integer>1</integer>
+	<integer>4</integer>
+	<integer>9</integer>
+	<integer>16</integer>
+	<string>can also handle mixed</string>
+</array>
+</dict>
+</plist>

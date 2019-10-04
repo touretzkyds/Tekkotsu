@@ -1,0 +1,20 @@
+This DH Wizard project was created in Spring 2010 by Owen Greeley and
+Nicholas Buroojy, extending an earlier version by Leland Thorpe
+(Spring 2009).  All authors are at Carnegie Mellon University.
+
+Documentation describing this project can be found on the Tekkotsu
+wiki at wiki.Tekkotsu.org.
+
+To build the tool, cd to the tools/dhwizard/code directory and type "make".
+
+Typical usage:
+
+1. Start the Mirage simulator.
+
+2. Open a kin file (such as Chiara.kin) with this wizard with the
+   following command:
+
+   /usr/local/Tekkotsu/tools/DHWizard ~/project/ms/config/Chiara.kin
+
+An optional second argument specifies the host where the Mirage server
+is running.  The default is "localhost".

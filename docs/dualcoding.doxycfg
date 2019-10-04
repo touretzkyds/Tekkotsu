@@ -1,0 +1,17 @@
+@INCLUDE = doxygencfg
+
+PROJECT_NAME = DualCoding
+INPUT = ../DualCoding ../Crew
+EXCLUDE =
+EXCLUDE_PATTERNS =
+OUTPUT_DIRECTORY = generated/html
+EXTRACT_ALL = YES
+ALWAYS_DETAILED_SEC = NO
+GENERATE_TREEVIEW = YES
+HTML_OUTPUT = dualcoding
+HIDE_SCOPE_NAMES = YES
+SEARCHENGINE = YES
+GENERATE_TAGFILE = generated/dualcoding.tag
+HTML_HEADER = exthead.html
+HTML_FOOTER = dualcodingfoot.html
+PREDEFINED += use_namespace

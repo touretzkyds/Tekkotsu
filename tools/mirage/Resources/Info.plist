@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Environment Configuration File</string>
+			<key>CFBundleTypeIconFile</key>
+			<string>Environment.icns</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>org.tekkotsu.mirage</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Tekkotsu Kinematics</string>
+			<key>CFBundleTypeIconFile</key>
+			<string>Kinematics.icns</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>org.tekkotsu.kinematics</string>
+			</array>
+		</dict>
+	</array>
+	<key>CFBundleExecutable</key>
+	<string>${EXECUTABLE_NAME}</string>
+	<key>CFBundleIconFile</key>
+	<string>Mirage.icns</string>
+	<key>CFBundleIdentifier</key>
+	<string>org.tekkotsu.mirage</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>${PRODUCT_NAME}</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+	<key>NSMainNibFile</key>
+	<string>MainMenu</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	
+	 <key>UTExportedTypeDeclarations</key> <array>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>org.tekkotsu.mirage</string>
+			<key>UTTypeReferenceURL</key>
+			<string>http://tekkotsu.no-ip.org/mirage.html</string>
+			<key>UTTypeDescription</key>
+			<string>Tekkotsu Mirage Environment</string>
+			<key>UTTypeIconFile</key>
+			<string>Environment.icns</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>com.apple.property-list</string>
+				<string>public.xml</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>mirage</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>org.tekkotsu.kinematics</string>
+			<key>UTTypeReferenceURL</key>
+			<string>http://tekkotsu.no-ip.org/Kinematics.html</string>
+			<key>UTTypeDescription</key>
+			<string>Tekkotsu Kinematics</string>
+			<key>UTTypeIconFile</key>
+			<string>Kinematics.icns</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>com.apple.property-list</string>
+				<string>public.xml</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>kin</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
+</dict>
+</plist>

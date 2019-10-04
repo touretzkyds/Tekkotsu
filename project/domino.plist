@@ -1,0 +1,171 @@
+<?xml version="1.0"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<!--======== CommPorts ========-->
+<!--Communication portals for use by device drivers-->
+<key>CommPorts</key> <dict>
+	<!--======== CreateSerial ========-->
+	<key>CreateSerial</key>  <dict>
+		<!--.type: Stores the typename of the class so it can be re-instantiated on load.
+		** Do not edit ** -->
+		<key>.type</key>    <string>SerialCommPort</string>
+	
+		<!--Baud: Communication frequency (bits per second)-->
+		<key>Baud</key>     <integer>57600</integer>
+	
+		<!--DataBits: Number of data bits to send at a time (5-8)-->
+		<key>DataBits</key> <integer>8</integer>
+	
+		<!--Mode bitmask to pass to the open() call, defaults to 'w+b': in|out|trunc|binary (see std::ios_base::openmode)-->
+		<key>Mode</key>     <integer>60</integer>
+	
+		<!--Parity bit can be sent for error checking
+		Value is one of: { EVEN | ODD | NONE } -->
+		<key>Parity</key>   <string>NONE</string>
+	
+		<!--Path of file system object being accessed-->
+		<key>Path</key>     <string>/dev/ttyUSB0</string>
+	
+		<!--StopBits: Number of stop bits to send between data bits (1-2)-->
+		<key>StopBits</key> <integer>1</integer>
+	
+		<!--TTYFlags: Additional configuration string to pass to stty
+		(may not work when using non-standard baud rates on OS X)-->
+		<key>TTYFlags</key> <string></string>
+	</dict>
+
+	<!--======== USB2DynamixelAX ========-->
+	<key>USB2DynamixelAX</key>  <dict>
+		<!--.type: Stores the typename of the class so it can be re-instantiated on load.
+		** Do not edit ** -->
+		<key>.type</key>    <string>SerialCommPort</string>
+	
+		<!--Baud: Communication frequency (bits per second)-->
+		<key>Baud</key>     <integer>1000000</integer>
+	
+		<!--DataBits: Number of data bits to send at a time (5-8)-->
+		<key>DataBits</key> <integer>8</integer>
+	
+		<!--Mode bitmask to pass to the open() call, defaults to 'w+b': in|out|trunc|binary (see std::ios_base::openmode)-->
+		<key>Mode</key>     <integer>60</integer>
+	
+		<!--Parity bit can be sent for error checking
+		Value is one of: { EVEN | ODD | NONE } -->
+		<key>Parity</key>   <string>NONE</string>
+	
+		<!--Path of file system object being accessed-->
+		<key>Path</key>     <string>/dev/ttyUSB1</string>
+	
+		<!--StopBits: Number of stop bits to send between data bits (1-2)-->
+		<key>StopBits</key> <integer>1</integer>
+	
+		<!--TTYFlags: Additional configuration string to pass to stty
+		(may not work when using non-standard baud rates on OS X)-->
+		<key>TTYFlags</key> <string></string>
+	</dict>
+</dict>
+
+<!--======== Drivers ========-->
+<!--Settings for device drivers-->
+<key>Drivers</key> <dict>
+	<!--======== Create ========-->
+	<key>Create</key> <dict>
+		<!--.type: Stores the typename of the class so it can be re-instantiated on load.
+		** Do not edit ** -->
+		<key>.type</key> <string>Create</string>
+		
+		<!--CommPort: The name of the comm port where output will be sent-->
+		<key>CommPort</key> <string>CreateSerial</string>
+	</dict>
+	
+	<!--======== DynamixelAX ========-->
+	<key>DynamixelAX</key>  <dict>
+		<!--.type: Stores the typename of the class so it can be re-instantiated on load.
+		** Do not edit ** -->
+		<key>.type</key>        <string>Dynamixel</string>
+		
+		<!--CommPort: The name of the comm port where output will be sent-->
+		<key>CommPort</key>     <string>USB2DynamixelAX</string>
+		
+		<!--======== Servos ========-->
+		<!--Maps servo IDs to Tekkotsu output offsets, use command line new/delete commands to add/remove mappings.-->
+		<key>Servos</key>       <dict load="sync">
+			<key>001</key>  <dict>
+				<key>Output</key> <string>NECK:pan</string>
+				<key>LED</key> <string/>
+				<key>FreeSpinOutput</key> <string/> <!-- By default, Dynamixel driver would try to use this as a wheel, have to override -->
+			</dict>
+			<key>002</key>  <dict>
+				<key>Output</key> <string>NECK:tilt</string>
+				<key>LED</key> <string/>
+                <key>ZeroAngle</key> <real>0.1</real>
+				<key>FreeSpinOutput</key> <string/> <!-- By default, Dynamixel driver would try to use this as a wheel, have to override -->
+			</dict>
+			<key>003</key>  <dict>
+				<key>Output</key> <string>ARM:base</string>
+				<key>LED</key> <string/>
+			</dict>
+			<key>004</key>  <dict>
+				<key>Output</key> <string>ARM:shoulder</string>
+				<key>LED</key> <string/>
+			</dict>
+			<key>005</key>  <dict>
+				<key>Output</key> <string>ARM:gripper</string>
+				<key>LED</key> <string/>
+				<key>InvertRotation</key> <true/>
+			</dict>
+			<key>100</key>  <dict>
+				<key>LeftIRDistOffset</key>   <string>RightIRDist</string>
+				<key>RightIRDistOffset</key>   <string>LeftIRDist</string>
+				<key>LeftLuminosityOffset</key>   <string>RightLuminosity</string>
+				<key>RightLuminosityOffset</key>   <string>LeftLuminosity</string>
+			</dict>
+		</dict>
+	</dict>
+
+	<!--======== Camera ========-->
+	<key>Camera</key>  <dict>
+		<!--.type: Stores the typename of the class so it can be re-instantiated on load.
+		** Do not edit ** -->
+		<key>.type</key>      <string>Camera</string>
+		
+		<!--Path to the video device, e.g. /dev/video0-->
+		<key>Path</key>       <string>/dev/video1</string>
+
+		<key>Options</key> <dict>
+			<!--Parameter settings for the Sony PlayStation Eye-->
+			<key>HFlip</key>                   <integer>1</integer>		
+			<key>VFlip</key>                   <integer>1</integer>		
+			<key>Light Frequency Filter</key>  <integer>1</integer>
+			<key>Auto Gain</key>               <integer>0</integer>		
+			<key>Main Gain</key>               <integer>2</integer>
+			<key>Auto Exposure</key>           <integer>0</integer>
+			<key>Exposure</key>                <integer>120</integer>
+			<key>Brightness</key>              <integer>50</integer>
+			<key>Contrast</key>                <integer>5</integer>
+			<key>Saturation</key>              <integer>110</integer>
+			<key>Hue</key>                     <integer>10</integer>
+		</dict>
+
+		<!--Resolution: Image resolution of the final output image, e.g. 640x480. If small enough, image will be captured at twice this resolution and downsampled, otherwise image will be captured at this resolution and upsampled.-->
+		<key>Resolution</key> <string>640x480</string>
+	</dict>
+</dict>
+
+<!--======== Sensors ========-->
+<!--Settings for the loading of sensor values-->
+<key>Sensors</key>         <dict>
+	<key>Sources</key>    <array>
+				<string>Create</string>
+				<string>DynamixelAX</string>
+			      </array>
+</dict>
+
+<!--======== Vision ========-->
+<!--Settings for the loading of camera frames-->
+<key>Vision</key> <dict>
+	<key>Sources</key> <array><string>Camera</string></array>
+</dict>
+
+<key>WaitForSensors</key> <false/>
+</dict></plist>

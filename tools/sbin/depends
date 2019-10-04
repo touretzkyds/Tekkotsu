@@ -1,0 +1,125 @@
+#!/bin/bash
+
+declare -r SRC_COLOR="#FFD0E0";
+declare -r SRC_SHAPE="box";
+declare -r HDR_COLOR="#FFFFE0";
+declare -r HDR_SHAPE="oval";
+
+declare usage="Usage: $0 [-p|--plain] [--cc | (-s|--src ext)] [-o|--out file] root-file
+
+  -p, --plain  refrains from using color or shapes in graph
+      --cc     sets CC to g++ instead of default gcc
+  -s, --src    recurses on source files corresponding to header files
+  -o, --out    specifies output file, format taken from file extension
+
+  root-file is the source file from which to start expansion
+  If no output file is given, 'dot' format is dumped to stdout.
+  CPPFLAGS will be passed to gcc, set -I or -D flags there.";
+
+if [ $# -eq 0 ] ; then
+	cat <<< "$usage";
+	exit 2;
+fi;
+
+declare sub=false;
+declare drop;
+declare plain=false;
+declare srcext;
+declare out
+declare -a tgts
+
+while [ $# -gt 0 ] ; do
+	case "$1" in
+		--sub) sub=true; shift ;;
+		--drop) drop=$2; shift; shift ;;
+		-p|--plain) plain=true; shift ;;
+		--cc) CC="g++ -x c++"; shift ;;
+		-s|--src) srcext=$2; shift; shift ;;
+		-o|--out) out=$2; shift; shift ;;
+		-h|--help) cat <<< "$usage"; exit 0 ;;
+		-*) echo "Unknown flag $1" 1>&2; exit 1 ;;
+		*) tgts=("${tgts[@]}" "$1"); shift ;;
+	esac
+done;
+
+if [ -z "$CC" ] ; then
+	if [ "$srcext" = ".cc" -o "$srcext" = ".cpp" -o "$srcext" = ".c++" ] ; then
+		CC="g++ -x c++"
+	else
+		CC="gcc -x c"
+	fi
+fi
+
+if [ ${#tgts[@]} = 0 ] ; then
+	echo "$0 error: no target files specified"
+	exit 1;
+fi;
+
+if [ -z "$drop" ] ; then
+	drop=$(mktemp -t $(basename $0)XXXX);
+fi;
+
+narg="--sub --drop $drop";
+if [ -n "$srcext" ] ; then
+	narg="$narg -s $srcext";
+fi;
+if $plain ; then
+	narg="$narg -p";
+fi;
+
+(
+	if ! $sub ; then
+		echo "digraph \"$tgtname\" {";
+	fi;
+
+	if [ ${#tgts[@]} -gt 1 ] ; then
+		#process one at a time
+		for x in "${tgts[@]}" ; do
+			$0 "$x" $narg;
+		done;
+	else
+		declare tgt=${tgts[0]}
+		declare tgtname=$(sed 's@.*/@@' <<< "$tgt")
+		echo $tgt >> "$drop";
+
+		declare list=$($CC $tgt -M -MM -MG -MP $CPPFLAGS | grep : | sed -n 's@\(.*\):$@\1@p' | sort -u )
+		declare used=$(for file in $list ; do filename=$(sed 's@.*/@@' <<< $file); if grep $filename $tgt | grep -q include ; then echo $file ; fi; done)
+
+		if ! $plain ; then
+			if [[ "$tgtname" == *\.h || "$tgtname" == *\.hpp || "$tgtname" == *\.tpp || "$tgtname" == *\.ipp ]]; then
+				echo "	\"$tgtname\" [fillcolor=\"$HDR_COLOR\",shape=\"$HDR_SHAPE\",style=filled]";
+			else
+				echo "	\"$tgtname\" [fillcolor=\"$SRC_COLOR\",shape=\"$SRC_SHAPE\",style=filled]";
+			fi; 
+		fi;
+
+		for file in $used ; do
+			filename=$(sed 's@.*/@@' <<< $file);
+			echo "	\"$tgtname\" -> \"$filename\"";
+			if ! grep -q $file "$drop" ; then
+				#echo $0 --sub $file --drop $drop : $(< "$drop");
+				$0 $file $narg;
+				if [ -n "$srcext" ] ; then
+					srcfile=$(sed 's@.h$@'$srcext'@' <<< "$file");
+					if [ -r $srcfile -a "$srcfile" != "$file" ] ; then
+						if ! grep -q $srcfile $drop; then
+							$0 $srcfile $narg;
+						fi;
+					fi;
+				fi;
+			fi;
+		done
+	fi;
+
+	if ! $sub ; then
+		echo "}"
+		rm "$drop";
+	fi;
+) | if [ -z "$out" ] ; then
+	cat;
+elif [[ "$out" == *\.dot ]] ; then
+	cat > $out;
+else
+	ext=$(sed 's/.*\.//' <<< "$out");
+	dot -T$ext -o$out;
+fi;

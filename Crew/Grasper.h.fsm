@@ -1,0 +1,679 @@
+#ifndef _GRASPER_H
+#define _GRASPER_H
+
+#include "Shared/RobotInfo.h"
+#if (defined(TGT_HAS_ARMS) || !defined(STRICT_TGT_MODEL)) && !defined(TGT_IS_AIBO)
+
+#include "Behaviors/Nodes/ArmNode.h"
+#include "Behaviors/Nodes/DynamicMotionSequenceNode.h"
+#include "Behaviors/Nodes/PostMachine.h"
+#include "Behaviors/Nodes/SpeechNode.h"
+#include "Behaviors/Transitions/CompareTrans.h"
+#include "Behaviors/Transitions/CompletionTrans.h"
+#include "Behaviors/Transitions/NullTrans.h"
+#include "Behaviors/Transitions/PilotTrans.h"
+#include "Behaviors/Transitions/SignalTrans.h"
+#include "Behaviors/Transitions/TextMsgTrans.h"
+#include "Crew/GrasperRequest.h"
+#include "Crew/MapBuilderNode.h"
+#include "Crew/MotionNodes.h"
+#include "Crew/PilotNode.h"
+#include "Events/GrasperEvent.h"
+#include "Motion/IKSolver.h"
+
+#if defined(TGT_IS_CALLIOPE5) || defined(TGT_IS_CALLIOPE2) || defined(TGT_IS_CALLIOPE3) || defined(TGT_IS_MANTIS)
+#  include "Planners/Manipulation/ShapeSpacePlanner3DR.h"
+#else
+#  include "Planners/Manipulation/ShapeSpacePlanner2DR.h"
+#endif
+
+/*
+  TODO
+  - Add code to validate Grasper requests and complain, e.g., if reach is missing an object
+  - fix up the Fail/Success/Complete thing; do we need all those different classes?
+  - plan failure is currently not being caught; the Grasper hangs
+  - take out all the DEBUG printouts
+ 
+  - Sweep
+  - Test-suite
+  - Calculate the offset of the gripper frame from wristYaw when projected in XY
+*/
+
+//! The Grasper is the member of the Tekkotsu @a Crew responsible for arm-based manipulation.
+
+/*! The Grasper can make requests to the Pilot, MapBuilder, and Lookout.
+
+  The quintessential Grasper operation is @a moveTo, which picks up an
+  object, transports it to a destination, and deposits it there.
+  Depending on the type of robot, arm, and gripper, and the locations of
+  the object and destination point, a grasper request might involve
+  moving the robot's body as well as the arm.
+
+  The @a moveTo operation has six phases:
+
+  @li @a Approach: Get the robot close to the object.  Then position the arm
+  so it's ready to grab the object.
+
+  @li @a Grasp: Close the fingers around the object and verify that it is
+  under control of the gripper.  May involve moving the object and visual verification.
+
+  @li @a Transport: Carry or drag the object to a location near the destination.  May
+  involve lifting the object, or repositioning the arm prior to moving the body.
+
+  @li @a Deliver: Place the object at its destination.
+
+  @li @a Release: Let go of the object and verify that it is placed properly.
+
+  @li @a Withdraw: retract the arm and/or move the body away from the object.
+
+*/
+
+class Grasper: public StateNode {
+public:
+#if defined(TGT_IS_CALLIOPE5)
+  typedef ShapeSpacePlanner3DR<NumArmJoints-2> ArmPlanner;
+  typedef PlannerObstacle3D PlannerObstacleG;
+  static const unsigned int numPlannerJoints = NumArmJoints-2;
+#elif defined(TGT_IS_CALLIOPE2) || defined(TGT_IS_CALLIOPE3)
+  typedef ShapeSpacePlanner3DR<NumArmJoints-1> ArmPlanner;
+  typedef PlannerObstacle3D PlannerObstacleG;
+  static const unsigned int numPlannerJoints = NumArmJoints-1;
+#elif defined(TGT_IS_MANTIS)
+  typedef ShapeSpacePlanner3DR<JointsPerFrLeg> ArmPlanner;
+  typedef PlannerObstacle3D PlannerObstacleG;
+  static const unsigned int numPlannerJoints = JointsPerFrLeg;
+#elif defined(TGT_HAS_FINGERS)
+  typedef ShapeSpacePlanner2DR<NumArmJoints-2> ArmPlanner;
+  typedef PlannerObstacle2D PlannerObstacleG;
+  static const unsigned int numPlannerJoints = NumArmJoints-2;
+#elif defined(TGT_HAS_GRIPPER)
+  typedef ShapeSpacePlanner2DR<NumArmJoints-1> ArmPlanner;
+  typedef PlannerObstacle2D PlannerObstacleG;
+  static const unsigned int numPlannerJoints = NumArmJoints-1;
+#else
+  typedef ShapeSpacePlanner2DR<NumArmJoints> ArmPlanner;
+  typedef PlannerObstacle2D PlannerObstacleG;
+  static const unsigned int numPlannerJoints = NumArmJoints;
+#endif
+  typedef ArmPlanner::NodeType_t NodeType_t;
+  typedef NodeType_t::NodeValue_t NodeValue_t;
+
+  typedef unsigned int GrasperVerbosity_t;
+  static const GrasperVerbosity_t GVstart = 1<<0;
+  static const GrasperVerbosity_t GVexecuteRequest   = 1<<1;
+  static const GrasperVerbosity_t GVnumObstacles     = 1<<2;
+  static const GrasperVerbosity_t GVexecutePath      = 1<<3;
+  static const GrasperVerbosity_t GVcomputeGoals     = 1<<4;
+  static const GrasperVerbosity_t GVsetJoint         = 1<<5;
+
+private:
+  //! Plan an approach or transport path for the body
+  GenericRRTBase::PlannerResult2D planBodyPath(const Point &targPt, AngTwoPi approachOrientation,
+																							 const fmat::Column<3> &baseOffset,
+																							 Shape<AgentData> &pose, float radius, bool isFinalApproach);
+
+  //**************** Nodes Used in Grasper Actions ****************
+  //
+  // A collection of nodes from which complex Grasper actions are built
+
+  //! Plan body motion to approach the object
+  $nodeclass PlanBodyApproach : StateNode {
+    virtual void doStart();
+		static float getBodyApproachRadius();
+  }
+
+  //! Execute body motion to approach the object
+  $nodeclass DoBodyApproach : PilotNode(PilotTypes::goToShape) {
+    virtual void doStart();
+  }
+
+  //! Re-acquire object on local map after moving the body
+  $nodeclass FindObj : MapBuilderNode {
+    virtual void doStart();
+  }
+
+  //! Plan arm motion to get fingers around the object
+  $nodeclass PlanArmApproach : StateNode {
+    virtual void doStart();
+  }
+
+  //! Execute arm motion to get fingers around the object
+  $nodeclass DoArmApproach : StateNode {
+#if defined(TGT_IS_CALLIOPE2) || defined(TGT_IS_CALLIOPE3)
+    // For Calliope2SP: deploy the arm and set finger height first, then open fingers
+    $setupmachine{
+      MoveArm(GrasperRequest::doApproach) =C=> FingersApproach[setMC(VRmixin::grasper->getArmId())] =C=> PostMachineCompletion
+    }
+#else
+    // For Calliope5KP: open fingers and then move the arm to acquire the object
+    $setupmachine{
+	FingersApproach[setMC(VRmixin::grasper->getArmId())] =C=> MoveArm(GrasperRequest::doApproach) =C=> PostMachineCompletion
+    }
+#endif
+  }
+
+  //! Open fingers far enough to accomodate object
+  $nodeclass FingersApproach : ArmNode {
+    virtual void doStart();
+  }
+
+  //! For Calliope2SP: move body instead of arm to acquire the object
+  $nodeclass DoBodyApproach2 : PilotNode(PilotTypes::walk) {
+    virtual void doStart();
+  }
+
+  //! For Calliope2SP: move body instead of arm to acquire the object
+  $nodeclass DoBodyApproach3 : PilotNode(PilotTypes::walk) {
+    virtual void doStart();
+  }
+
+  $nodeclass DoBodyApproach4 : PilotNode(PilotTypes::walk) {
+    virtual void doStart();
+  }
+	
+  //! Verify that object is grasped
+  $nodeclass Verify(bool postGrasp) {
+		//--------------------------------------New as of 4-18-14
+		enum VerifyMethod {
+			apriltag,
+			cross,
+			domino,
+			gripperload
+		};
+		
+		$nodeclass VerifyDispatch : StateNode {
+			virtual void doStart();
+		}
+		    
+		$nodeclass GetAprilTag : MapBuilderNode(MapBuilderRequest::cameraMap) {
+      virtual void doStart();
+    }
+
+    $nodeclass CheckAprilTag {
+      virtual void doStart();
+    }
+
+		$nodeclass GetDomino : MapBuilderNode(MapBuilderRequest::localMap) {
+			virtual void doStart();
+		}
+
+		$nodeclass CheckDomino {
+			virtual void doStart();
+		}
+		
+		$nodeclass GetCross : MapBuilderNode(MapBuilderRequest::localMap) {
+			virtual void doStart();
+		}
+
+		$nodeclass CheckCross {
+			virtual void doStart();
+		} 
+
+		$nodeclass CheckGripperLoad : StateNode {
+			virtual void doStart();
+		}
+
+		$nodeclass CheckUserVerify : StateNode {
+			virtual void doStart();
+		}
+
+    $setupmachine{	//Updated as of 4-18-14
+			startnode : VerifyDispatch
+				startnode =S<GrasperRequest::GrasperVerifyStrategy_t>(GrasperRequest::verifyNone)=> PostMachineCompletion
+			startnode =S<GrasperRequest::GrasperVerifyStrategy_t>(GrasperRequest::verifyAprilTag)=> lookApril
+			startnode =S<GrasperRequest::GrasperVerifyStrategy_t>(GrasperRequest::verifyDomino)=> lookDomino
+			startnode =S<GrasperRequest::GrasperVerifyStrategy_t>(GrasperRequest::verifyCross)=> lookCross
+			startnode =S<GrasperRequest::GrasperVerifyStrategy_t>(GrasperRequest::verifyLoad)=> checkLoad
+			startnode =S<GrasperRequest::GrasperVerifyStrategy_t>(GrasperRequest::verifyUser)=> checkUser
+
+      lookApril : LookAtGripper =C=> GetAprilTag =C=> CheckAprilTag
+			lookDomino: LookAtGripper(100.0) =C=> GetDomino =C=> CheckDomino
+			lookCross: LookAtGripper(100.0) =C=> GetCross =C=> CheckCross
+			checkLoad : CheckGripperLoad
+			checkUser : CheckUserVerify
+    }
+  }
+
+  //! Close fingers to grasp the object
+  $nodeclass ArmGrasp : ArmNode {
+    virtual void doStart();
+  }
+
+	//! Set or clear gripper pulsing to prevent load errors
+	$nodeclass ArmPulse(bool activate) : ArmNode {
+		virtual void doStart();
+	}
+
+  //! Move the object to test that it was grasped successfully
+  $nodeclass ArmNudge : DynamicMotionSequenceNode {
+    virtual void doStart();
+  }
+
+  //! Raise the object for transport
+  $nodeclass ArmRaise : DynamicMotionSequenceNode {
+    virtual void doStart();
+  }
+
+  //! Plan body move to dropoff location
+  $nodeclass PlanBodyTransport : StateNode {
+    virtual void doStart();
+  }
+
+  //! Execute body move for dropoff
+  $nodeclass DoBodyTransport : PilotNode(PilotTypes::goToShape) {
+    virtual void doStart();
+  }
+
+  //! Plan arm move to dropoff location
+  $nodeclass PlanArmDeliver : StateNode {
+    virtual void doStart();
+  }
+
+  //! Execute arm motion to deposit the object at its destination
+  $nodeclass DoArmDeliver : StateNode {
+#if defined(TGT_IS_CALLIOPE2) || defined(TGT_IS_CALLIOPE3)
+		//Changed as of 4-28-2014
+		
+		$setupmachine{
+			//Move the arm down, open the gripper, and then transition to the next node
+      MoveArm(GrasperRequest::doDeliver) =C=> FingersApproach[setMC(VRmixin::grasper->getArmId())] =C=> PostMachineCompletion
+    }
+#else
+    // Move arm to destination
+    $setupmachine{
+      FingersApproach[setMC(VRmixin::grasper->getArmId())] =C=> MoveArm(GrasperRequest::doDeliver) =C=> PostMachineCompletion
+    }
+#endif
+  }
+
+  //! Release the object
+  $nodeclass ReleaseArm : ArmNode {
+		virtual void doStart();
+	}
+
+  //! DoWithdraw from the object
+  $nodeclass DoWithdraw : PilotNode(PilotTypes::walk) {
+		virtual void doStart();
+	}
+
+  //==== MOTION ====
+  
+  //! Moves the body
+
+  //! Executes an arm movement with time delays estimated for hand/eye system
+  $nodeclass MoveArm(GrasperRequest::GrasperPathType_t pa) : DynamicMotionSequenceNode {
+    virtual void doStart();
+    void executeMove(const std::vector<NodeValue_t>& path);
+    unsigned int advTime(const NodeValue_t& confDif) {
+      float maxDiff = abs(confDif[0]);
+			unsigned int jointsToMove = 
+#ifdef TGT_IS_MANTIS
+				JointsPerFrLeg
+#else
+			  JointsPerArm
+#endif
+				;
+      for (unsigned int i = 1; i < jointsToMove; i++) {
+        if (confDif[i] > maxDiff)
+          maxDiff = abs(confDif[i]);
+      }
+      unsigned int time = (unsigned int)( maxDiff/(M_PI/6)*1500 );
+      return max((unsigned)11, (unsigned int)(time * curReq->armTimeFactor));
+    }
+  }
+
+  /*
+  //! Grasps or releases an object from the gripper if the gripper is manipulable
+  $nodeclass Grasp(bool closeGripper = true): StateNode : setup {
+    $statemachine {
+      startnode: StateNode =N=> split
+
+      split: StateNode
+      split >==CompareTrans<bool>($,$$,&closeGripper,CompareTrans<bool>::EQ,true)==> openTheGripper
+      split >==CompareTrans<bool>($,$$,&closeGripper,CompareTrans<bool>::EQ,false)==> closeTheGripper
+
+      openTheGripper: OpenTheGripper =C=> PostMachineCompletion
+      closeTheGripper: CloseTheGripper =C=> PostMachineCompletion
+
+      failed: SignalGraspError(GrasperRequest::badMove)
+    }
+  }
+  */
+
+  //! Moves the arm to the rest state
+  $nodeclass Rest: StateNode {
+    $nodeclass GetRestType: StateNode : doStart {
+      postStateSignal<GrasperRequest::GrasperRestType_t>(curReq->restType);
+    }
+
+    $nodeclass GetOpenGripperFlag : StateNode : doStart {
+      postStateSignal<bool>(curReq->openGripperOnRest);
+    }
+
+    virtual void setup() {
+      $statemachine{
+        startnode: GetRestType
+        startnode =S<GrasperRequest::GrasperRestType_t>(GrasperRequest::stationary)=> succeeded
+        startnode =S<GrasperRequest::GrasperRestType_t>(GrasperRequest::settleArm)=> restArm
+        startnode =S<GrasperRequest::GrasperRestType_t>(GrasperRequest::settleBodyAndArm)=> restToOpen
+        
+        restArm: MoveArm(GrasperRequest::doRelease) =C=> succeeded
+        restArm =F=> failed
+        
+        restToOpen: MoveArm(GrasperRequest::doRelease) =C=> open
+        restToOpen =F=> failed
+        
+        open: GetOpenGripperFlag
+        open =S<bool>(false)=> succeeded
+        open =S<bool>(true)=> OpenTheGripper =C=> succeeded
+        
+        succeeded: PostMachineCompletion
+        
+        failed: SignalGraspError(GrasperRequest::badMove)
+      }
+    }
+  }
+
+  //! Set joint to specified angle
+	$nodeclass SetJoint(string jointName, float storedVal = 0, float speed = 0.4f): ArmNode {
+		void moveJoint(float value);	
+		virtual void doStart() {
+			if (const DataEvent<float> *dev = dynamic_cast<const DataEvent<float>*>(event)) {
+				float receivedVal = dev->getData();
+				moveJoint(receivedVal);
+			} else {
+				moveJoint(storedVal);
+			}
+		}
+	}
+
+  //! Open the gripper
+  $nodeclass OpenTheGripper : StateNode : setup {
+#if defined(TGT_HAS_GRIPPER)
+    $statemachine{
+      startnode: StateNode =N=> {openLeft, openRight}
+    openLeft: SetJoint("ARM:gripperLeft", outputRanges[capabilities.findFrameOffset("ARM:gripperLeft")][0])[setMC(VRmixin::grasper->getArmId())]
+      openRight: SetJoint("ARM:gripperRight", outputRanges[capabilities.findFrameOffset("ARM:gripperRight")][1])[setMC(VRmixin::grasper->getArmId())]
+      {openLeft, openRight} =C=> PostMachineCompletion
+    }
+#endif
+  }
+
+  //! Close the gripper
+  $nodeclass CloseTheGripper : StateNode : setup {
+#if defined(TGT_HAS_GRIPPER)
+    $statemachine{
+      startnode: StateNode =N=> {closeLeft, closeRight}
+
+      closeLeft: SetJoint("ARM:gripperLeft", outputRanges[capabilities.findFrameOffset("ARM:gripperLeft")][1])[setMC(VRmixin::grasper->getArmId())]
+      closeRight: SetJoint("ARM:gripperRight", outputRanges[capabilities.findFrameOffset("ARM:gripperRight")][0])[setMC(VRmixin::grasper->getArmId())]
+
+      {closeLeft, closeRight} =C=> PostMachineCompletion
+    }
+#endif
+  }
+
+  // ==== OLD VERSION'S PLANNING NODES ====
+
+  //! Plan a constrained path
+  $nodeclass PathPlanConstrained : StateNode {
+    virtual void doStart();
+  }
+
+  //! Plan a path to the rest state
+  $nodeclass PathPlanToRest : StateNode {
+    virtual void doStart();
+  }
+
+  //==== POSTING OF EVENTS ====
+
+  $nodeclass IfRequestIs(GrasperRequest::GrasperRequestType_t rt) : StateNode : doStart {
+    if ( curReq->requestType == rt )
+      postStateSuccess();
+    else
+      postStateCompletion();
+  }
+
+  //! Signal the failure of a grasp sub-statemachine via a signalTrans
+  $nodeclass SignalGraspError(GraspError e = GrasperRequest::noError) : StateNode : doStart {
+    if (const DataEvent<GraspError> *datev = dynamic_cast<const DataEvent<GraspError>*>(event))
+      postParentSignal<GraspError>(datev->getData());
+    else
+      postParentSignal<GraspError>(e);
+    VRmixin::refreshSketchWorld();
+  }
+
+  //! Report successful completion of the grasper request via a GrasperEvent
+  $nodeclass GrasperSucceeded : StateNode : doStart {
+    GrasperEvent ev(true, curReq->requestType, GrasperRequest::noError, (size_t)curReq->requestingBehavior);
+    switch (curReq->populateEventPathWith) {
+    case GrasperRequest::doApproach:
+      ev.path = curReq->approachPath;
+      break;
+    case GrasperRequest::doDeliver:
+      ev.path = curReq->deliverPath;
+      break;
+    case GrasperRequest::doRelease:
+      ev.path = curReq->releasePath;
+      break;
+    case GrasperRequest::noPath:
+    default:
+      break;
+    }
+    erouter->postEvent(ev);
+  }
+
+  //! Report failure of the grasper request via a GrasperEvent
+  $nodeclass GrasperFailed(GraspError err = GrasperRequest::badMove) : StateNode : doStart {
+    GraspError e(err);
+    if (const DataEvent<GraspError> *datev = dynamic_cast<const DataEvent<GraspError>*>(event))
+      e = datev->getData();
+    GrasperEvent myEvent(false, curReq->requestType, e, (size_t)curReq->requestingBehavior);
+    if (e == GrasperRequest::pickUpUnreachable || e == GrasperRequest::dropOffUnreachable) {
+      // myEvent.suggestedRobotLocation = VRmixin::grasper->getDesiredRobotLocation();
+      // myEvent.suggestedLookAtPoint = VRmixin::grasper->getDesiredLookAtPoint();
+    }
+    std::cout << "GrasperFailed posting " << myEvent.getDescription() << std::endl;
+    erouter->postEvent(myEvent);
+    VRmixin::refreshSketchWorld();
+  }
+
+  //! Move on to the next grasper request
+  $nodeclass NextRequest : StateNode : doStart {
+    delete curReq;
+    curReq = NULL;
+    VRmixin::grasper->executeRequest();
+    stop();
+  }
+
+  //**************** End of Grasper Actions ****************
+	
+
+  StateNode *startmain_;	//!< The main reach-grasp-move-release-rest sequence
+
+public:
+			
+  Grasper(): StateNode(), startmain_(), requests(), idCounter(0), armId(MotionManager::invalid_MC_ID)
+  {
+    curReq = NULL;
+  }
+  
+  virtual void setup() {
+    SharedObject<ArmMC> arm_mc;
+    armId = motman->addPersistentMotion(arm_mc);
+    $statemachine{
+		startnode: StateNode // just sit around until execute request received
+
+				startmain: StateNode =N=> parkArm // startmain is activated when executing a request
+
+	//**** Initialization Phase
+	// Park arm first to maximize chance of successful path planning around obstacles
+	parkArm : ParkArm =C=> planBodyApproach
+
+	//**** Approach Phase
+
+	planBodyApproach : PlanBodyApproach =C=> doBodyApproach
+	planBodyApproach =F=> planArmApproach // body motion not needed or not allowed
+	planBodyApproach =S<GraspError>=> failed
+
+	doBodyApproach  : DoBodyApproach =PILOT(noError)=> findobj
+	doBodyApproach  =F=> planArmApproach   // invalid approachPose found; shouldn't happen
+	doBodyApproach  =PILOT=> pilotFailed
+
+	findobj    :  FindObj =C=> planArmApproach   // find the object in local space
+	findobj    =F=> planArmApproach
+
+	// for Calliope2, this plans the height of the gripper
+	// for Calliope5, this plans the arm path to get the fingers around the object
+	planArmApproach  : PlanArmApproach =C=> doArmApproach
+	planArmApproach  =S<GraspError>=> failed
+
+  // execute the planned gripper or arm motion
+	doArmApproach   : DoArmApproach =C=> doBodyApproach2
+
+	// for Calliope2, turn the body to align the gripper with the object
+	// for Calliope5, this is a no-op
+	doBodyApproach2 : DoBodyApproach2 =PILOT(noError)=> verify_turn
+
+	verify_turn : IfRequestIs(GrasperRequest::turn) =S=> succeeded
+	verify_turn =C=> doBodyApproach3
+
+  doBodyApproach2 =F=> failed
+  doBodyApproach2 =PILOT=> pilotFailed
+
+	// for Calliope2, this drives the gripper into the object
+	// for Calliope5, this is a no-op
+	doBodyApproach3 : DoBodyApproach3
+	doBodyApproach3 =C=> FindObj =C=> doBodyApproach4
+	doBodyApproach3 =F=> verify1
+
+        doBodyApproach4 : DoBodyApproach2 =PILOT(noError)=> doBodyApproach5
+	doBodyApproach4 =F=> failed
+	doBodyApproach4 =PILOT=> pilotFailed
+
+        doBodyApproach5 : DoBodyApproach4
+        doBodyApproach5 =C=> verify1a
+        doBodyApproach5 =F=> verify1a 
+
+	verify1    : Verify(false) =C=> verify1a
+	verify1    =S<GraspError>=> failed 
+
+	verify1a  : IfRequestIs(GrasperRequest::reach) =S=> succeeded
+	verify1a    =C=> armGrasp
+
+	//**** Grasp Phase
+  armGrasp   : ArmGrasp[setMC(VRmixin::grasper->getArmId())] =C=> verify2 // armPulse
+
+	armPulse   : ArmPulse(true)[setMC(VRmixin::grasper->getArmId())] =C=> armNudge
+
+	armNudge   : ArmNudge =C=> verify2
+
+	verify2    : Verify(true) =C=> verify2a
+	verify2     =S<GraspError>=> failed
+
+	verify2a   : IfRequestIs(GrasperRequest::grasp) =S=> succeeded
+	verify2a    =C=> planBodyTransport
+
+  armRaise   : ArmRaise =C=> doBodyTransport
+
+	//**** Transport Phase
+	planBodyTransport : PlanBodyTransport
+	planBodyTransport =C=> armRaise
+	planBodyTransport =F=> planArmDeliver  // body motion not needed
+
+	doBodyTransport    : DoBodyTransport
+  doBodyTransport    =C=> planArmDeliver
+
+	planArmDeliver : PlanArmDeliver
+  planArmDeliver =C=> doArmDeliver
+
+	doArmDeliver   : DoArmDeliver
+	doArmDeliver   =C=> releaseArm
+
+	releaseArm     : ReleaseArm[setMC(VRmixin::grasper->getArmId())]
+	releaseArm     =C=> verify3
+	
+	verify3        : Verify(true) =C=> doWithdraw
+	verify3         =S<GraspError>=> failed
+
+	doWithdraw     : DoWithdraw
+	doWithdraw     =C=> succeeded
+
+	pilotFailed    : SpeechNode("Pilot failed.  What to do now???") // to be written
+
+	succeeded      : GrasperSucceeded =N=> next
+	failed         : GrasperFailed =N=> next
+        next           : NextRequest
+    }
+
+  startmain_ = startmain;
+  }
+
+  virtual void preStart() {
+    StateNode::preStart();
+    if ( verbosity & GVstart ) {
+      cout << "Grasper starting up" << endl;
+    }
+    while ( !requests.empty() ) {
+      delete requests.front();
+      requests.pop();
+    }
+  }
+	
+  //! User-level interface for queueing a request to the Grasper
+  unsigned int executeRequest(const GrasperRequest& req, BehaviorBase* requestingBehavior);
+
+  //! Executes the next pending request, i.e., the one at the front of the queue
+  void executeRequest();
+
+  //! Dispatches on the request type, running the appropriate state machine; called by executeRequest()
+  void dispatch();
+  void doStop();
+	
+  MotionManager::MC_ID getArmId() const { return armId; }
+
+  //! Gets current state of robot's arm from the end effector given
+  /* If no joint is given, pulls values from WorldState */
+  static void getCurrentState(NodeValue_t &current, KinematicJoint* endEffector=NULL);
+	
+  //! Generates potential goal states around a point, rotating the approach orientation
+  void computeGoalStates(IKSolver::Point &toPt,
+			 std::vector<std::pair<float, float> >& rangesX,
+                         std::vector<std::pair<float, float> >& rangesY,
+			 std::vector<std::pair<float, float> >& rangesZ,
+                         float resolution,
+			 std::vector<NodeValue_t>& goals,
+			 const IKSolver::Point &offset);
+
+  //! Helper function for computeGoalStates
+  void checkGoalCandidate(const IKSolver::Point &offset, const IKSolver::Rotation &ori, 
+			  KinematicJoint* effector, const IKSolver::Point &position, std::vector<NodeValue_t>& goals);
+
+protected:
+  //	Point desiredRobotLocation;	//! When an object or target is out of range, this will hold the desired robot's location in order to manipulate
+  //	Point desiredLookAtPoint;	//! When an object or target is out of range, this will hold the desired robot's orientation in order to manipulate
+	
+  std::queue<GrasperRequest*> requests; //!< Queue of pending Grasper requests
+  unsigned int idCounter;               //!< Counter for assigning a unique id to each Grasper request
+  MotionManager::MC_ID armId;		//!< id for shared ArmMC
+
+public:
+  static GrasperRequest* curReq;        //!< The request itself
+  static GrasperVerbosity_t verbosity;
+
+private:
+  Grasper(const Grasper& o);  //!< Copy constructor; do not use
+  void operator=(const Grasper& o); //!< Assignment operator; do not use
+};
+
+#else   // not TGT_HAS_ARMS
+class Grasper: public StateNode {
+public:
+  unsigned int executeRequest(const GrasperRequest& req, BehaviorBase* requestingBehavior) {
+    std::cout << "Warning:  cannot execute Grasper request: robot has no arms!" << std::endl;
+    return 0;
+  }
+};
+#endif
+
+#endif

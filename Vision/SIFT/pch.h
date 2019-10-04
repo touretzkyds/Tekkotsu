@@ -1,0 +1,7 @@
+#include "ImageHandling/SIFTImage.h"
+#include "SIFTDatabase/keygroup.h"
+#include "SIFTDatabase/keypoint.h"
+#include "SIFTDatabase/keypointpair.h"
+#include "SIFTDatabase/model.h"
+#include "SIFTDatabase/object.h"
+#include "SIFTPP/sift.hpp"

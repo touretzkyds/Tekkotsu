@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><array>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>0.0°</real>
+	<key>r</key> <real>0.0</real>
+	<key>Min</key> <real>0.0°</real>
+	<key>Max</key> <real>0.0°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>ReferenceFrame</string>
+	<key>Name</key> <string>BaseFrame</string>
+</dict>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>0.0°</real>
+	<key>r</key> <real>0.0</real>
+	<key>Min</key> <real>-180.48170546620932°</real>
+	<key>Max</key> <real>180.48170546620932°</real>
+	<key>qOffset</key> <real>0.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>HandEye/Link1</string>
+	<key>Name</key> <string>A</string>
+</dict>
+<dict>
+	<key>JointType</key> <string>revolute</string>
+	<key>θ</key> <real>0.0°</real>
+	<key>d</key> <real>0.0</real>
+	<key>α</key> <real>0.0°</real>
+	<key>r</key> <real>200.0</real>
+	<key>Min</key> <real>-180.48170546620932°</real>
+	<key>Max</key> <real>180.48170546620932°</real>
+	<key>qOffset</key> <real>1.0</real>
+	<key>Mass</key> <real>0.0</real>
+	<key>Model</key> <string>HandEye/Gripper</string>
+	<key>Name</key> <string>a</string>
+</dict>
+</array>
+</plist>

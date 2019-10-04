@@ -1,0 +1,200 @@
+#!/bin/sh
+
+if [ "$1" = "-h" -o "$1" = "--help" -o ! -r Makefile ] ; then
+	echo "Usage: $0 [-q] [-f file] [-mipal [mi-pal_options]]";
+	echo "       -q     will do a quick analysis using emonLogParser (from Sony)";
+	echo "       -f     will read file as emon.log instead of looking";
+	echo "              at \$MEMSTICK_ROOT/open-r/emon.log";
+	echo "       -mipal will use the Mi-Pal tools from Griffith University";
+	echo "              mi-pal_options (if any) are passed to StackedIt";
+	echo "       If no options are given, '-q -mipal -2' is assumed.";
+	echo "       This should be run from within the project directory";
+	echo "       which caused the crash";
+fi;
+
+if [ "$1" = "-h" -o "$1" = "--help" ] ; then
+	exit 2;
+fi;
+
+#First lets find out where the environment configuration is
+# Note that this value we're about to pull out might not be a direct
+# file name - can (and does by default) involve makefile functions, so
+# we can't easily directly interpret it.
+TEKKOTSU_ENVIRONMENT_CONFIGURATION=`grep "^TEKKOTSU_ENVIRONMENT_CONFIGURATION.*=" Makefile | cut -f 2- -d =`;
+if [ ! "$TEKKOTSU_ENVIRONMENT_CONFIGURATION" ] ; then
+	TEKKOTSU_ENVIRONMENT_CONFIGURATION=Environment.conf;
+	echo "WARNING: could not find TEKKOTSU_ENVIRONMENT_CONFIGURATION specification in Makefile.";
+	echo "         Defaulting to '$TEKKOTSU_ENVIRONMENT_CONFIGURATION'.";
+fi;
+
+#This monstrosity will con make into parsing the environment configuration for us
+eval `make -f - <<EOF
+include \\\$(shell echo "$TEKKOTSU_ENVIRONMENT_CONFIGURATION" | sed 's/ /\\ /g')
+.PHONY: all
+all:
+	@echo BUILDDIR=\\"\\\$(PROJ_BD)\\"
+	@echo TEKKOTSU_ROOT=\\"\\\$(TEKKOTSU_ROOT)\\"
+	@echo OPENRSDK_ROOT=\\"\\\$(OPENRSDK_ROOT)\\"
+	@echo MEMSTICK_ROOT=\\"\\\$(MEMSTICK_ROOT)\\"
+	@echo FILENAME_CASE=\\"\\\$(FILENAME_CASE)\\"
+EOF`
+
+#Now we'll check the values that we just pulled out are sane
+if [ ! "$BUILDDIR" ] ; then
+	BUILDDIR=build/PLATFORM_APERIOS_TGT_ERS7;
+	echo "WARNING: could not find PROJECT_BD specification in your project's";
+	echo "         Makefile environment configuration. Defaulting to '$BUILDDIR'.";
+fi;
+
+if [ ! -d "$BUILDDIR" ] ; then
+	echo "ERROR: Build directory '$BUILDDIR' does not exist";
+	echo "Are you in the project directory for the code that was running";
+	echo "at the time of the crash?  You're supposed to be... otherwise";
+	echo "how am I supposed to know which project you're debugging? ;)";
+	exit 1;
+fi;
+
+if [ -z "$TEKKOTSU_ROOT" ] ; then
+	TEKKOTSU_ROOT=/usr/local/Tekkotsu;
+	echo "WARNING: No TEKKOTSU_ROOT value, defaulting to $TEKKOTSU_ROOT"
+fi;
+if [ ! -d "$TEKKOTSU_ROOT" ] ; then
+	echo "ERROR: Could not find TEKKOTSU_ROOT: $TEKKOTSU_ROOT";
+	exit 1;
+fi;
+export TEKKOTSU_ROOT;
+
+if [ -z "$OPENRSDK_ROOT" ] ; then
+	OPENRSDK_ROOT=/usr/local/OPEN_R_SDK;
+	echo "WARNING: No OPENRSDK_ROOT value, defaulting to $OPENRSDK_ROOT"
+fi;
+if [ ! -d "$OPENRSDK_ROOT" ] ; then
+	echo "ERROR: Could not find OPENRSDK_ROOT: $OPENRSDK_ROOT";
+	exit 1;
+fi;
+export OPENRSDK_ROOT;
+
+if [ -z "$MEMSTICK_ROOT" ] ; then
+	MEMSTICK_ROOT=/mnt/memstick;
+	echo "WARNING: No MEMSTICK_ROOT value, defaulting to $MEMSTICK_ROOT"
+fi;
+export MEMSTICK_ROOT;
+
+if [ -z "FILENAME_CASE" ] ; then
+	FILENAME_CASE=lower;
+	echo "WARNING: No FILENAME_CASE value, defaulting to $FILENAME_CASE"
+fi;
+export FILENAME_CASE;
+
+echo "Processing from build directory: \`$BUILDDIR'"
+echo
+
+# On with the show!
+
+runquick=;
+if [ "$1" = "-q" ] ; then
+	runquick=true;
+	shift;
+fi;
+
+emonfile=;
+usefile=;
+if [ "$1" = "-f" ] ; then
+	usefile=true;
+	emonfile="$2";
+	shift; shift;
+fi;
+
+runmipal=;
+if [ "$1" = "-mipal" ] ; then
+	runmipal=true;
+	shift;
+
+	options=$*;
+	if [ ! "$options" ] ; then
+		options=-2
+	fi;
+fi;
+
+if [ -z "$runquick" -a -z "$runmipal" -a $# -eq 0 ] ; then
+	runquick=true;
+	runmipal=true;
+	options=-2;
+fi;
+
+cd "$BUILDDIR/aperios"
+
+ln -sf MMCombo.nosnap.elf MainObj.nosnap.elf;
+ln -sf MMCombo.nosnap.elf MotoObj.nosnap.elf;
+ln -sf SndPlay.nosnap.elf SoundPlay.nosnap.elf;
+if [ "$FILENAME_CASE"="lower" ] ; then
+	if [ -z "$emonfile" ] ; then
+		emonfile=${MEMSTICK_ROOT}/open-r/emon.log;
+	fi;
+else
+	if [ -z "$emonfile" ] ; then
+		emonfile=${MEMSTICK_ROOT}/OPEN-R/EMON.LOG;
+	fi;
+fi;
+
+# remove any previous disassembly files
+rm -f aiboDis*.ass;
+# just so the elp.pl doesn't complain about not finding any previous
+touch aiboDis0.ass;
+
+if [ -z "$usefile" ] ; then
+	echo "Copying emon.log from memory stick...";
+	${TEKKOTSU_ROOT}/tools/sbin/mntmem;
+	if [ $? -ne 0 ] ; then
+		echo "ERROR: Memory stick not mounted.";
+		exit 1;
+	fi;
+	cp "${emonfile}" "/tmp/${USER}_emon.log";
+	emonfile="/tmp/${USER}_emon.log";
+	${TEKKOTSU_ROOT}/tools/sbin/umntmem;
+	echo "I'm done copying the emon file from the memory stick, ${MEMSTICK_ROOT} unmounted";
+	echo "";
+fi;
+
+if [ "$runquick" ] ; then
+	grep "exception code:" ${emonfile}
+	printf "** Running '${TEKKOTSU_ROOT}/tools/sbin/emonLogParser',\n** taken and modified from the Sony samples...\n"
+	${TEKKOTSU_ROOT}/tools/sbin/emonLogParser ${emonfile} > quick-out.txt;
+	file=`sed -n '/object:/s/object:	*//p' quick-out.txt`;
+	${TEKKOTSU_ROOT}/tools/sbin/emonLogParser ${emonfile} ${file}.nosnap.elf;
+fi;
+
+if [ "$runmipal" ] ; then
+	if [ "$runquick" ] ; then
+		echo "";
+	fi;
+	printf "Using StackedIt options: $options\n";
+	printf "Generating disassembly (this can take a *long* time)...";
+	${TEKKOTSU_ROOT}/tools/mipaltools/elp.pl -e ${emonfile} > elp-out.txt;
+	echo "done.";
+	
+	LINES=`cat elp-out.txt | wc -l`
+	
+	echo "*** Using elp.pl by Stuart Seymon (v2.0, 5/9/2003) ***"
+	echo "***  Mi-Pal,  Griffith University, Australia  ***"
+	echo " see ${TEKKOTSU_ROOT}/tools/mipaltools/ for more info"
+	if [ $LINES -lt 7 ] ; then
+		cat elp-out.txt
+		exit 1;
+	fi;
+	head -`expr $LINES - 7` elp-out.txt;
+	
+	EPC=`grep "^EPC:" elp-out.txt | cut -f 2 -d x`;
+	RT=`grep "^linkTimeAddr:" elp-out.txt | cut -f 2 -d x`;
+	
+	echo
+	echo "*** Using StackedIt by Joel Fenwick (v2.0, 1/9/2003) ***"
+	echo "***   Mi-Pal,  Griffith University, Australia    ***"
+	echo " see ${TEKKOTSU_ROOT}/tools/mipaltools/ for more info"
+	${TEKKOTSU_ROOT}/tools/mipaltools/StackedIt $options $EPC $RT aiboDis1.ass ${emonfile};
+	
+	if [ "$usefile" ] ; then
+		${TEKKOTSU_ROOT}/tools/sbin/umntmem;
+	fi;
+fi;
+

@@ -1,0 +1,113 @@
+EasyTrain instructions:
+
+Usage:
+  java EasyTrain [-isYUV | -isRGB] [-show YUV|HSB|rg|xy|Lab] imagefile...
+
+See additional tutorials at:
+  http://www.cs.cmu.edu/~dst/Tekkotsu/Tutorial/colorsegment.shtml
+  http://www.cs.cmu.edu/~tekkotsu/CameraSetup.html
+
+
+== Command Line Flags: ===========
+
+  -isYUV, -isRGB   Report the mode that input images were saved in.
+
+  -show <mode>     Controls the color space shown in Color Spectrum window:
+                     YUV - displays U,V channels; native space of the AIBO
+                     HSB - [default] displays Hue and Saturation
+                     rg  - R and G contributions of RGB space
+                     xy  - X and Y contributions of XYZ space
+                     Lab - displays a,b channels
+
+  Among the color spaces available for showing, all except HSB distribute
+  hues basically radially, with a white point at the center.  HSB places
+  the hues along the x axis, and saturation along the y; thus the white
+  point is spread out along the top of the plot.
+      YUV might be preferred for its direct control
+      HSB might be preferred for a horizontal view of hue
+      Lab might be preferred for a radial view of hue
+      (rg and xy are mainly side-effects, but made available if desired)
+
+
+== Expected Image Format: ========
+
+  Image files should be saved from the Tekkotsu RawCam window as PNG files
+  with YUV encoding, but the program can also handle images in RGB
+  encoding.  If you do decide to use JPEG images, you should actually save
+  them in 'RGB' mode, because the JPEG format uses YUV internally.
+
+  Pass '-isYUV' if the images were saved in YUV mode, pass '-isRGB' if they
+  were saved in RGB mode.
+
+
+== Window List: ==================
+
+1. RGB Image View: displays the current image file in RGB color space.  Use
+   the arrow keys to cycle through all the image files.
+
+2. Segmented Viewer: displays the color-segmented version of the
+   current image file.  (If no colors are defined yet, it will be all
+   grey.)
+
+3. Color Spectrum Window: displays pixels from selected image regions in a
+   2D color space representation.  Draw a bounding region with the mouse to
+   select pixel clusters.  See discussion of the '-show' option for
+   controlling the color space used
+
+4. Control window: contains buttons to add or remove colors, load or save
+   files, etc.  Hover over items for tooltips.
+
+5. Thumbnail window: shows thumbnails of loaded images, allows you to
+   directly jump to specific images by clicking on them.
+
+
+== Shortcuts: ==============
+
+  In any of the editor windows (1-3 above):
+    Ctrl-A: select all
+    Ctrl-D: deselect
+    Ctrl-Z: undo
+    Shift-Ctrl-Z: redo
+    '+': Increase magnification multiple
+    '-': Decrease magnification multiple
+    '=': Reset magnification to "actual size"
+
+
+== Usage: ==================
+ 
+  Start by entering a color name, say, "pink".  (Type the color name in the
+  dialog box at the top of the GUI window, and hit "enter".)
+
+  Now use the mouse to circle a pink region in the raw image window.  This
+  will cause a cloud of pink pixels to appear in the color space window.
+  (Note: if you have a pink object on a green background and you just draw
+  a big box around it, so that some green pixels are included in the box,
+  that's okay, because the green pixels will be far enough away from the
+  pink ones in color space that you can easily separate them.)
+
+  Use the mouse to circle just the cloud of pink pixels in color space.
+  Once you've done that, the pink regions should appear in the color
+  segmented image window.
+
+  You can add to a region by holding down the shift key and drawing with
+  the mouse.  You can subtract from a region by holding down the control
+  key and drawing.
+
+  You can use the arrow keys in the raw or segmented image windows to cycle
+  though the images.  You can circle zero or more regions in each image.
+  Pixels from all the images will be lumped together in the color space
+  window.  (If no regions are selected, or 'all pixels' control is
+  selected, then the full color spectrum is shown)
+
+  After you've defined all your colors, use the "Save" button to save your
+  work.  The area boundary info for each image will be saved, along with
+  the .col and .tm files needed by CMVision.  That means if you come back
+  later and run the program again, loading in the same image files, the
+  program will also load in the boundaries you defined, so you can continue
+  to edit them.
+
+================
+
+Note to Linux users: if you're receiving warnings about inability to locate
+a system preferences file, this is because of the way Java was installed.
+See http://java.sun.com/j2se/1.5.0/install-linux.html for a fix.

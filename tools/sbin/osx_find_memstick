@@ -1,0 +1,50 @@
+#!/bin/sh
+
+device=`diskutil list | grep DOS_FAT_12 | tail -n 1 | sed -n 's/.* //p'`
+ans=`diskutil info "$device" | sed -n 's/.*Mount Point: *//p'`
+#ans=/Volumes/`diskutil list | grep DOS_FAT_12 | tail -n 1 | sed -n 's/^.*DOS_FAT_12 \(.*\) *[0-9]*.[0-9] MB.*/\1/p' | sed 's/ *[0-9]*$//g'`
+
+if [ -d "$ans" ] ; then
+	echo "$ans";
+	exit 0;
+fi;
+
+echo "warning: Could not determine memory stick mount point:" 1>&2;
+echo "  * if memory stick is not inserted, please insert it now" 1>&2;
+echo "  * if memory stick is inserted, but does not appear in Finder, try re-inserting" 1>&2;
+echo "  * if memory stick is inserted and shown in Finder, but the script is not" 1>&2;
+echo "    continuing, you can manually define MEMSTICK_ROOT in Environment.conf" 1>&2;
+
+#check that we are running in a termincal (not Xcode)
+if stty > /dev/null 2>&1 ; then
+	until [ -d "$ans" ] ; do
+		printf "\\a" > /dev/stderr;
+		sleep 1;
+		device=`diskutil list | grep DOS_FAT_12 | tail -n 1 | sed -n 's/.* //p'`
+		ans=`diskutil info "$device" | sed -n 's/.*Mount Point: *//p'`
+	done;
+else
+	TMPFEEDBACK=/tmp/$USER-osx_find_memstick
+	until [ -d "$ans" ] ; do
+		osascript -l AppleScript > $TMPFEEDBACK 2>&1 << EOF
+tell application "Xcode"
+	activate (beep)
+	show window "Make - Build Results"
+	display dialog "Please insert memory stick" buttons {"Cancel"} with icon 0 default button 1 giving up after 2
+end tell
+EOF
+		if grep -q "canceled" $TMPFEEDBACK ; then
+			echo "error: The user cancelled build" 1>&2;
+			killall make;
+			rm $TMPFEEDBACK;
+			exit 1;
+		fi;
+		rm $TMPFEEDBACK;
+		#osascript -l AppleScript -e beep;
+		#sleep 1;
+		device=`diskutil list | grep DOS_FAT_12 | tail -n 1 | sed -n 's/.* //p'`
+		ans=`diskutil info "$device" | sed -n 's/.*Mount Point: *//p'`
+	done;
+fi
+printf "$ans";
+
